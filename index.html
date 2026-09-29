@@ -62,12 +62,13 @@
           <div>
             <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
             <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-bold text-amber-300 focus:border-amber-400 focus:outline-none">
-              <option value="forbidden_alchemist">포비든 알케미스트</option>
-              <option value="variable_gunner">배리어블 거너</option>
-              <option value="dark_mage">다크 메이지</option>
-              <option value="elemental_knight">엘레멘탈 나이트</option>
-              <option value="alchemic_stinger">알케믹 스팅어</option>
-              <option value="saint_bard">세인트 바드</option>
+              <option value="forbidden_alchemist">포비든 알케미스트 (연금)</option>
+              <option value="variable_gunner">배리어블 거너 (듀얼건)</option>
+              <option value="dark_mage">다크 메이지 (마법)</option>
+              <option value="elemental_knight">엘레멘탈 나이트 (근접)</option>
+              <option value="alchemic_stinger">알케믹 스팅어 (궁술)</option>
+              <option value="blader">블레이드 랜서 (창)</option>
+              <option value="saint_bard">세인트 바드 (축복/마법)</option>
             </select>
           </div>
         </div>
@@ -108,9 +109,9 @@
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
               <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
-                <option value="two_handed" selected>양손무기 (스태프/실린더 포함)</option>
-                <option value="one_handed">한손무기 (단일)</option>
-                <option value="dual_wield">쌍수무기 (쌍검/쌍둔/쌍총)</option>
+                <option value="two_handed" selected>양손무기 (스태프/실린더/활/양손검)</option>
+                <option value="one_handed">한손무기 (원드/한손검)</option>
+                <option value="dual_wield">쌍수무기 (쌍검/듀얼건/너클)</option>
               </select>
             </div>
             
@@ -199,7 +200,7 @@
           <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
             <i data-lucide="gem" class="w-4 h-4"></i> 4. 에코스톤 각성 효과 (최대 3개)
           </h2>
-          <p class="text-[11px] text-slate-400 mt-1">에코스톤 색상에 맞는 각성 능력이 노출됩니다. 장비 세공과 겹치면 <span class="text-rose-400 font-bold">에코스톤 수치로 오버라이드</span> 됩니다.</p>
+          <p class="text-[11px] text-slate-400 mt-1">장비 세공과 동일한 옵션이 있을 경우 <span class="text-rose-400 font-bold">더 높은 레벨 하나만 적용</span>됩니다.</p>
         </div>
         <div id="echostoneListContainer" class="space-y-3">
           <!-- JS 렌더링 -->
@@ -326,34 +327,40 @@
       one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
     };
 
+    // 표준 메타 피어싱 가중치
     const PIERCING_BASE_MULT = 0.115;
 
-    // 아르카나 스탯 타입 명칭 맞춤 적용
+    // 아카라이브 정보 기반 아르카나별 유효 세공 데이터베이스 완벽 세팅
     const ARCANAS = {
       forbidden_alchemist: {
         name: '포비든 알케미스트', statType: '연금술 대미지', statUnit: '환산치', defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'water_cannon', name: '워터 캐논 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
-          { id: 'flame_burst', name: '플레이머 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
-          { id: 'alchemy_mastery', name: '연금술 마스터리', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'cylinder_dmg', name: '실린더 최대 대미지', maxLevel: 20, flatAdd: 3, echo: 'black' }
+          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
+          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
+          { id: 'fire_alchemy_dmg', name: '불 속성 연금술 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'water_alchemy_dmg', name: '물 속성 연금술 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'hydra_prot', name: '하이드라 연성 마법방어/보호 감소', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' }
         ]
       },
       variable_gunner: {
         name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
           { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'silver' },
-          { id: 'bullet_storm', name: '불릿 스톰 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'shooting_rush', name: '슈팅 러쉬 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'frenzy_dur', name: '프렌지 지속시간', maxLevel: 20, weightPerLevel: 0.0025, echo: 'silver' }
+          { id: 'bullet_storm_mult', name: '불릿 스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'shooting_rush_mult', name: '슈팅 러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' }
         ]
       },
       dark_mage: {
         name: '다크 메이지', statType: '마법 공격력', statUnit: '마공', defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'fireball_dmg', name: '파이어볼 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'blue' },
-          { id: 'light_rod', name: '라이트닝 로드', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'magic_att', name: '마법 공격력', maxLevel: 20, flatAdd: 4, echo: 'blue' }
+          { id: 'magic_att', name: '마법 공격력', maxLevel: 20, flatAdd: 4, echo: 'blue' },
+          { id: 'fireball_dmg', name: '파이어볼 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'blue' },
+          { id: 'fire_mastery', name: '파이어 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
+          { id: 'lightning_mastery', name: '라이트닝 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
+          { id: 'bolt_combine', name: '볼트 마법 조합 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'bolt_mastery', name: '볼트 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'blue' },
+          { id: 'cast_speed', name: '캐스팅 속도', maxLevel: 20, weightPerLevel: 0.002, echo: 'blue' }
         ]
       },
       elemental_knight: {
@@ -361,21 +368,40 @@
         validReforges: [
           { id: 'smash_dmg', name: '스매시 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'red' },
           { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
-          { id: 'max_att', name: '한계돌파 최대공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
+          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
+          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'down_attack', name: '다운어택 대미지', maxLevel: 20, weightPerLevel: 0.001, echo: 'red' }
         ]
       },
       alchemic_stinger: {
         name: '알케믹 스팅어', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
           { id: 'magnum_dmg', name: '매그넘 샷 대미지', maxLevel: 20, weightPerLevel: 0.0045, echo: 'yellow' },
-          { id: 'crash_shot', name: '크래시 샷 파편', maxLevel: 20, weightPerLevel: 0.0025, echo: 'yellow' }
+          { id: 'crash_shot_frag', name: '크래시 샷 파편 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'yellow' },
+          { id: 'crash_shot_num', name: '크래시 샷 최대 파편 수', maxLevel: 20, weightPerLevel: 0.003, echo: 'yellow' },
+          { id: 'bow_mastery', name: '보우/크로스보우 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'yellow' },
+          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' }
+        ]
+      },
+      blader: {
+        name: '블레이드 랜서', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'two_handed',
+        validReforges: [
+          { id: 'lance_charge_horse', name: '랜스차지 마상 돌진 대미지', maxLevel: 20, weightPerLevel: 0.005, echo: 'red' },
+          { id: 'lance_charge_main', name: '랜스차지 주 목표물 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
+          { id: 'lance_charge_charge', name: '랜스차지 차지 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
+          { id: 'lance_mastery', name: '랜스 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
         ]
       },
       saint_bard: {
         name: '세인트 바드', statType: '마법 공격력', statUnit: '마공', defaultWeapon: 'one_handed',
         validReforges: [
           { id: 'music_buff', name: '음악 버프 효과', maxLevel: 20, weightPerLevel: 0.006, echo: 'blue' },
-          { id: 'healing', name: '힐링 회복량', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
+          { id: 'healing_hp', name: '힐링 생명력 회복', maxLevel: 20, weightPerLevel: 0.002, echo: 'blue' },
+          { id: 'party_healing_hp', name: '파티 힐링 생명력 회복', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'god_music_ratio', name: '신들린 연주 비율', maxLevel: 20, weightPerLevel: 0.001, echo: 'blue' },
+          { id: 'god_music_eff', name: '신들린 연주 효과', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
         ]
       }
     };
@@ -541,24 +567,31 @@
 
       const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
 
-      let mergedReforges = {};
+      // 세공과 에코스톤 겹칠 시 높은 레벨만 적용 로직 (Math.max)
+      let finalReforges = {};
       
+      // 장비 세공 취합
       activeReforges.forEach(r => {
-        mergedReforges[r.id] = (mergedReforges[r.id] || 0) + r.level;
+        if (!finalReforges[r.id] || r.level > finalReforges[r.id]) {
+          finalReforges[r.id] = r.level;
+        }
       });
 
+      // 에코스톤과 비교하여 높은 쪽 채택
       activeEchostones.forEach(e => {
         if (e.id && e.id !== 'none' && e.color !== 'none') {
-          mergedReforges[e.id] = e.level; 
+          if (!finalReforges[e.id] || e.level > finalReforges[e.id]) {
+            finalReforges[e.id] = e.level;
+          }
         }
       });
 
       let addFromReforge = 0;
       const defs = ARCANAS[currentArcanaKey].validReforges;
-      Object.keys(mergedReforges).forEach(key => {
+      Object.keys(finalReforges).forEach(key => {
         const def = defs.find(d => d.id === key);
         if (def) {
-          const lvl = mergedReforges[key];
+          const lvl = finalReforges[key];
           if (def.flatAdd) addFromReforge += lvl * def.flatAdd;
           else if (def.weightPerLevel) addFromReforge += Math.round(baseStat * (lvl * def.weightPerLevel));
         }
@@ -596,8 +629,15 @@
         currentArcanaKey = e.target.value;
         const arc = ARCANAS[currentArcanaKey];
         document.getElementById('baseStatLabel').textContent = `노도핑 ${arc.statType}`;
-        document.getElementById('arcanaBadge').textContent = arc.name;
         
+        let iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'elemental_knight' || currentArcanaKey === 'blader') iconHtml = '<i data-lucide="swords" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'dark_mage' || currentArcanaKey === 'saint_bard') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
+        
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `${iconHtml}<span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${arc.name}</span>`;
+        lucide.createIcons();
+
         const wpSelect = document.getElementById('weaponTypeSelect');
         wpSelect.value = arc.defaultWeapon;
         wpSelect.dispatchEvent(new Event('change'));
@@ -670,7 +710,6 @@
         alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
       });
 
-      // 초기 설정
       const initialArcana = ARCANAS[currentArcanaKey];
       document.getElementById('baseStatLabel').textContent = `노도핑 ${initialArcana.statType}`;
       document.getElementById('arcanaBadge').textContent = initialArcana.name;
