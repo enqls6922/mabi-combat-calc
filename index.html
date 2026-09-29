@@ -183,17 +183,17 @@
           <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2">
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리 상한 %)</label>
-              <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
+              <input type="number" id="neleInput" value="7" min="0" max="7.5" step="1"
                 class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
-              <input type="number" id="yvonaInput" value="10.0" min="0" max="10" step="0.1"
+              <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
                 class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">농장/토템 크뎀 (%)</label>
-              <input type="number" id="totemCritInput" value="3.0" min="0" max="30" step="0.1"
+              <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
                 class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
@@ -662,9 +662,9 @@
       const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
       const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
-      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7.5);
+      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7);
       const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
-      const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3.0);
+      const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3);
       const bonusDmgRate = Security.clampNumber(document.getElementById('bonusDamageInput').value, 0, 100, 0) / 100;
 
       const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
@@ -681,13 +681,13 @@
         rawCritDmg = R_GRADE_DATA[weaponType][rGrade] || 0;
       }
 
-      // 소수점 반올림 버그 수정 (toFixed(1) 적용)
+      // 정수 연산으로 크리 상한 계산 (반올림 오류 방지)
       const critRateCap = 30 + nele;
       const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
       const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
       
       document.getElementById('rGradeInfoText').textContent = 
-        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
+        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
       const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
 
