@@ -6,14 +6,47 @@
   <title>에린 전투력 환산 계산기 (v1.0)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tailwind 동적 테마 커스텀 설정 -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            theme: {
+              main: 'var(--theme-main)',
+              light: 'var(--theme-light)',
+              bg: 'var(--theme-bg)',
+              border: 'var(--theme-border)',
+              from: 'var(--theme-from)',
+              to: 'var(--theme-to)'
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-    body { font-family: 'Noto Sans KR', sans-serif; }
-    .gold-gradient-text {
-      background: linear-gradient(135deg, #fce043 0%, #fb7185 100%);
+    
+    :root {
+      /* 기본 테마: 포비든 알케미스트 (Rose/Crimson) */
+      --theme-main: #fb7185; 
+      --theme-light: #fecdd3;
+      --theme-bg: rgba(225, 29, 72, 0.15);
+      --theme-border: rgba(225, 29, 72, 0.35);
+      --theme-from: #fda4af;
+      --theme-to: #be123c;
+    }
+
+    body { font-family: 'Noto Sans KR', sans-serif; transition: all 0.4s ease; }
+    
+    .theme-gradient-text {
+      background: linear-gradient(135deg, var(--theme-from) 0%, var(--theme-to) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      transition: all 0.4s ease;
     }
+    
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
   </style>
@@ -24,11 +57,11 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
-        <div class="p-2 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400">
+        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg text-theme-main transition-colors duration-500">
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold gold-gradient-text tracking-wide">에린 전투력 환산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v1.0</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 전투력 환산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v1.0</span></h1>
         </div>
       </div>
     </div>
@@ -41,18 +74,18 @@
       
       <!-- 1. 캐릭터 & 아르카나 정보 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
-        <h2 class="text-sm font-semibold text-amber-400 mb-4 flex items-center gap-2">
+        <h2 class="text-sm font-semibold text-theme-main mb-4 flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="swords" class="w-4 h-4"></i> 1. 캐릭터 & 아르카나 정보
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs text-slate-400 mb-1">캐릭터 닉네임</label>
             <input type="text" id="nicknameInput" maxlength="12" placeholder="밀레시안" value="밀레시안"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">서버</label>
-            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
+            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="류트">류트</option>
               <option value="만돌린">만돌린</option>
               <option value="하프">하프</option>
@@ -61,16 +94,16 @@
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
-            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-amber-300 focus:border-amber-400 focus:outline-none cursor-pointer">
+            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-theme-light focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="forbidden_alchemist">포비든 알케미스트 (연금)</option>
               <option value="elemental_knight">엘레멘탈 나이트 (근접)</option>
               <option value="dark_mage">다크 메이지 (마법)</option>
               <option value="alchemic_stinger">알케믹 스팅어 (궁술)</option>
               <option value="variable_gunner">배리어블 거너 (듀얼건)</option>
               <option value="blader">블래스트 랜서 (창)</option>
-              <option value="fury_fighter" class="text-rose-300">퓨리 파이터 (격투)</option>
-              <option value="melodic_puppeteer" class="text-purple-300">멜로딕 퍼펫티어 (인형/음악)</option>
-              <option value="sacred_guard" class="text-sky-300">세이크리드 가드 (방패/보호)</option>
+              <option value="fury_fighter">퓨리 파이터 (격투)</option>
+              <option value="melodic_puppeteer">멜로딕 퍼펫티어 (인형/음악)</option>
+              <option value="sacred_guard">세이크리드 가드 (방패/보호)</option>
             </select>
           </div>
         </div>
@@ -78,7 +111,7 @@
 
       <!-- 2. 베이스 스탯 & 무기 스펙 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-        <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+        <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="activity" class="w-4 h-4"></i> 2. 무기 및 핵심 평판 스탯
         </h2>
         
@@ -86,11 +119,11 @@
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 4대 연금술 대미지 평균</label>
             <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-semibold text-amber-300 focus:border-amber-400 focus:outline-none">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
-            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
+            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="0">0 레벨</option>
               <option value="1">1 레벨</option>
               <option value="2">2 레벨</option>
@@ -110,16 +143,16 @@
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
-              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
-                <option value="two_handed" selected>양손무기 (스태프/실린더/활/양손검)</option>
-                <option value="one_handed">한손무기 (원드/한손검/방패)</option>
-                <option value="dual_wield">쌍수무기 (쌍검/듀얼건/너클)</option>
+              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                <option value="two_handed" selected>양손무기</option>
+                <option value="one_handed">한손무기</option>
+                <option value="dual_wield">쌍수무기</option>
               </select>
             </div>
             
             <div id="singleRGradeContainer">
               <label class="block text-xs text-slate-400 mb-1">특별개조 (R강)</label>
-              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
+              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                 <option value="0">노개조 / S강</option>
                 <option value="1">R1강</option>
                 <option value="2">R2강</option>
@@ -135,7 +168,7 @@
             <div id="dualRGradeContainer" class="hidden flex gap-2">
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">오른손 R강</label>
-                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
+                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7" selected>R7강</option>
@@ -144,7 +177,7 @@
               </div>
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">왼손 R강</label>
-                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
+                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7">R7강</option>
@@ -159,22 +192,22 @@
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리 상한 %)</label>
               <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
               <input type="number" id="yvonaInput" value="10.0" min="0" max="10" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">농장/토템 크뎀 (%)</label>
               <input type="number" id="totemCritInput" value="3.0" min="0" max="30" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
               <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
           </div>
         </div>
@@ -185,11 +218,11 @@
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+            <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
               <i data-lucide="sparkles" class="w-4 h-4"></i> 3. 장비 세공 옵션
             </h2>
           </div>
-          <button id="addReforgeBtn" class="flex items-center gap-1 text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition">
+          <button id="addReforgeBtn" class="flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 세공 추가
           </button>
         </div>
@@ -199,20 +232,20 @@
       <!-- 4. 에코스톤 각성 옵션 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex flex-col">
-          <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+          <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
             <i data-lucide="gem" class="w-4 h-4"></i> 4. 에코스톤 각성 효과 (최대 3개)
           </h2>
-          <p class="text-[11px] text-slate-400 mt-1">장비 세공과 동일한 옵션이 있을 경우 <span class="text-rose-400 font-bold">더 높은 레벨 하나만 적용</span>됩니다.</p>
+          <p class="text-[11px] text-slate-400 mt-1">장비 세공과 동일한 옵션이 있을 경우 <span class="text-theme-main font-bold">더 높은 레벨 하나만 적용</span>됩니다.</p>
         </div>
         <div id="echostoneListContainer" class="space-y-3"></div>
       </div>
 
       <!-- 5. 스크린샷 업로드 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
-        <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+        <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="image" class="w-4 h-4"></i> 5. 캐릭터 외형 등록 (선택)
         </h2>
-        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-amber-400/50 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/40">
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
           <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
           <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
@@ -224,11 +257,12 @@
     <!-- 우측: 환산 결과 카드 -->
     <section class="lg:col-span-5 space-y-6">
       
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden" id="cardExportArea">
-        <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-colors duration-500" id="cardExportArea">
+        <!-- 테마 컬러 후광 효과 -->
+        <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rose-950/60 border border-rose-500/40 text-rose-300">
+          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-600 text-slate-300">
             에린 표준 환산 기준
           </span>
           <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
@@ -236,18 +270,18 @@
 
         <div class="relative w-full h-52 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="previewImage" src="" alt="Avatar" class="w-full h-full object-cover hidden">
-            <div id="defaultAvatarPlaceholder" class="text-center">
-              <i data-lucide="flask-conical" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>
+            <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500">
+              <i data-lucide="flask-conical" class="w-16 h-16 text-slate-600 mb-2 mx-auto"></i>
               <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">포비든 알케미스트</span>
             </div>
-            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-purple-600/90 text-purple-100 text-[10px] px-2 py-0.5 rounded font-bold backdrop-blur">
+            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-theme-main text-white text-[10px] px-2 py-0.5 rounded font-bold backdrop-blur">
               ✨ AI Illustration
             </div>
         </div>
 
         <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
           <span class="text-xs text-slate-400 block mb-1">최종 실효 환산 전투력</span>
-          <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500 tracking-tight" id="totalScoreText">
+          <div class="text-4xl font-black theme-gradient-text tracking-tight" id="totalScoreText">
             3,250
           </div>
         </div>
@@ -259,7 +293,7 @@
           </div>
           <div class="flex justify-between text-slate-400">
             <span>피어싱 관통 환산치</span>
-            <span id="breakdownPiercing" class="text-amber-400 font-semibold">+ 0</span>
+            <span id="breakdownPiercing" class="text-theme-light font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
             <span>평판/크뎀/보뎀 환산치</span>
@@ -273,12 +307,19 @@
       </div>
 
       <div class="space-y-2">
-        <button id="aiTransformBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition">
-          <i data-lucide="clapperboard" class="w-4 h-4"></i> AI 일러스트 카드 만들기 (광고 5초)
+        <button id="aiTransformBtn" class="w-full theme-gradient-text !text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
+          <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> AI 일러스트 카드 만들기 (광고 5초)
         </button>
         <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition">
           <i data-lucide="download" class="w-4 h-4"></i> 스펙 카드 이미지 저장
         </button>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+        <h3 class="text-xs font-bold text-theme-main uppercase tracking-wider mb-3 flex items-center gap-1.5 transition-colors duration-500">
+          <i data-lucide="trending-up" class="w-4 h-4"></i> 옵션 1단위 가치 리포트
+        </h3>
+        <div class="space-y-2.5 text-xs" id="efficiencyReport"></div>
       </div>
 
     </section>
@@ -287,7 +328,7 @@
   <!-- 광고 모달 -->
   <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
-      <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
+      <div class="w-12 h-12 bg-theme-bg text-theme-main rounded-full flex items-center justify-center mx-auto border border-theme-border">
         <i data-lucide="play-circle" class="w-6 h-6"></i>
       </div>
       <div>
@@ -295,9 +336,9 @@
         <p class="text-xs text-slate-400 mt-1">광고 종료 후 이미지가 변환됩니다.</p>
       </div>
       <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-        <div id="adProgress" class="bg-amber-400 h-full w-0 transition-all duration-1000 ease-linear"></div>
+        <div id="adProgress" class="bg-theme-main h-full w-0 transition-all duration-1000 ease-linear"></div>
       </div>
-      <span id="adCountdownText" class="text-xs text-amber-300 font-bold block">남은 시간: 5초</span>
+      <span id="adCountdownText" class="text-xs text-theme-light font-bold block">남은 시간: 5초</span>
     </div>
   </div>
 
@@ -316,15 +357,37 @@
       }
     };
 
+    // --- 동적 테마 설정 맵핑 ---
+    const THEMES = {
+      forbidden_alchemist: { main: '#fb7185', light: '#fecdd3', bg: 'rgba(251, 113, 133, 0.1)', border: 'rgba(251, 113, 133, 0.3)', from: '#fda4af', to: '#be123c' }, // Rose
+      elemental_knight:    { main: '#fbbf24', light: '#fde68a', bg: 'rgba(251, 191, 36, 0.1)', border: 'rgba(251, 191, 36, 0.3)', from: '#fde047', to: '#d97706' }, // Amber
+      dark_mage:           { main: '#a78bfa', light: '#ddd6fe', bg: 'rgba(167, 139, 250, 0.1)', border: 'rgba(167, 139, 250, 0.3)', from: '#c4b5fd', to: '#6d28d9' }, // Violet
+      alchemic_stinger:    { main: '#34d399', light: '#a7f3d0', bg: 'rgba(52, 211, 153, 0.1)', border: 'rgba(52, 211, 153, 0.3)', from: '#6ee7b7', to: '#047857' }, // Emerald
+      variable_gunner:     { main: '#38bdf8', light: '#bae6fd', bg: 'rgba(56, 189, 248, 0.1)', border: 'rgba(56, 189, 248, 0.3)', from: '#7dd3fc', to: '#0369a1' }, // Sky
+      blader:              { main: '#60a5fa', light: '#bfdbfe', bg: 'rgba(96, 165, 250, 0.1)', border: 'rgba(96, 165, 250, 0.3)', from: '#93c5fd', to: '#1d4ed8' }, // Blue
+      fury_fighter:        { main: '#f87171', light: '#fecaca', bg: 'rgba(248, 113, 113, 0.1)', border: 'rgba(248, 113, 113, 0.3)', from: '#fca5a5', to: '#b91c1c' }, // Red
+      melodic_puppeteer:   { main: '#e879f9', light: '#f5d0fe', bg: 'rgba(232, 121, 249, 0.1)', border: 'rgba(232, 121, 249, 0.3)', from: '#f0abfc', to: '#a21caf' }, // Fuchsia
+      sacred_guard:        { main: '#facc15', light: '#fef08a', bg: 'rgba(250, 204, 21, 0.1)', border: 'rgba(250, 204, 21, 0.3)', from: '#fef08a', to: '#a16207' }  // Yellow
+    };
+
+    function applyTheme(key) {
+      const t = THEMES[key] || THEMES.forbidden_alchemist;
+      const root = document.documentElement;
+      root.style.setProperty('--theme-main', t.main);
+      root.style.setProperty('--theme-light', t.light);
+      root.style.setProperty('--theme-bg', t.bg);
+      root.style.setProperty('--theme-border', t.border);
+      root.style.setProperty('--theme-from', t.from);
+      root.style.setProperty('--theme-to', t.to);
+    }
+
     const R_GRADE_DATA = {
       two_handed: { 0: 0, 1: 0.06, 2: 0.16, 3: 0.26, 4: 0.38, 5: 0.50, 6: 0.62, 7: 0.74, 8: 0.89 },
       one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
     };
 
-    // 표준 메타 피어싱 가중치
     const PIERCING_BASE_MULT = 0.115;
 
-    // 아르카나별 유효 세공 데이터베이스 완벽 세팅 (중복 제거 & 정확한 계산식 반영)
     const ARCANAS = {
       forbidden_alchemist: {
         name: '포비든 알케미스트', statType: '4대 연금술 대미지 평균', statUnit: '환산치', defaultWeapon: 'two_handed',
@@ -378,13 +441,12 @@
       variable_gunner: {
         name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
-          { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'silver' },
-          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'silver' },
-          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'frenzy_dur', name: '프렌지 지속', maxLevel: 20, weightPerLevel: 0.002, echo: 'silver' },
+          { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'blue' },
+          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'blue' },
+          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
         ]
       },
@@ -394,8 +456,8 @@
           { id: 'lance_charge_horse', name: '랜스 차지 마상 돌진 대미지', maxLevel: 20, weightPerLevel: 0.005, echo: 'red' },
           { id: 'lance_charge_main', name: '랜스 차지 주 목표물 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
           { id: 'lance_charge_dmg', name: '랜스 차지 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' }
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
         ]
       },
       fury_fighter: {
@@ -451,6 +513,7 @@
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
       const validList = ARCANAS[currentArcanaKey].validReforges;
+      const selectedIds = activeReforges.map(r => r.id);
 
       if (activeReforges.length === 0) {
         container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 세공 옵션이 없습니다.</p>`;
@@ -458,13 +521,19 @@
         activeReforges.forEach((item, index) => {
           const row = document.createElement('div');
           row.className = "flex items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs";
-          let optionsHtml = validList.map(opt => `<option value="${opt.id}" ${opt.id === item.id ? 'selected' : ''}>${opt.name}</option>`).join('');
+          
+          let optionsHtml = validList.map(opt => {
+            const isSelected = opt.id === item.id;
+            const isAlreadyUsed = selectedIds.includes(opt.id) && !isSelected;
+            return `<option value="${opt.id}" ${isSelected ? 'selected' : ''} ${isAlreadyUsed ? 'disabled' : ''}>${opt.name}</option>`;
+          }).join('');
+
           row.innerHTML = `
             <div class="flex-1">
               <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
             </div>
             <div class="w-24 flex items-center gap-1">
-              <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-semibold text-center focus:outline-none" data-index="${index}">
+              <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
               <span class="text-slate-400">Lv</span>
             </div>
             <button class="remove-reforge-btn text-rose-400 hover:bg-rose-500/10 p-1 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -491,11 +560,11 @@
             <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
             <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
               <option value="none" ${item.color === 'none' ? 'selected' : ''}>-- 장착 안 함 --</option>
-              <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤 (체력/근접/방어)</option>
-              <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤 (지력/마법/음악)</option>
-              <option value="yellow" ${item.color === 'yellow' ? 'selected' : ''}>옐로우 에코스톤 (솜씨/궁술/인형)</option>
-              <option value="silver" ${item.color === 'silver' ? 'selected' : ''}>실버 에코스톤 (의지/격투/듀얼건)</option>
-              <option value="black" ${item.color === 'black' ? 'selected' : ''}>블랙 에코스톤 (연금/체인)</option>
+              <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤</option>
+              <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤</option>
+              <option value="yellow" ${item.color === 'yellow' ? 'selected' : ''}>옐로우 에코스톤</option>
+              <option value="silver" ${item.color === 'silver' ? 'selected' : ''}>실버 에코스톤</option>
+              <option value="black" ${item.color === 'black' ? 'selected' : ''}>블랙 에코스톤</option>
             </select>
           </div>
         `;
@@ -527,9 +596,24 @@
     }
 
     function attachReforgeEvents() {
-      document.querySelectorAll('.reforge-select').forEach(sel => { sel.addEventListener('change', (e) => { activeReforges[e.target.dataset.index].id = e.target.value; calculateTotal(); }); });
-      document.querySelectorAll('.reforge-level').forEach(inp => { inp.addEventListener('input', (e) => { activeReforges[e.target.dataset.index].level = Security.clampNumber(e.target.value, 0, 25, 0); calculateTotal(); }); });
-      document.querySelectorAll('.remove-reforge-btn').forEach(btn => { btn.addEventListener('click', (e) => { activeReforges.splice(e.currentTarget.dataset.index, 1); renderReforgeList(); }); });
+      document.querySelectorAll('.reforge-select').forEach(sel => { 
+        sel.addEventListener('change', (e) => { 
+          activeReforges[e.target.dataset.index].id = e.target.value; 
+          renderReforgeList(); // 선택 불가 업데이트를 위한 재렌더링
+        }); 
+      });
+      document.querySelectorAll('.reforge-level').forEach(inp => { 
+        inp.addEventListener('input', (e) => { 
+          activeReforges[e.target.dataset.index].level = Security.clampNumber(e.target.value, 0, 25, 0); 
+          calculateTotal(); 
+        }); 
+      });
+      document.querySelectorAll('.remove-reforge-btn').forEach(btn => { 
+        btn.addEventListener('click', (e) => { 
+          activeReforges.splice(e.currentTarget.dataset.index, 1); 
+          renderReforgeList(); 
+        }); 
+      });
     }
 
     function attachEchostoneEvents() {
@@ -563,8 +647,15 @@
 
     function addReforgeRow() {
       const validList = ARCANAS[currentArcanaKey].validReforges;
-      if (validList.length === 0) return;
-      activeReforges.push({ id: validList[0].id, level: 20 });
+      const selectedIds = activeReforges.map(r => r.id);
+      
+      const availableOpt = validList.find(opt => !selectedIds.includes(opt.id));
+      if (!availableOpt) {
+        alert('더 이상 추가할 수 있는 유효 세공 옵션이 없습니다.');
+        return;
+      }
+      
+      activeReforges.push({ id: availableOpt.id, level: 20 });
       renderReforgeList();
     }
 
@@ -635,6 +726,22 @@
       document.getElementById('breakdownPiercing').textContent = `+ ${addFromPiercing.toLocaleString()}`;
       document.getElementById('breakdownMult').textContent = `+ ${addFromMult.toLocaleString()}`;
       document.getElementById('breakdownReforge').textContent = `+ ${addFromReforge.toLocaleString()}`;
+
+      updateEfficiencyReport(baseStat);
+    }
+
+    function updateEfficiencyReport(baseStat) {
+      const rep = document.getElementById('efficiencyReport');
+      rep.innerHTML = `
+        <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
+          <span class="text-slate-300">피어싱 +1 증가 효율</span>
+          <span class="font-bold text-theme-light">+${Math.round(baseStat * PIERCING_BASE_MULT)} 환산 스탯</span>
+        </div>
+        <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
+          <span class="text-slate-300">보너스 대미지 +1% 효율</span>
+          <span class="font-bold text-emerald-300">+${Math.round(baseStat * 0.01)} 환산 스탯</span>
+        </div>
+      `;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -642,18 +749,21 @@
       
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
+        applyTheme(currentArcanaKey); // 아르카나 변경 시 동적 테마 적용
+
         const arc = ARCANAS[currentArcanaKey];
         document.getElementById('baseStatLabel').textContent = `노도핑 ${arc.statType}`;
         
-        let iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'elemental_knight' || currentArcanaKey === 'blader') iconHtml = '<i data-lucide="swords" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>';
+        // 아르카나별 뱃지 아이콘 설정
+        let iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'elemental_knight' || currentArcanaKey === 'blader') iconHtml = '<i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 mb-2 mx-auto"></i>';
 
-        document.getElementById('defaultAvatarPlaceholder').innerHTML = `${iconHtml}<span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${arc.name}</span>`;
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)">${iconHtml}</div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${arc.name}</span>`;
         lucide.createIcons();
 
         const wpSelect = document.getElementById('weaponTypeSelect');
@@ -728,9 +838,11 @@
         alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
       });
 
+      // 초기 설정
+      applyTheme(currentArcanaKey);
       const initialArcana = ARCANAS[currentArcanaKey];
       document.getElementById('baseStatLabel').textContent = `노도핑 ${initialArcana.statType}`;
-      document.getElementById('arcanaBadge').textContent = initialArcana.name;
+      document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)"><i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i></div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${initialArcana.name}</span>`;
       
       activeReforges = [{ id: 'water_cannon', level: 20 }];
       renderReforgeList();
