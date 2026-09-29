@@ -14,6 +14,9 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+    /* 스크롤바 커스텀 */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -27,7 +30,7 @@
         </div>
         <div>
           <h1 class="text-lg font-bold gold-gradient-text tracking-wide">에린 전투력 환산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v26.09</span></h1>
-          <p class="text-xs text-slate-400">최신 메타 브리레흐 / 탈라가흐 완벽 대응</p>
+          <p class="text-xs text-slate-400">쌍수 평균 R강 & 평판 시스템 적용판</p>
         </div>
       </div>
 
@@ -70,7 +73,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">아르카나 재능 (2026)</label>
+            <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
             <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-bold text-amber-300 focus:border-amber-400 focus:outline-none">
               <option value="forbidden_alchemist">포비든 알케미스트</option>
               <option value="variable_gunner">배리어블 거너</option>
@@ -83,11 +86,12 @@
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 & 무기 스펙 -->
+      <!-- 2. 베이스 스탯 & 무기 스펙 (평판 추가) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4"></i> 2. 베이스 스탯 및 핵심 장비
+          <i data-lucide="activity" class="w-4 h-4"></i> 2. 무기 및 핵심 평판 스탯
         </h2>
+        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 베이스 스탯</label>
@@ -95,7 +99,7 @@
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-amber-300 focus:border-amber-400 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs text-slate-400 mb-1">무기 피어싱 레벨</label>
+            <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
             <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
               <option value="0">0 레벨</option>
               <option value="1">1 레벨</option>
@@ -107,29 +111,66 @@
               <option value="7">7 레벨</option>
               <option value="8">8 레벨</option>
               <option value="9">9 레벨</option>
+              <option value="10">10 레벨</option>
+              <option value="11">11 레벨</option>
             </select>
           </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">특별개조 (무기 타입)</label>
-            <select id="weaponTypeSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
-              <option value="two_handed" selected>양손무기 (스태프/실린더 포함)</option>
-              <option value="one_handed">한손무기</option>
-            </select>
-          </div>
-          <div class="flex gap-2">
-            <div class="flex-1">
-              <label class="block text-xs text-slate-400 mb-1">R강 단계</label>
-              <select id="upgradeSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+
+          <!-- 무기 타입 & R강 선택기 -->
+          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
+              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                <option value="two_handed" selected>양손무기 (스태프/실린더 포함)</option>
+                <option value="one_handed">한손무기 (단일)</option>
+                <option value="dual_wield">쌍수무기 (쌍검/쌍둔/쌍총)</option>
+              </select>
+            </div>
+            
+            <!-- 단일 무기용 R강 -->
+            <div id="singleRGradeContainer">
+              <label class="block text-xs text-slate-400 mb-1">특별개조 (R강)</label>
+              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
                 <option value="0">노개조 / S강</option>
-                <option value="1">R1강</option>
-                <option value="2">R2강</option>
-                <option value="3">R3강</option>
-                <option value="4">R4강</option>
                 <option value="5">R5강</option>
                 <option value="6">R6강</option>
                 <option value="7" selected>R7강</option>
                 <option value="8">R8강</option>
               </select>
+            </div>
+
+            <!-- 쌍수 무기용 R강 (기본 숨김) -->
+            <div id="dualRGradeContainer" class="hidden flex gap-2">
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">오른손 R강</label>
+                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                  <option value="0">노개조</option>
+                  <option value="6">R6강</option>
+                  <option value="7" selected>R7강</option>
+                </select>
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">왼손 R강</label>
+                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                  <option value="0">노개조</option>
+                  <option value="6">R6강</option>
+                  <option value="7">R7강</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 평판 및 보뎀 -->
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">네일 평판 (크리 상한 증가 %)</label>
+            <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+          </div>
+          <div class="flex gap-2">
+            <div class="flex-1">
+              <label class="block text-xs text-slate-400 mb-1">이보나 평판 (크뎀 %)</label>
+              <input type="number" id="yvonaInput" value="10.0" min="0" max="10" step="0.1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
             </div>
             <div class="flex-1">
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
@@ -141,14 +182,14 @@
         <p id="rGradeInfoText" class="text-[11px] text-emerald-400 text-right mt-1">현재 적용 크리 기댓값 계산 중...</p>
       </div>
 
-      <!-- 3. 아르카나별 유효 세공 동적 추가 -->
+      <!-- 3. 아르카나별 유효 세공 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4"></i> 3. 유효 세공 옵션 설정
             </h2>
-            <p class="text-[11px] text-slate-400">해당 아르카나의 딜 기여도에 비례해 스탯으로 자동 환산됩니다.</p>
+            <p class="text-[11px] text-slate-400">아르카나 딜 기여도에 비례해 스탯으로 자동 환산됩니다.</p>
           </div>
           <button id="addReforgeBtn" class="flex items-center gap-1 text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-3 py-1.5 rounded-lg hover:bg-amber-500/30 transition">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 세공 추가
@@ -157,12 +198,24 @@
         <div id="reforgeListContainer" class="space-y-3"></div>
       </div>
 
+      <!-- 4. 스크린샷 업로드 (카드 생성용) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
+        <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
+          <i data-lucide="image" class="w-4 h-4"></i> 4. 캐릭터 외형 등록 (선택)
+        </h2>
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-amber-400/50 rounded-xl p-6 text-center cursor-pointer transition bg-slate-950/40">
+          <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
+          <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+          <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
+        </div>
+      </div>
+
     </section>
 
     <!-- 우측: 환산 결과 카드 -->
     <section class="lg:col-span-5 space-y-6">
       
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 shadow-2xl relative overflow-hidden" id="cardExportArea">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -172,9 +225,16 @@
           <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
         </div>
 
-        <div class="relative w-full h-48 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
-            <i data-lucide="flask-conical" class="w-16 h-16 text-slate-700 mb-2"></i>
-            <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">포비든 알케미스트</span>
+        <!-- 캐릭터 이미지 영역 -->
+        <div class="relative w-full h-52 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
+            <img id="previewImage" src="" alt="Avatar" class="w-full h-full object-cover hidden">
+            <div id="defaultAvatarPlaceholder" class="text-center">
+              <i data-lucide="flask-conical" class="w-16 h-16 text-slate-700 mb-2 mx-auto"></i>
+              <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">포비든 알케미스트</span>
+            </div>
+            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-purple-600/90 text-purple-100 text-[10px] px-2 py-0.5 rounded font-bold backdrop-blur">
+              ✨ AI Illustration
+            </div>
         </div>
 
         <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
@@ -195,7 +255,7 @@
             <span id="breakdownPiercing" class="text-amber-400 font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
-            <span>크뎀/보뎀 곱연산 환산치</span>
+            <span>평판/크뎀/보뎀 환산치</span>
             <span id="breakdownMult" class="text-sky-400 font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
@@ -203,6 +263,16 @@
             <span id="breakdownReforge" class="text-emerald-400 font-semibold">+ 0</span>
           </div>
         </div>
+      </div>
+
+      <!-- 카드 액션 버튼 -->
+      <div class="space-y-2">
+        <button id="aiTransformBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition">
+          <i data-lucide="clapperboard" class="w-4 h-4"></i> AI 일러스트 카드 만들기 (광고 5초)
+        </button>
+        <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition">
+          <i data-lucide="download" class="w-4 h-4"></i> 스펙 카드 이미지 저장
+        </button>
       </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
@@ -214,6 +284,23 @@
 
     </section>
   </main>
+
+  <!-- 광고 모달 -->
+  <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
+      <div class="w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto border border-amber-500/20">
+        <i data-lucide="play-circle" class="w-6 h-6"></i>
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-200 text-sm">스폰서 광고 재생 중</h4>
+        <p class="text-xs text-slate-400 mt-1">광고 종료 후 이미지가 변환됩니다.</p>
+      </div>
+      <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+        <div id="adProgress" class="bg-amber-400 h-full w-0 transition-all duration-1000 ease-linear"></div>
+      </div>
+      <span id="adCountdownText" class="text-xs text-amber-300 font-bold block">남은 시간: 5초</span>
+    </div>
+  </div>
 
   <script>
     const Security = {
@@ -230,6 +317,7 @@
       }
     };
 
+    // R강 수치 데이터
     const R_GRADE_DATA = {
       two_handed: { 0: 0, 1: 0.06, 2: 0.16, 3: 0.26, 4: 0.38, 5: 0.50, 6: 0.62, 7: 0.74, 8: 0.89 },
       one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
@@ -246,19 +334,17 @@
         ]
       },
       variable_gunner: {
-        name: '배리어블 거너', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'two_handed',
+        name: '배리어블 거너', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
           { id: 'dual_gun_max', name: '듀얼건 최대 대미지 (무기)', maxLevel: 25, flatAdd: 5 },
           { id: 'bullet_storm', name: '불릿 스톰 대미지 (장갑)', maxLevel: 20, weightPerLevel: 0.004 },
-          { id: 'shooting_rush', name: '슈팅 러쉬 대미지 (신발)', maxLevel: 20, weightPerLevel: 0.003 },
-          { id: 'frenzy_dur', name: '프렌지 지속시간 (옷)', maxLevel: 20, weightPerLevel: 0.0025 }
+          { id: 'shooting_rush', name: '슈팅 러쉬 대미지 (신발)', maxLevel: 20, weightPerLevel: 0.003 }
         ]
       },
       dark_mage: {
         name: '다크 메이지', statType: '마법 공격력', statUnit: '마공', defaultWeapon: 'two_handed',
         validReforges: [
           { id: 'fireball_dmg', name: '파이어볼 대미지 (옷)', maxLevel: 20, weightPerLevel: 0.0035 },
-          { id: 'light_rod', name: '라이트닝 로드 (장갑)', maxLevel: 20, weightPerLevel: 0.003 },
           { id: 'magic_att', name: '마법 공격력 (무기)', maxLevel: 20, flatAdd: 4 }
         ]
       },
@@ -266,22 +352,19 @@
         name: '엘레멘탈 나이트', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
           { id: 'smash_dmg', name: '스매시 대미지 (장갑)', maxLevel: 20, weightPerLevel: 0.004 },
-          { id: 'windmill_dmg', name: '윈드밀 대미지 (모자)', maxLevel: 20, weightPerLevel: 0.0018 },
-          { id: 'max_att', name: '한계돌파 최대공격력', maxLevel: 25, flatAdd: 2.5 }
+          { id: 'windmill_dmg', name: '윈드밀 대미지 (모자)', maxLevel: 20, weightPerLevel: 0.0018 }
         ]
       },
       alchemic_stinger: {
         name: '알케믹 스팅어', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'magnum_dmg', name: '매그넘 샷 대미지 (장갑)', maxLevel: 20, weightPerLevel: 0.0045 },
-          { id: 'crash_shot', name: '크래시 샷 파편 (옷)', maxLevel: 20, weightPerLevel: 0.0025 }
+          { id: 'magnum_dmg', name: '매그넘 샷 대미지 (장갑)', maxLevel: 20, weightPerLevel: 0.0045 }
         ]
       },
       saint_bard: {
         name: '세인트 바드', statType: '마법 공격력', statUnit: '마공', defaultWeapon: 'one_handed',
         validReforges: [
-          { id: 'music_buff', name: '음악 버프 효과 (악기)', maxLevel: 20, weightPerLevel: 0.006 },
-          { id: 'healing', name: '힐링 회복량 (옷)', maxLevel: 20, weightPerLevel: 0.003 }
+          { id: 'music_buff', name: '음악 버프 효과 (악기)', maxLevel: 20, weightPerLevel: 0.006 }
         ]
       }
     };
@@ -297,15 +380,13 @@
     let currentArcanaKey = 'forbidden_alchemist';
     let activeReforges = []; 
 
+    // 세공 UI
     function renderReforgeList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
       const validList = ARCANAS[currentArcanaKey].validReforges;
 
-      if (activeReforges.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 py-2 text-center">선택된 세공이 없습니다.</p>`;
-        return;
-      }
+      if (activeReforges.length === 0) return;
 
       activeReforges.forEach((item, index) => {
         const row = document.createElement('div');
@@ -341,23 +422,40 @@
       document.querySelectorAll('.remove-reforge-btn').forEach(btn => { btn.addEventListener('click', (e) => { activeReforges.splice(e.currentTarget.dataset.index, 1); renderReforgeList(); }); });
     }
 
+    // 메인 계산 로직 (쌍수 & 평판 적용)
     function calculateTotal() {
       const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
-      const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 9, 0);
-      const rGrade = Security.clampNumber(document.getElementById('upgradeSelect').value, 0, 8, 0);
+      const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
+      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7.5);
+      const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
       const bonusDmgRate = Security.clampNumber(document.getElementById('bonusDamageInput').value, 0, 100, 0) / 100;
       const dungeon = DUNGEONS[document.getElementById('dungeonSelect').value];
 
       const addFromPiercing = Math.round(baseStat * (piercing * dungeon.piercingMult));
 
-      const rawCritDmg = R_GRADE_DATA[weaponType][rGrade] || 0;
-      const critMult = rawCritDmg * 0.35; 
+      // 쌍수(평균) 및 단일무기 R강 처리
+      let rawCritDmg = 0;
+      if (weaponType === 'dual_wield') {
+        const rMain = document.getElementById('mainHandUpgradeSelect').value;
+        const rOff = document.getElementById('offHandUpgradeSelect').value;
+        const dmgMain = R_GRADE_DATA['one_handed'][rMain] || 0;
+        const dmgOff = R_GRADE_DATA['one_handed'][rOff] || 0;
+        rawCritDmg = (dmgMain + dmgOff) / 2; // 쌍수는 메인/서브 평균치 적용
+      } else {
+        const rGrade = document.getElementById('upgradeSelect').value;
+        rawCritDmg = R_GRADE_DATA[weaponType][rGrade] || 0;
+      }
+
+      // 평판 적용 (기본 크리 상한 30% + 네일)
+      const critRateCap = 0.30 + (nele / 100);
+      const totalCritDmgMult = rawCritDmg + (yvona / 100);
+      const expectedCritMult = totalCritDmgMult * critRateCap; 
       
       document.getElementById('rGradeInfoText').textContent = 
-        `적용 크리티컬 대미지: +${Math.round(rawCritDmg * 100)}% (크리 기댓값 환산율: +${(critMult * 100).toFixed(1)}%)`;
+        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${Math.round(critRateCap*100)}% 적용 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
-      const addFromMult = Math.round(baseStat * critMult) + Math.round(baseStat * bonusDmgRate);
+      const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
 
       let addFromReforge = 0;
       const defs = ARCANAS[currentArcanaKey].validReforges;
@@ -393,37 +491,90 @@
           <span class="text-slate-300">피어싱 +1 증가 효율</span>
           <span class="font-bold text-amber-300">+${Math.round(baseStat * dungeon.piercingMult)} 환산 스탯</span>
         </div>
-        <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
-          <span class="text-slate-300">보너스 대미지 +1% 효율</span>
-          <span class="font-bold text-emerald-300">+${Math.round(baseStat * 0.01)} 환산 스탯</span>
-        </div>
       `;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         const arc = ARCANAS[currentArcanaKey];
         document.getElementById('baseStatLabel').textContent = `노도핑 ${arc.statType}`;
         document.getElementById('arcanaBadge').textContent = arc.name;
-        document.getElementById('weaponTypeSelect').value = arc.defaultWeapon;
+        
+        const wpSelect = document.getElementById('weaponTypeSelect');
+        wpSelect.value = arc.defaultWeapon;
+        wpSelect.dispatchEvent(new Event('change'));
+
         activeReforges = [{ id: arc.validReforges[0].id, level: 20 }];
         renderReforgeList();
       });
 
-      document.getElementById('dungeonSelect').addEventListener('change', (e) => {
-        document.getElementById('cardDungeonBadge').textContent = DUNGEONS[e.target.value].label;
+      // 무기 타입(쌍수/단일) 전환에 따른 R강 UI 변경
+      document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
+        const isDual = e.target.value === 'dual_wield';
+        document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
+        document.getElementById('dualRGradeContainer').classList.toggle('hidden', !isDual);
         calculateTotal();
       });
 
-      ['baseStatInput', 'piercingSelect', 'upgradeSelect', 'weaponTypeSelect', 'bonusDamageInput'].forEach(id => {
+      ['dungeonSelect', 'baseStatInput', 'piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect', 'neleInput', 'yvonaInput', 'bonusDamageInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
+        document.getElementById(id).addEventListener('change', calculateTotal);
       });
 
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
       document.getElementById('addReforgeBtn').addEventListener('click', addReforgeRow);
+
+      // 이미지 업로드 기능 복구
+      const dropZone = document.getElementById('dropZone');
+      const imageInput = document.getElementById('imageInput');
+      dropZone.addEventListener('click', () => imageInput.click());
+      imageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = document.getElementById('previewImage');
+          img.src = event.target.result;
+          img.classList.remove('hidden');
+          document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // AI 카드 변환 (광고 시뮬레이션) 복구
+      document.getElementById('aiTransformBtn').addEventListener('click', () => {
+        const modal = document.getElementById('adModal');
+        const progress = document.getElementById('adProgress');
+        const countText = document.getElementById('adCountdownText');
+        modal.classList.remove('hidden');
+        progress.style.width = '0%';
+
+        let sec = 5;
+        const timer = setInterval(() => {
+          sec--;
+          countText.textContent = `남은 시간: ${sec}초`;
+          progress.style.width = `${((5 - sec) / 5) * 100}%`;
+          if (sec <= 0) {
+            clearInterval(timer);
+            modal.classList.add('hidden');
+            document.getElementById('animeOverlayBadge').classList.remove('hidden');
+            const preview = document.getElementById('previewImage');
+            if (!preview.classList.contains('hidden')) {
+              preview.style.filter = 'contrast(120%) saturate(130%) brightness(110%)';
+            }
+            alert('🎉 광고 시청 완료! AI 변환 일러스트가 적용되었습니다.');
+          }
+        }, 1000);
+      });
+
+      // 이미지 저장 버튼 액션
+      document.getElementById('saveCardBtn').addEventListener('click', () => {
+        alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
+      });
 
       activeReforges = [{ id: 'water_cannon', level: 20 }];
       renderReforgeList();
