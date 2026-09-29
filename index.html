@@ -73,7 +73,7 @@
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 & 무기 스펙 (평판 및 토템 추가) -->
+      <!-- 2. 베이스 스탯 & 무기 스펙 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold text-amber-400 flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4"></i> 2. 무기 및 핵심 평판 스탯
@@ -81,7 +81,7 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 베이스 스탯</label>
+            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 연금술 대미지</label>
             <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-amber-300 focus:border-amber-400 focus:outline-none">
           </div>
@@ -328,7 +328,7 @@
 
     const PIERCING_BASE_MULT = 0.115;
 
-    // 각 세공 옵션이 어느 에코스톤에서 등장하는지(echo 속성) 명시
+    // 아르카나 스탯 타입 명칭 맞춤 적용
     const ARCANAS = {
       forbidden_alchemist: {
         name: '포비든 알케미스트', statType: '연금술 대미지', statUnit: '환산치', defaultWeapon: 'two_handed',
@@ -340,7 +340,7 @@
         ]
       },
       variable_gunner: {
-        name: '배리어블 거너', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
+        name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
           { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'silver' },
           { id: 'bullet_storm', name: '불릿 스톰 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
@@ -357,7 +357,7 @@
         ]
       },
       elemental_knight: {
-        name: '엘레멘탈 나이트', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'two_handed',
+        name: '엘레멘탈 나이트', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
           { id: 'smash_dmg', name: '스매시 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'red' },
           { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
@@ -365,7 +365,7 @@
         ]
       },
       alchemic_stinger: {
-        name: '알케믹 스팅어', statType: '최대 대미지', statUnit: '맥뎀', defaultWeapon: 'two_handed',
+        name: '알케믹 스팅어', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
           { id: 'magnum_dmg', name: '매그넘 샷 대미지', maxLevel: 20, weightPerLevel: 0.0045, echo: 'yellow' },
           { id: 'crash_shot', name: '크래시 샷 파편', maxLevel: 20, weightPerLevel: 0.0025, echo: 'yellow' }
@@ -382,7 +382,6 @@
 
     let currentArcanaKey = 'forbidden_alchemist';
     let activeReforges = []; 
-    // 에코스톤 3슬롯 상태 고정 (색상, 각성능력ID, 레벨)
     let activeEchostones = [
       { color: 'none', id: 'none', level: 0 },
       { color: 'none', id: 'none', level: 0 },
@@ -428,7 +427,6 @@
         const row = document.createElement('div');
         row.className = "flex flex-col gap-2 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 text-xs";
         
-        // 1. 에코스톤 색상 선택기
         row.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
@@ -443,9 +441,7 @@
           </div>
         `;
 
-        // 2. 색상에 맞는 각성 능력 필터링
         const filteredOptions = allValidList.filter(opt => opt.echo === item.color);
-        
         let abilityHtml = `<option value="none">-- 각성 능력 선택 --</option>`;
         if (item.color !== 'none') {
           if(filteredOptions.length > 0) {
@@ -674,6 +670,11 @@
         alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
       });
 
+      // 초기 설정
+      const initialArcana = ARCANAS[currentArcanaKey];
+      document.getElementById('baseStatLabel').textContent = `노도핑 ${initialArcana.statType}`;
+      document.getElementById('arcanaBadge').textContent = initialArcana.name;
+      
       activeReforges = [{ id: 'water_cannon', level: 20 }];
       renderReforgeList();
       renderEchostoneList();
