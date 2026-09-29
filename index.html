@@ -45,6 +45,16 @@
       transition: all 0.4s ease;
     }
     
+    select {
+      /* 브라우저 기본 화살표 디자인 억제 후 커스텀 여백 조정 */
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
   </style>
@@ -76,11 +86,11 @@
           <div>
             <label class="block text-xs text-slate-400 mb-1">캐릭터 닉네임</label>
             <input type="text" id="nicknameInput" maxlength="12" placeholder="밀레시안" value="밀레시안"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">서버</label>
-            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="류트">류트</option>
               <option value="만돌린">만돌린</option>
               <option value="하프">하프</option>
@@ -89,7 +99,7 @@
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
-            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-theme-light focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm font-bold text-theme-light focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="elemental_knight">엘레멘탈 나이트</option>
               <option value="dark_mage">다크 메이지</option>
               <option value="alchemic_stinger">알케믹 스팅어</option>
@@ -106,18 +116,18 @@
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 무기 및 핵심 평판 스탯
+          <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 전투 베이스 & 무기 스펙
         </h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력</label>
+            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 베이스 스탯</label>
             <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
-            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="0">0 레벨</option>
               <option value="1">1 레벨</option>
               <option value="2">2 레벨</option>
@@ -136,7 +146,7 @@
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
-              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                 <option value="two_handed" selected>양손무기</option>
                 <option value="one_handed">한손무기</option>
                 <option value="dual_wield">쌍수무기</option>
@@ -145,7 +155,7 @@
             
             <div id="singleRGradeContainer">
               <label class="block text-xs text-slate-400 mb-1">특별개조 (R강)</label>
-              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                 <option value="0">노개조 / S강</option>
                 <option value="1">R1강</option>
                 <option value="2">R2강</option>
@@ -161,7 +171,7 @@
             <div id="dualRGradeContainer" class="hidden flex gap-2">
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">오른손 R강</label>
-                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7" selected>R7강</option>
@@ -170,7 +180,7 @@
               </div>
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">왼손 R강</label>
-                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 pr-8 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7">R7강</option>
@@ -180,26 +190,36 @@
             </div>
           </div>
           
-          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2 border-t border-slate-800 pt-3">
             <div>
-              <label class="block text-xs text-slate-400 mb-1">네일 (크리 상한 %)</label>
-              <input type="number" id="neleInput" value="7" min="0" max="7.5" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-xs text-slate-400 mb-1">도핑 버프 증뎀 (%)</label>
+              <input type="number" id="buffDamageInput" value="25" min="0" max="100" step="1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300" title="전장의 서곡, 마공포, 물공포 등">
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
-              <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
-            </div>
-            <div>
-              <label class="block text-xs text-slate-400 mb-1">농장/토템 크뎀 (%)</label>
-              <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-xs text-slate-400 mb-1">아르카나 링크 (%)</label>
+              <input type="number" id="arcanaLinkInput" value="10" min="0" max="20" step="1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300" title="아르카나 개방에 따른 스킬 대미지 보너스">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
               <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">네일 (크리상한 %)</label>
+              <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
+              <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">토템/농장 크뎀 (%)</label>
+              <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
           </div>
         </div>
@@ -268,7 +288,7 @@
         </div>
 
         <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
-          <span class="text-xs text-slate-400 block mb-1">최종 실효 환산 전투력</span>
+          <span class="text-xs text-slate-400 block mb-1">종합 전투력 환산 스코어</span>
           <div class="text-4xl font-black theme-gradient-text tracking-tight" id="totalScoreText">
             3,250
           </div>
@@ -276,7 +296,7 @@
 
         <div class="space-y-2 text-xs border-t border-slate-800 pt-3">
           <div class="flex justify-between text-slate-400">
-            <span>순수 베이스 스탯</span>
+            <span>도핑 적용 베이스 스탯</span>
             <span id="breakdownBase" class="text-slate-200 font-semibold">0</span>
           </div>
           <div class="flex justify-between text-slate-400">
@@ -284,7 +304,7 @@
             <span id="breakdownPiercing" class="text-theme-light font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
-            <span>평판/크뎀/보뎀 환산치</span>
+            <span>크뎀/보뎀/링크 배율 환산치</span>
             <span id="breakdownMult" class="text-sky-400 font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
@@ -529,7 +549,7 @@
 
           row.innerHTML = `
             <div class="flex-1">
-              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
+              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
             </div>
             <div class="w-24 flex items-center gap-1">
               <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
@@ -557,7 +577,7 @@
         row.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
-            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
+            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
               <option value="none" ${item.color === 'none' ? 'selected' : ''}>-- 장착 안 함 --</option>
               <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤</option>
               <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤</option>
@@ -580,7 +600,7 @@
 
         row.innerHTML += `
           <div class="flex items-center gap-2 pl-6">
-            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
+            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
               ${abilityHtml}
             </select>
             <div class="w-24 flex items-center gap-1">
@@ -659,12 +679,19 @@
     }
 
     function calculateTotal() {
-      const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
+      const rawBaseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
+      const buffRate = Security.clampNumber(document.getElementById('buffDamageInput').value, 0, 100, 25) / 100;
+      
+      // 도핑 적용 베이스 스탯
+      const baseStat = rawBaseStat * (1 + buffRate);
+
       const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
-      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7);
+      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7.5);
       const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
       const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3);
+      
+      const arcanaLinkRate = Security.clampNumber(document.getElementById('arcanaLinkInput').value, 0, 20, 10) / 100;
       const bonusDmgRate = Security.clampNumber(document.getElementById('bonusDamageInput').value, 0, 100, 0) / 100;
 
       const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
@@ -681,18 +708,19 @@
         rawCritDmg = R_GRADE_DATA[weaponType][rGrade] || 0;
       }
 
-      // 정수 연산으로 크리 상한 계산 (반올림 오류 방지)
+      // 소수점 복구 및 오차 없는 크리 계산식
       const critRateCap = 30 + nele;
       const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
       const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
       
       document.getElementById('rGradeInfoText').textContent = 
-        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
+        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
-      const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
+      // 곱연산 가중치 적용 (아르카나 링크 보너스 포함)
+      const combinedMultiplier = expectedCritMult + bonusDmgRate + arcanaLinkRate;
+      const addFromMult = Math.round(baseStat * combinedMultiplier);
 
       let finalReforges = {};
-      
       activeReforges.forEach(r => {
         if (!finalReforges[r.id] || r.level > finalReforges[r.id]) {
           finalReforges[r.id] = r.level;
@@ -720,8 +748,8 @@
 
       const totalScore = baseStat + addFromPiercing + addFromMult + addFromReforge;
 
-      document.getElementById('totalScoreText').textContent = totalScore.toLocaleString();
-      document.getElementById('breakdownBase').textContent = baseStat.toLocaleString();
+      document.getElementById('totalScoreText').textContent = Math.round(totalScore).toLocaleString();
+      document.getElementById('breakdownBase').textContent = Math.round(baseStat).toLocaleString();
       document.getElementById('breakdownPiercing').textContent = `+ ${addFromPiercing.toLocaleString()}`;
       document.getElementById('breakdownMult').textContent = `+ ${addFromMult.toLocaleString()}`;
       document.getElementById('breakdownReforge').textContent = `+ ${addFromReforge.toLocaleString()}`;
@@ -781,7 +809,7 @@
         calculateTotal();
       });
 
-      ['baseStatInput', 'piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect', 'neleInput', 'yvonaInput', 'totemCritInput', 'bonusDamageInput'].forEach(id => {
+      ['baseStatInput', 'piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect', 'neleInput', 'yvonaInput', 'totemCritInput', 'bonusDamageInput', 'buffDamageInput', 'arcanaLinkInput'].forEach(id => {
         document.getElementById(id).addEventListener('input', calculateTotal);
         document.getElementById(id).addEventListener('change', calculateTotal);
       });
