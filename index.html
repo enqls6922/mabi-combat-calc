@@ -295,7 +295,7 @@
       </div>
 
       <div class="space-y-2">
-        <button id="aiTransformBtn" class="w-full theme-gradient-text !text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
+        <button id="aiTransformBtn" class="w-full text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
           <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> AI 일러스트 카드 만들기 (광고 5초)
         </button>
         <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition">
@@ -374,7 +374,6 @@
 
     const PIERCING_BASE_MULT = 0.115;
 
-    // 아르카나별 장착 가능 무기 제약 조건 적용
     const ARCANAS = {
       elemental_knight: {
         name: '엘레멘탈 나이트', statType: '최대 공격력', statUnit: '맥뎀', allowedWeapons: ['two_handed', 'one_handed', 'dual_wield'], defaultWeapon: 'two_handed',
@@ -499,9 +498,8 @@
     function updateWeaponTypeOptions() {
       const arc = ARCANAS[currentArcanaKey];
       const wpSelect = document.getElementById('weaponTypeSelect');
-      
-      // 해당 아르카나의 허용 무기 종류만 드롭다운에 노출
       const labels = { two_handed: '양손무기', one_handed: '한손무기', dual_wield: '쌍수무기' };
+      
       wpSelect.innerHTML = arc.allowedWeapons.map(w => 
         `<option value="${w}" ${w === arc.defaultWeapon ? 'selected' : ''}>${labels[w]}</option>`
       ).join('');
@@ -683,12 +681,13 @@
         rawCritDmg = R_GRADE_DATA[weaponType][rGrade] || 0;
       }
 
-      const critRateCap = 0.30 + (nele / 100);
+      // 소수점 반올림 버그 수정 (toFixed(1) 적용)
+      const critRateCap = 30 + nele;
       const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
-      const expectedCritMult = totalCritDmgMult * critRateCap; 
+      const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
       
       document.getElementById('rGradeInfoText').textContent = 
-        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${Math.round(critRateCap*100)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
+        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
       const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
 
