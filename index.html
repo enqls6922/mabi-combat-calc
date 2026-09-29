@@ -48,11 +48,11 @@
           <div>
             <label class="block text-xs text-slate-400 mb-1">캐릭터 닉네임</label>
             <input type="text" id="nicknameInput" maxlength="12" placeholder="밀레시안" value="밀레시안"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">서버</label>
-            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
               <option value="류트">류트</option>
               <option value="만돌린">만돌린</option>
               <option value="하프">하프</option>
@@ -61,7 +61,7 @@
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
-            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-bold text-amber-300 focus:border-amber-400 focus:outline-none">
+            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-amber-300 focus:border-amber-400 focus:outline-none cursor-pointer">
               <option value="forbidden_alchemist">포비든 알케미스트 (연금)</option>
               <option value="variable_gunner">배리어블 거너 (듀얼건)</option>
               <option value="dark_mage">다크 메이지 (마법)</option>
@@ -84,11 +84,11 @@
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 연금술 대미지</label>
             <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm font-semibold text-amber-300 focus:border-amber-400 focus:outline-none">
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-semibold text-amber-300 focus:border-amber-400 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
-            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
               <option value="0">0 레벨</option>
               <option value="1">1 레벨</option>
               <option value="2">2 레벨</option>
@@ -108,7 +108,7 @@
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
-              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
                 <option value="two_handed" selected>양손무기 (스태프/실린더/활/양손검)</option>
                 <option value="one_handed">한손무기 (원드/한손검)</option>
                 <option value="dual_wield">쌍수무기 (쌍검/듀얼건/너클)</option>
@@ -117,7 +117,7 @@
             
             <div id="singleRGradeContainer">
               <label class="block text-xs text-slate-400 mb-1">특별개조 (R강)</label>
-              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
                 <option value="0">노개조 / S강</option>
                 <option value="1">R1강</option>
                 <option value="2">R2강</option>
@@ -133,7 +133,7 @@
             <div id="dualRGradeContainer" class="hidden flex gap-2">
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">오른손 R강</label>
-                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7" selected>R7강</option>
@@ -142,7 +142,7 @@
               </div>
               <div class="flex-1">
                 <label class="block text-xs text-slate-400 mb-1">왼손 R강</label>
-                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none cursor-pointer">
                   <option value="0">노개조</option>
                   <option value="6">R6강</option>
                   <option value="7">R7강</option>
@@ -157,22 +157,22 @@
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리 상한 %)</label>
               <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
               <input type="number" id="yvonaInput" value="10.0" min="0" max="10" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">농장/토템 크뎀 (%)</label>
               <input type="number" id="totemCritInput" value="3.0" min="0" max="30" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
               <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-amber-400 focus:outline-none">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-amber-400 focus:outline-none">
             </div>
           </div>
         </div>
@@ -330,7 +330,7 @@
     // 표준 메타 피어싱 가중치
     const PIERCING_BASE_MULT = 0.115;
 
-    // 아카라이브 정보 기반 아르카나별 유효 세공 데이터베이스 완벽 세팅
+    // 아카라이브 정보 기반 아르카나별 유효 세공 데이터베이스
     const ARCANAS = {
       forbidden_alchemist: {
         name: '포비든 알케미스트', statType: '연금술 대미지', statUnit: '환산치', defaultWeapon: 'two_handed',
@@ -346,9 +346,13 @@
         name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
           { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'silver' },
-          { id: 'bullet_storm_mult', name: '불릿 스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'shooting_rush_mult', name: '슈팅 러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' }
+          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'silver' },
+          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'frenzy_dur', name: '프렌지 지속', maxLevel: 20, weightPerLevel: 0.002, echo: 'silver' },
+          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
         ]
       },
       dark_mage: {
@@ -428,7 +432,7 @@
           let optionsHtml = validList.map(opt => `<option value="${opt.id}" ${opt.id === item.id ? 'selected' : ''}>${opt.name}</option>`).join('');
           row.innerHTML = `
             <div class="flex-1">
-              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none" data-index="${index}">${optionsHtml}</select>
+              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
             </div>
             <div class="w-24 flex items-center gap-1">
               <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-amber-300 font-semibold text-center focus:outline-none" data-index="${index}">
@@ -456,7 +460,7 @@
         row.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
-            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none" data-index="${index}">
+            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
               <option value="none" ${item.color === 'none' ? 'selected' : ''}>-- 장착 안 함 --</option>
               <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤 (체력/근접)</option>
               <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤 (지력/마법/음악)</option>
@@ -479,7 +483,7 @@
 
         row.innerHTML += `
           <div class="flex items-center gap-2 pl-6">
-            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 focus:outline-none" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
+            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-1 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
               ${abilityHtml}
             </select>
             <div class="w-24 flex items-center gap-1">
