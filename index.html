@@ -6,7 +6,6 @@
   <title>에린 전투력 환산 계산기 (v1.0)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Tailwind 동적 테마 커스텀 설정 -->
   <script>
     tailwind.config = {
       theme: {
@@ -29,13 +28,12 @@
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
     
     :root {
-      /* 기본 테마: 포비든 알케미스트 (Rose/Crimson) */
-      --theme-main: #fb7185; 
-      --theme-light: #fecdd3;
-      --theme-bg: rgba(225, 29, 72, 0.15);
-      --theme-border: rgba(225, 29, 72, 0.35);
-      --theme-from: #fda4af;
-      --theme-to: #be123c;
+      --theme-main: #f97316; 
+      --theme-light: #fed7aa;
+      --theme-bg: rgba(249, 115, 22, 0.15);
+      --theme-border: rgba(249, 115, 22, 0.35);
+      --theme-from: #fb923c;
+      --theme-to: #c2410c;
     }
 
     body { font-family: 'Noto Sans KR', sans-serif; transition: all 0.4s ease; }
@@ -53,7 +51,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- 상단 네비게이션 -->
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
@@ -69,10 +66,8 @@
 
   <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
     
-    <!-- 좌측: 유저 스펙 입력 영역 -->
     <section class="lg:col-span-7 space-y-6">
       
-      <!-- 1. 캐릭터 & 아르카나 정보 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
         <h2 class="text-sm font-semibold text-theme-main mb-4 flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="swords" class="w-4 h-4"></i> 1. 캐릭터 & 아르카나 정보
@@ -95,21 +90,20 @@
           <div>
             <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
             <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-theme-light focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
-              <option value="forbidden_alchemist">포비든 알케미스트 (연금)</option>
               <option value="elemental_knight">엘레멘탈 나이트 (근접)</option>
               <option value="dark_mage">다크 메이지 (마법)</option>
               <option value="alchemic_stinger">알케믹 스팅어 (궁술)</option>
-              <option value="variable_gunner">배리어블 거너 (듀얼건)</option>
+              <option value="sacred_guard">세이크리드 가드 (방패)</option>
               <option value="blader">블래스트 랜서 (창)</option>
-              <option value="fury_fighter">퓨리 파이터 (격투)</option>
+              <option value="variable_gunner">배리어블 거너 (듀얼건)</option>
+              <option value="forbidden_alchemist">포비든 알케미스트 (연금)</option>
               <option value="melodic_puppeteer">멜로딕 퍼펫티어 (인형/음악)</option>
-              <option value="sacred_guard">세이크리드 가드 (방패/보호)</option>
+              <option value="fury_fighter">퓨리 파이터 (격투)</option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 & 무기 스펙 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="activity" class="w-4 h-4"></i> 2. 무기 및 핵심 평판 스탯
@@ -117,7 +111,7 @@
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 4대 연금술 대미지 평균</label>
+            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력</label>
             <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
@@ -139,7 +133,6 @@
             </select>
           </div>
 
-          <!-- 무기 타입 & R강 선택기 -->
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
@@ -187,7 +180,6 @@
             </div>
           </div>
           
-          <!-- 평판 및 보뎀 & 농장토템 -->
           <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-2">
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리 상한 %)</label>
@@ -214,7 +206,6 @@
         <p id="rGradeInfoText" class="text-[11px] text-emerald-400 text-right mt-1">현재 적용 크리 기댓값 계산 중...</p>
       </div>
 
-      <!-- 3. 장비 세공 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -229,7 +220,6 @@
         <div id="reforgeListContainer" class="space-y-3"></div>
       </div>
 
-      <!-- 4. 에코스톤 각성 옵션 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex flex-col">
           <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
@@ -240,7 +230,6 @@
         <div id="echostoneListContainer" class="space-y-3"></div>
       </div>
 
-      <!-- 5. 스크린샷 업로드 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
         <h2 class="text-sm font-semibold text-theme-main flex items-center gap-2 transition-colors duration-500">
           <i data-lucide="image" class="w-4 h-4"></i> 5. 캐릭터 외형 등록 (선택)
@@ -258,7 +247,6 @@
     <section class="lg:col-span-5 space-y-6">
       
       <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-colors duration-500" id="cardExportArea">
-        <!-- 테마 컬러 후광 효과 -->
         <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -271,8 +259,8 @@
         <div class="relative w-full h-52 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="previewImage" src="" alt="Avatar" class="w-full h-full object-cover hidden">
             <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500">
-              <i data-lucide="flask-conical" class="w-16 h-16 text-slate-600 mb-2 mx-auto"></i>
-              <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">포비든 알케미스트</span>
+              <i data-lucide="swords" class="w-16 h-16 text-slate-600 mb-2 mx-auto"></i>
+              <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">엘레멘탈 나이트</span>
             </div>
             <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-theme-main text-white text-[10px] px-2 py-0.5 rounded font-bold backdrop-blur">
               ✨ AI Illustration
@@ -325,7 +313,6 @@
     </section>
   </main>
 
-  <!-- 광고 모달 -->
   <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-theme-bg text-theme-main rounded-full flex items-center justify-center mx-auto border border-theme-border">
@@ -357,21 +344,21 @@
       }
     };
 
-    // --- 동적 테마 설정 맵핑 ---
+    // --- 인게임 엠블럼 기반 정확한 아르카나 테마 컬러 매핑 ---
     const THEMES = {
-      forbidden_alchemist: { main: '#fb7185', light: '#fecdd3', bg: 'rgba(251, 113, 133, 0.1)', border: 'rgba(251, 113, 133, 0.3)', from: '#fda4af', to: '#be123c' }, // Rose
-      elemental_knight:    { main: '#fbbf24', light: '#fde68a', bg: 'rgba(251, 191, 36, 0.1)', border: 'rgba(251, 191, 36, 0.3)', from: '#fde047', to: '#d97706' }, // Amber
-      dark_mage:           { main: '#a78bfa', light: '#ddd6fe', bg: 'rgba(167, 139, 250, 0.1)', border: 'rgba(167, 139, 250, 0.3)', from: '#c4b5fd', to: '#6d28d9' }, // Violet
-      alchemic_stinger:    { main: '#34d399', light: '#a7f3d0', bg: 'rgba(52, 211, 153, 0.1)', border: 'rgba(52, 211, 153, 0.3)', from: '#6ee7b7', to: '#047857' }, // Emerald
-      variable_gunner:     { main: '#38bdf8', light: '#bae6fd', bg: 'rgba(56, 189, 248, 0.1)', border: 'rgba(56, 189, 248, 0.3)', from: '#7dd3fc', to: '#0369a1' }, // Sky
-      blader:              { main: '#60a5fa', light: '#bfdbfe', bg: 'rgba(96, 165, 250, 0.1)', border: 'rgba(96, 165, 250, 0.3)', from: '#93c5fd', to: '#1d4ed8' }, // Blue
-      fury_fighter:        { main: '#f87171', light: '#fecaca', bg: 'rgba(248, 113, 113, 0.1)', border: 'rgba(248, 113, 113, 0.3)', from: '#fca5a5', to: '#b91c1c' }, // Red
-      melodic_puppeteer:   { main: '#e879f9', light: '#f5d0fe', bg: 'rgba(232, 121, 249, 0.1)', border: 'rgba(232, 121, 249, 0.3)', from: '#f0abfc', to: '#a21caf' }, // Fuchsia
-      sacred_guard:        { main: '#facc15', light: '#fef08a', bg: 'rgba(250, 204, 21, 0.1)', border: 'rgba(250, 204, 21, 0.3)', from: '#fef08a', to: '#a16207' }  // Yellow
+      elemental_knight:    { main: '#f97316', light: '#fed7aa', bg: 'rgba(249, 115, 22, 0.15)', border: 'rgba(249, 115, 22, 0.35)', from: '#fb923c', to: '#c2410c' }, // R1 엘나 (화염 오렌지)
+      dark_mage:           { main: '#a855f7', light: '#e9d5ff', bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.35)', from: '#c084fc', to: '#7e22ce' }, // R2 닼메 (바이올렛)
+      alchemic_stinger:    { main: '#eab308', light: '#fef08a', bg: 'rgba(234, 179, 8, 0.15)', border: 'rgba(234, 179, 8, 0.35)', from: '#facc15', to: '#a16207' }, // R2 알스 (골드 옐로우)
+      sacred_guard:        { main: '#ea580c', light: '#ffedd5', bg: 'rgba(234, 88, 12, 0.15)', border: 'rgba(234, 88, 12, 0.35)', from: '#f97316', to: '#9a3412' }, // R3 세가 (브론즈 오렌지)
+      blader:              { main: '#06b6d4', light: '#cffafe', bg: 'rgba(6, 182, 212, 0.15)', border: 'rgba(6, 182, 212, 0.35)', from: '#22d3ee', to: '#0e7490' }, // R3 블랜 (시안/청록)
+      variable_gunner:     { main: '#3b82f6', light: '#dbeafe', bg: 'rgba(59, 130, 246, 0.15)', border: 'rgba(59, 130, 246, 0.35)', from: '#60a5fa', to: '#1d4ed8' }, // R4 거너 (아이스 블루)
+      forbidden_alchemist: { main: '#ca8a04', light: '#fef08a', bg: 'rgba(202, 138, 4, 0.15)', border: 'rgba(202, 138, 4, 0.35)', from: '#eab308', to: '#854d0e' }, // R4 포알 (황금 연두)
+      melodic_puppeteer:   { main: '#ec4899', light: '#fce7f3', bg: 'rgba(236, 72, 153, 0.15)', border: 'rgba(236, 72, 153, 0.35)', from: '#f472b6', to: '#be185d' }, // R5 멜퍼 (핑크 로즈)
+      fury_fighter:        { main: '#dc2626', light: '#fee2e2', bg: 'rgba(220, 38, 38, 0.15)', border: 'rgba(220, 38, 38, 0.35)', from: '#ef4444', to: '#991b1b' }  // R5 퓨파 (크림슨 레드)
     };
 
     function applyTheme(key) {
-      const t = THEMES[key] || THEMES.forbidden_alchemist;
+      const t = THEMES[key] || THEMES.elemental_knight;
       const root = document.documentElement;
       root.style.setProperty('--theme-main', t.main);
       root.style.setProperty('--theme-light', t.light);
@@ -388,19 +375,8 @@
 
     const PIERCING_BASE_MULT = 0.115;
 
+    // 아르카나 데이터베이스 (요청 반영: 엘나 기본 선택)
     const ARCANAS = {
-      forbidden_alchemist: {
-        name: '포비든 알케미스트', statType: '4대 연금술 대미지 평균', statUnit: '환산치', defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
-          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
-          { id: 'rain_water_cannon', name: '레인 캐스팅 워터 캐논 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'heat_buster', name: '히트 버스터 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' },
-          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'hydra_prot', name: '하이드라 연성 마법 보호 감소 수치', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' }
-        ]
-      },
       elemental_knight: {
         name: '엘레멘탈 나이트', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'two_handed',
         validReforges: [
@@ -438,16 +414,15 @@
           { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' }
         ]
       },
-      variable_gunner: {
-        name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
+      sacred_guard: {
+        name: '세이크리드 가드', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'one_handed',
         validReforges: [
-          { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'blue' },
-          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'blue' },
-          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
-          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
+          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
+          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
+          { id: 'blunt_mastery', name: '블런트 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'axe_mastery', name: '엑스 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
         ]
       },
       blader: {
@@ -460,18 +435,28 @@
           { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
         ]
       },
-      fury_fighter: {
-        name: '퓨리 파이터', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
+      variable_gunner: {
+        name: '배리어블 거너', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
-          { id: 'pounding', name: '파운딩 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'screw_upper', name: '스크류 어퍼 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'charging_fist', name: '차징 피스트 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'silver' },
-          { id: 'combo_mastery', name: '연속기 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'knuckle_mastery', name: '너클 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'silver' },
-          { id: 'somersault', name: '섬머 솔트 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'drop_kick', name: '드롭킥 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
+          { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'blue' },
+          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'blue' },
+          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
+        ]
+      },
+      forbidden_alchemist: {
+        name: '포비든 알케미스트', statType: '4대 연금술 대미지 평균', statUnit: '환산치', defaultWeapon: 'two_handed',
+        validReforges: [
+          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
+          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
+          { id: 'rain_water_cannon', name: '레인 캐스팅 워터 캐논 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'heat_buster', name: '히트 버스터 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' },
+          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'hydra_prot', name: '하이드라 연성 마법 보호 감소 수치', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' }
         ]
       },
       melodic_puppeteer: {
@@ -488,20 +473,23 @@
           { id: 'melody_shock', name: '멜로디 쇼크 순간 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
         ]
       },
-      sacred_guard: {
-        name: '세이크리드 가드', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'one_handed',
+      fury_fighter: {
+        name: '퓨리 파이터', statType: '최대 공격력', statUnit: '맥뎀', defaultWeapon: 'dual_wield',
         validReforges: [
-          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
-          { id: 'blunt_mastery', name: '블런트 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'axe_mastery', name: '엑스 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
+          { id: 'pounding', name: '파운딩 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'screw_upper', name: '스크류 어퍼 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'charging_fist', name: '차징 피스트 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'silver' },
+          { id: 'combo_mastery', name: '연속기 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'knuckle_mastery', name: '너클 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'silver' },
+          { id: 'somersault', name: '섬머 솔트 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'drop_kick', name: '드롭킥 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
           { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
         ]
       }
     };
 
-    let currentArcanaKey = 'forbidden_alchemist';
+    let currentArcanaKey = 'elemental_knight';
     let activeReforges = []; 
     let activeEchostones = [
       { color: 'none', id: 'none', level: 0 },
@@ -599,7 +587,7 @@
       document.querySelectorAll('.reforge-select').forEach(sel => { 
         sel.addEventListener('change', (e) => { 
           activeReforges[e.target.dataset.index].id = e.target.value; 
-          renderReforgeList(); // 선택 불가 업데이트를 위한 재렌더링
+          renderReforgeList(); 
         }); 
       });
       document.querySelectorAll('.reforge-level').forEach(inp => { 
@@ -691,7 +679,6 @@
 
       const addFromMult = Math.round(baseStat * expectedCritMult) + Math.round(baseStat * bonusDmgRate);
 
-      // 세공과 에코스톤 병합 (중복 시 가장 높은 레벨 1개만 적용)
       let finalReforges = {};
       
       activeReforges.forEach(r => {
@@ -749,19 +736,19 @@
       
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
-        applyTheme(currentArcanaKey); // 아르카나 변경 시 동적 테마 적용
+        applyTheme(currentArcanaKey); 
 
         const arc = ARCANAS[currentArcanaKey];
         document.getElementById('baseStatLabel').textContent = `노도핑 ${arc.statType}`;
         
-        // 아르카나별 뱃지 아이콘 설정
-        let iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'elemental_knight' || currentArcanaKey === 'blader') iconHtml = '<i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i>';
+        let iconHtml = '<i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'blader') iconHtml = '<i data-lucide="sword" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'forbidden_alchemist') iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
 
         document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)">${iconHtml}</div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${arc.name}</span>`;
         lucide.createIcons();
@@ -838,13 +825,15 @@
         alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
       });
 
-      // 초기 설정
+      // 초기 설정 (엘레멘탈 나이트 기본)
+      currentArcanaKey = 'elemental_knight';
+      document.getElementById('arcanaSelect').value = 'elemental_knight';
       applyTheme(currentArcanaKey);
       const initialArcana = ARCANAS[currentArcanaKey];
       document.getElementById('baseStatLabel').textContent = `노도핑 ${initialArcana.statType}`;
-      document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)"><i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i></div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${initialArcana.name}</span>`;
+      document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)"><i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i></div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${initialArcana.name}</span>`;
       
-      activeReforges = [{ id: 'water_cannon', level: 20 }];
+      activeReforges = [{ id: 'smash_dmg', level: 20 }];
       renderReforgeList();
       renderEchostoneList();
     });
