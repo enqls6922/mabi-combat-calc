@@ -3,12 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
+  
+  <!-- 구글 애드센스 대응 CSP 정책 적용 -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self'; 
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://pagead2.googlesyndication.com https://adservice.google.com; 
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+    font-src https://fonts.gstatic.com; 
+    img-src 'self' data: blob: https://pagead2.googlesyndication.com;
+    frame-src 'self' https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://tpc.googlesyndication.com;
+    connect-src 'self' https://pagead2.googlesyndication.com;
+  ">
+  
   <title>에린 전투력 환산 계산기 (v1.0)</title>
+  
+  <!-- 구글 애드센스 심사/호출 스크립트 (발급받은 본인 클라이언트 ID로 교체) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- html2canvas 라이브러리 추가 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
   <script>
     tailwind.config = {
       theme: {
@@ -60,19 +75,24 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     
-    /* 스펙 카드 캡처 및 비율 조정 스타일 */
-    #cardExportArea {
-      position: relative;
-    }
-    .exporting-mode {
-      width: 400px !important;
-      border-radius: 0 !important; 
-    }
-    /* 프로필 카드 세로형 비율 */
+    #cardExportArea { position: relative; }
     .image-ratio-container {
       aspect-ratio: 3 / 4; 
       width: 100%;
       max-height: 400px;
+    }
+
+    .exporting-mode {
+      width: 400px !important;
+      border-radius: 0 !important; 
+    }
+    .exporting-mode .theme-gradient-text {
+      background: none !important;
+      -webkit-text-fill-color: var(--theme-main) !important;
+      color: var(--theme-main) !important;
+    }
+    .exporting-mode .blur-3xl {
+      display: none !important;
     }
   </style>
 </head>
@@ -88,13 +108,18 @@
           <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 전투력 환산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v1.0</span></h1>
         </div>
       </div>
+      <div class="text-xs text-slate-400">
+        마비노기 아르카나 노도핑 스펙 시뮬레이터
+      </div>
     </div>
   </header>
 
   <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
     
+    <!-- 좌측 입력 영역 -->
     <section class="lg:col-span-7 space-y-6">
       
+      <!-- 1. 캐릭터 정보 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
         <h2 class="text-sm font-semibold theme-gradient-text mb-4 flex items-center gap-2">
           <i data-lucide="swords" class="w-4 h-4 text-theme-main"></i> 1. 캐릭터 & 아르카나 정보
@@ -131,6 +156,7 @@
         </div>
       </div>
 
+      <!-- 2. 전투 베이스 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 노도핑 전투 베이스 스펙
@@ -238,6 +264,7 @@
         <p id="rGradeInfoText" class="text-[11px] text-emerald-400 text-right mt-1">현재 적용 크리 기댓값 계산 중...</p>
       </div>
 
+      <!-- 3. 장비 세공 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -252,6 +279,7 @@
         <div id="reforgeListContainer" class="space-y-3"></div>
       </div>
 
+      <!-- 4. 에코스톤 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex flex-col">
           <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
@@ -262,6 +290,7 @@
         <div id="echostoneListContainer" class="space-y-3"></div>
       </div>
 
+      <!-- 5. 캐릭터 외형 등록 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="image" class="w-4 h-4 text-theme-main"></i> 5. 캐릭터 외형 등록 (선택)
@@ -273,9 +302,23 @@
         </div>
       </div>
 
+      <!-- [애드센스 슬롯 1: 좌측 하단 반응형 배너] -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden">
+        <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Sponsored Ad</div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="XXXXXXXXXX"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+
     </section>
 
-    <!-- 우측: 환산 결과 카드 -->
+    <!-- 우측 출력 영역 -->
     <section class="lg:col-span-5 space-y-6">
       
       <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-colors duration-500" id="cardExportArea">
@@ -342,9 +385,66 @@
         <div class="space-y-2.5 text-xs" id="efficiencyReport"></div>
       </div>
 
+      <!-- [애드센스 슬롯 2: 우측 사이드바 직사각형 배너] -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden">
+        <div class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Sponsored Ad</div>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+             data-ad-slot="YYYYYYYYYY"
+             data-ad-format="rectangle"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+
     </section>
   </main>
 
+  <!-- 하단 콘텐츠 & 법적 푸터 (애드센스 승인 필수 요소) -->
+  <footer class="bg-slate-900 border-t border-slate-800 mt-12 py-8 px-4 text-slate-400 text-xs">
+    <div class="max-w-7xl mx-auto space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-slate-800 pb-6">
+        <div>
+          <h4 class="font-bold text-slate-200 mb-2">에린 전투력 환산기 안내</h4>
+          <p class="leading-relaxed">
+            본 계산기는 넥슨의 MMORPG 마비노기의 아르카나 재능 시스템(엘레멘탈 나이트, 다크 메이지, 알케믹 스팅어, 세이크리드 가드, 블래스트 랜서, 배리어블 거너, 포비든 알케미스트 등)에 맞춘 순수 스펙 환산기입니다. 전장의 서곡이나 물공포 등 일시적인 도핑 버프를 배제하고, 캐릭터의 고유 베이스 스탯, 피어싱, R개조 및 세공/에코스톤의 실효 기댓값을 종합 평가하여 객관적인 전투력 수치로 제공합니다.
+          </p>
+        </div>
+        <div>
+          <h4 class="font-bold text-slate-200 mb-2">데이터 및 산출 기준</h4>
+          <p class="leading-relaxed">
+            모든 계산식은 최신 메타 데이터를 기반으로 산정되었으며, 피어싱 및 크리티컬 상한(네일/이보나 평판), 보너스 대미지 및 아르카나 스킬 증뎀이 곱연산 및 합연산 공식에 맞게 정밀 반영되었습니다. 세공 및 에코스톤의 중복 옵션은 게임 내 룰에 따라 높은 수치 1개만 자동 채택됩니다.
+          </p>
+        </div>
+      </div>
+      
+      <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
+        <p>&copy; 2026 에린 전투력 환산기. All rights reserved. Data based on Mabinogi gameplay.</p>
+        <div class="flex space-x-4">
+          <button id="openPrivacyBtn" class="hover:text-amber-400 underline">개인정보처리방침 (Privacy Policy)</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 개인정보처리방침 모달 -->
+  <div id="privacyModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 text-xs text-slate-300 space-y-4 max-h-[80vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+        <h3 class="font-bold text-slate-100 text-sm">개인정보처리방침 (Privacy Policy)</h3>
+        <button id="closePrivacyBtn" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-3 leading-relaxed">
+        <p><strong>1. 수집하는 개인정보</strong><br>본 웹사이트는 회원가입을 요구하지 않으며, 서버 측에 이용자의 어떠한 개인 식별 정보도 저장하지 않습니다. 사용자가 입력하는 닉네임, 스펙 수치 및 업로드되는 캐릭터 이미지는 전적으로 브라우저 내부에서만 연산 및 렌더링됩니다.</p>
+        <p><strong>2. 쿠키 및 제3자 광고 (Google AdSense)</strong><br>본 사이트는 제3자 광고 사업자(Google)의 애드센스 서비스를 이용할 수 있습니다. Google은 사용자가 본 사이트 또는 다른 웹사이트를 방문한 기록을 바탕으로 관련성 높은 광고를 게재하기 위해 쿠키(Cookie)를 사용합니다. 이용자는 브라우저 설정을 통해 쿠키 저장을 거부할 수 있습니다.</p>
+        <p><strong>3. 면책조항</strong><br>본 계산기는 게임 내 공식 수치 계산을 지원하기 위해 팬 메이드로 제작된 비공식 도구이며, 실제 인게임 대미지는 타겟의 방어/보호 및 몬스터 속성에 따라 달라질 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 광고 재생 모달 -->
   <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-theme-bg text-theme-main rounded-full flex items-center justify-center mx-auto border border-theme-border">
@@ -874,7 +974,7 @@
         }, 1000);
       });
 
-      // 스펙 카드 이미지 저장 기능 구현
+      // 스펙 카드 이미지 저장 기능 구현 (캡처 버그 해결 CSS 적용)
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -912,6 +1012,18 @@
             lucide.createIcons();
           });
         }, 300);
+      });
+
+      // 개인정보처리방침 모달 이벤트
+      const privacyModal = document.getElementById('privacyModal');
+      document.getElementById('openPrivacyBtn').addEventListener('click', () => {
+        privacyModal.classList.remove('hidden');
+      });
+      document.getElementById('closePrivacyBtn').addEventListener('click', () => {
+        privacyModal.classList.add('hidden');
+      });
+      privacyModal.addEventListener('click', (e) => {
+        if(e.target === privacyModal) privacyModal.classList.add('hidden');
       });
 
       currentArcanaKey = 'elemental_knight';
