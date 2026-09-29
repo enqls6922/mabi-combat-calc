@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 보안 설정: CSP (Content Security Policy) - 허용된 CDN과 인라인 스타일, 내부 이미지(data:) 외의 악성 스크립트 실행 방지 -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
   <title>에린 전투력 환산 계산기 (v1.0)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- html2canvas 라이브러리 추가 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -58,6 +59,21 @@
 
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    
+    /* 스펙 카드 캡처 및 비율 조정 스타일 */
+    #cardExportArea {
+      position: relative;
+    }
+    .exporting-mode {
+      width: 400px !important;
+      border-radius: 0 !important; 
+    }
+    /* 프로필 카드 세로형 비율 */
+    .image-ratio-container {
+      aspect-ratio: 3 / 4; 
+      width: 100%;
+      max-height: 400px;
+    }
   </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -272,7 +288,7 @@
           <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
         </div>
 
-        <div class="relative w-full h-52 bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
+        <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="previewImage" src="" alt="Avatar" class="w-full h-full object-cover hidden">
             <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500">
               <i data-lucide="swords" class="w-16 h-16 text-slate-600 mb-2 mx-auto"></i>
@@ -707,7 +723,6 @@
       document.getElementById('rGradeInfoText').textContent = 
         `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
-      // 곱연산식 정밀 업데이트: 베이스 스탯 * (크리 기댓값 + 보너스 대미지 배율 + 아르카나 대미지 배율)
       const combinedMultiplier = expectedCritMult + bonusDmgRate + arcanaDmgRate;
       const addFromMult = Math.round(baseStat * combinedMultiplier);
 
@@ -814,7 +829,6 @@
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
       
-      // 보안 로직: 업로드된 이미지가 실제 이미지 형식인지 검증
       imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -860,8 +874,44 @@
         }, 1000);
       });
 
+      // 스펙 카드 이미지 저장 기능 구현
       document.getElementById('saveCardBtn').addEventListener('click', () => {
-        alert("이 기능은 실제 서버 배포 후 html2canvas 라이브러리를 통해 즉시 다운로드 되도록 연동됩니다!");
+        const exportArea = document.getElementById('cardExportArea');
+        const btn = document.getElementById('saveCardBtn');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 이미지 생성 중...';
+        btn.disabled = true;
+        lucide.createIcons();
+        
+        exportArea.classList.add('exporting-mode');
+
+        setTimeout(() => {
+          html2canvas(exportArea, {
+            backgroundColor: '#020617', 
+            scale: 2,
+            useCORS: true
+          }).then(canvas => {
+            exportArea.classList.remove('exporting-mode');
+            
+            const link = document.createElement('a');
+            const nickname = document.getElementById('nicknameInput').value || '밀레시안';
+            link.download = `에린_전투력_${nickname}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            lucide.createIcons();
+          }).catch(err => {
+            console.error(err);
+            alert("이미지 저장 중 오류가 발생했습니다.");
+            exportArea.classList.remove('exporting-mode');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            lucide.createIcons();
+          });
+        }, 300);
       });
 
       currentArcanaKey = 'elemental_knight';
