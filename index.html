@@ -164,7 +164,6 @@
               <option value="10">10 레벨</option>
               <option value="11">11 레벨</option>
             </select>
-            <p class="text-[10px] text-rose-400 mt-1 pl-1">* 탈라가흐 피어싱 저항 2레벨 차감 적용</p>
           </div>
 
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
@@ -293,7 +292,7 @@
 
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
           <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-600 text-slate-300">
-            탈라가흐 포인셰 기준
+            에린 표준 환산 기준
           </span>
           <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
         </div>
@@ -310,29 +309,29 @@
         </div>
 
         <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
-          <span id="cardFinalLabel" class="text-xs text-slate-400 block mb-1">포인셰 기준 환산 최대 공격력</span>
+          <span class="text-xs text-slate-400 block mb-1">종합 전투력 환산 스코어</span>
           <div class="text-4xl font-black theme-gradient-text tracking-tight" id="totalScoreText">
             3,250
           </div>
         </div>
 
-        <!-- 독립 곱연산을 '순수 스탯' 형태로 변환해 누적 합산하는 브레이크다운 UI -->
+        <!-- 다시 합연산 기반 환산 스탯으로 변경 -->
         <div class="space-y-2 text-xs border-t border-slate-800 pt-3">
           <div class="flex justify-between text-slate-400">
-            <span>[합연산] 깡스탯 (베이스 + 고정세공)</span>
+            <span>노도핑 순수 베이스 스탯</span>
             <span id="breakdownBase" class="text-slate-200 font-semibold">0</span>
           </div>
           <div class="flex justify-between text-slate-400">
-            <span>[곱연산] 크리티컬 기댓값 환산치</span>
-            <span id="breakdownCrit" class="text-rose-400 font-semibold">+ 0</span>
+            <span>피어싱 관통 환산치</span>
+            <span id="breakdownPiercing" class="text-theme-light font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
-            <span>[곱연산] 보뎀/아뎀/스킬세공 환산치</span>
+            <span>크뎀/보뎀/아뎀 환산치</span>
             <span id="breakdownMult" class="text-sky-400 font-semibold">+ 0</span>
           </div>
           <div class="flex justify-between text-slate-400">
-            <span>[곱연산] 포인셰 방보 관통 환산치</span>
-            <span id="breakdownPiercing" class="text-emerald-400 font-semibold">+ 0</span>
+            <span>세공/에코스톤 환산치</span>
+            <span id="breakdownReforge" class="text-emerald-400 font-semibold">+ 0</span>
           </div>
         </div>
       </div>
@@ -348,7 +347,7 @@
 
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
         <h3 class="text-xs font-bold theme-gradient-text uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-theme-main"></i> 스펙 변동 1단위 가치 시뮬레이터
+          <i data-lucide="trending-up" class="w-4 h-4 text-theme-main"></i> 옵션 1단위 가치 리포트
         </h3>
         <div class="space-y-2.5 text-xs" id="efficiencyReport"></div>
       </div>
@@ -415,17 +414,16 @@
       one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
     };
 
-    // 포인셰(크롬, 글렌 등 최상위 던전) 방어보호 기준 비선형 피어싱 배율표
-    const PIERCING_MULTIPLIERS = [1.00, 1.03, 1.06, 1.10, 1.14, 1.19, 1.25, 1.32, 1.40, 1.49, 1.59, 1.70];
+    const PIERCING_BASE_MULT = 0.115;
 
-    // 스탯 고정치(flatAdd)와 콤보 배율 합산(multAdd)을 엄격히 구분한 세공 데이터
+    // 원래의 합산 가중치 데이터로 롤백 (weightPerLevel 사용)
     const ARCANAS = {
       elemental_knight: {
         name: '엘레멘탈 나이트', statType: '최대 공격력', allowedWeapons: ['two_handed', 'one_handed', 'dual_wield'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'smash_dmg', name: '스매시 대미지', maxLevel: 20, multAdd: 0.06, echo: 'red' }, 
-          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, multAdd: 0.02, echo: 'red' },
-          { id: 'down_attack', name: '다운 어택 대미지', maxLevel: 20, multAdd: 0.01, echo: 'red' },
+          { id: 'smash_dmg', name: '스매시 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'red' },
+          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
+          { id: 'down_attack', name: '다운 어택 대미지', maxLevel: 20, weightPerLevel: 0.001, echo: 'red' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
           { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
           { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
@@ -435,24 +433,24 @@
       dark_mage: {
         name: '다크 메이지', statType: '마법 공격력', allowedWeapons: ['two_handed', 'one_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'fireball_dmg', name: '파이어볼 최대 대미지', maxLevel: 20, multAdd: 0.05, echo: 'blue' },
-          { id: 'thunder_dmg', name: '썬더 최대 대미지', maxLevel: 20, multAdd: 0.04, echo: 'blue' },
-          { id: 'lightning_mastery', name: '라이트닝 마스터 대미지', maxLevel: 20, multAdd: 0.03, echo: 'blue' },
-          { id: 'fire_mastery', name: '파이어 마스터리 대미지', maxLevel: 20, multAdd: 0.03, echo: 'blue' },
-          { id: 'tuarim_explosion', name: '투아림 익스플로전 대미지', maxLevel: 20, multAdd: 0.04, echo: 'black' },
+          { id: 'fireball_dmg', name: '파이어볼 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'blue' },
+          { id: 'thunder_dmg', name: '썬더 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'lightning_mastery', name: '라이트닝 마스터 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
+          { id: 'fire_mastery', name: '파이어 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
+          { id: 'tuarim_explosion', name: '투아림 익스플로전 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
           { id: 'magic_att', name: '마법 공격력', maxLevel: 20, flatAdd: 4, echo: 'blue' }
         ]
       },
       alchemic_stinger: {
         name: '알케믹 스팅어', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'magnum_dmg', name: '매그넘 샷 대미지', maxLevel: 20, multAdd: 0.06, echo: 'yellow' },
-          { id: 'crash_shot_frag', name: '크래시 샷 파편 대미지', maxLevel: 20, multAdd: 0.04, echo: 'yellow' },
-          { id: 'crash_shot_num', name: '크래시 샷 최대 파편 수', maxLevel: 20, multAdd: 0.03, echo: 'yellow' },
-          { id: 'final_shot_dur', name: '파이널 샷 지속시간 증가', maxLevel: 20, multAdd: 0.02, echo: 'yellow' },
-          { id: 'effective_range', name: '유효 사거리', maxLevel: 20, multAdd: 0.01, echo: 'yellow' },
-          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, multAdd: 0.02, echo: 'black' },
-          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, multAdd: 0.02, echo: 'black' },
+          { id: 'magnum_dmg', name: '매그넘 샷 대미지', maxLevel: 20, weightPerLevel: 0.0045, echo: 'yellow' },
+          { id: 'crash_shot_frag', name: '크래시 샷 파편 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'yellow' },
+          { id: 'crash_shot_num', name: '크래시 샷 최대 파편 수', maxLevel: 20, weightPerLevel: 0.003, echo: 'yellow' },
+          { id: 'final_shot_dur', name: '파이널 샷 지속시간 증가', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
+          { id: 'effective_range', name: '유효 사거리', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
+          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'yellow' },
           { id: 'range_combat_mastery', name: '레인지 컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'yellow' }
         ]
@@ -460,7 +458,7 @@
       sacred_guard: {
         name: '세이크리드 가드', statType: '최대 공격력', allowedWeapons: ['two_handed', 'one_handed'], defaultWeapon: 'one_handed',
         validReforges: [
-          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, multAdd: 0.04, echo: 'red' },
+          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
           { id: 'blunt_mastery', name: '블런트 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
           { id: 'axe_mastery', name: '엑스 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
@@ -471,21 +469,21 @@
       blader: {
         name: '블래스트 랜서', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'lance_charge_horse', name: '랜스 차지 마상 돌진 대미지', maxLevel: 20, multAdd: 0.05, echo: 'red' },
-          { id: 'lance_charge_main', name: '랜스 차지 주 목표물 대미지', maxLevel: 20, multAdd: 0.04, echo: 'red' },
-          { id: 'lance_charge_dmg', name: '랜스 차지 대미지', maxLevel: 20, multAdd: 0.03, echo: 'red' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, multAdd: 0.04, echo: 'blue' },
-          { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, multAdd: 0.03, echo: 'blue' }
+          { id: 'lance_charge_horse', name: '랜스 차지 마상 돌진 대미지', maxLevel: 20, weightPerLevel: 0.005, echo: 'red' },
+          { id: 'lance_charge_main', name: '랜스 차지 주 목표물 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
+          { id: 'lance_charge_dmg', name: '랜스 차지 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
         ]
       },
       variable_gunner: {
         name: '배리어블 거너', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, multAdd: 0.06, echo: 'blue' },
-          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, multAdd: 0.04, echo: 'blue' },
-          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, multAdd: 0.04, echo: 'blue' },
-          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, multAdd: 0.03, echo: 'blue' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, multAdd: 0.04, echo: 'blue' },
+          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'blue' },
+          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
+          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
           { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'blue' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
         ]
@@ -493,38 +491,38 @@
       forbidden_alchemist: {
         name: '포비든 알케미스트', statType: '연금술 대미지', allowedWeapons: ['one_handed'], defaultWeapon: 'one_handed',
         validReforges: [
-          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, multAdd: 0.05, echo: 'black' },
-          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, multAdd: 0.04, echo: 'black' },
-          { id: 'rain_water_cannon', name: '레인 캐스팅 워터 캐논 대미지', maxLevel: 20, multAdd: 0.03, echo: 'black' },
-          { id: 'heat_buster', name: '히트 버스터 최대 대미지', maxLevel: 20, multAdd: 0.04, echo: 'black' },
-          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, multAdd: 0.02, echo: 'black' },
-          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, multAdd: 0.02, echo: 'black' },
-          { id: 'hydra_prot', name: '하이드라 연성 마법 보호 감소 수치', maxLevel: 20, multAdd: 0.04, echo: 'black' }
+          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
+          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
+          { id: 'rain_water_cannon', name: '레인 캐스팅 워터 캐논 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'heat_buster', name: '히트 버스터 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' },
+          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
+          { id: 'hydra_prot', name: '하이드라 연성 마법 보호 감소 수치', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' }
         ]
       },
       melodic_puppeteer: {
         name: '멜로딕 퍼펫티어', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'act_6', name: '광란의 질주 대미지 (6막)', maxLevel: 20, multAdd: 0.05, echo: 'yellow' },
-          { id: 'act_7', name: '질투의 화신 대미지 (7막)', maxLevel: 20, multAdd: 0.04, echo: 'yellow' },
-          { id: 'act_4', name: '솟구치는 분노 대미지 (4막)', maxLevel: 20, multAdd: 0.03, echo: 'yellow' },
-          { id: 'act_1', name: '우연한 충돌 대미지 (1막)', maxLevel: 20, multAdd: 0.02, echo: 'yellow' },
-          { id: 'act_2', name: '솟구치는 분노 대미지 (2막)', maxLevel: 20, multAdd: 0.02, echo: 'yellow' },
-          { id: 'melody_shock', name: '멜로디 쇼크 순간 대미지', maxLevel: 20, multAdd: 0.03, echo: 'blue' },
-          { id: 'marionette_max', name: '마리오네트 최대 대미지', maxLevel: 20, multAdd: 0.04, echo: 'yellow' },
-          { id: 'marionette_conn_max', name: '마리오네트 연결시 최대 대미지', maxLevel: 20, multAdd: 0.02, echo: 'yellow' },
+          { id: 'act_6', name: '광란의 질주 대미지 (6막)', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
+          { id: 'act_7', name: '질투의 화신 대미지 (7막)', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
+          { id: 'act_4', name: '솟구치는 분노 대미지 (4막)', maxLevel: 20, weightPerLevel: 0.003, echo: 'yellow' },
+          { id: 'act_1', name: '우연한 충돌 대미지 (1막)', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
+          { id: 'act_2', name: '솟구치는 분노 대미지 (2막)', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
+          { id: 'melody_shock', name: '멜로디 쇼크 순간 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
+          { id: 'marionette_max', name: '마리오네트 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
+          { id: 'marionette_conn_max', name: '마리오네트 연결시 최대 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
           { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
         ]
       },
       fury_fighter: {
         name: '퓨리 파이터', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
         validReforges: [
-          { id: 'pounding', name: '파운딩 대미지', maxLevel: 20, multAdd: 0.05, echo: 'silver' },
-          { id: 'screw_upper', name: '스크류 어퍼 대미지', maxLevel: 20, multAdd: 0.04, echo: 'silver' },
-          { id: 'charging_fist', name: '차징 피스트 대미지', maxLevel: 20, multAdd: 0.03, echo: 'silver' },
-          { id: 'combo_mastery', name: '연속기 마스터리 대미지', maxLevel: 20, multAdd: 0.03, echo: 'silver' },
-          { id: 'somersault', name: '섬머 솔트 대미지', maxLevel: 20, multAdd: 0.03, echo: 'silver' },
-          { id: 'drop_kick', name: '드롭킥 대미지', maxLevel: 20, multAdd: 0.04, echo: 'silver' },
+          { id: 'pounding', name: '파운딩 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'screw_upper', name: '스크류 어퍼 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
+          { id: 'charging_fist', name: '차징 피스트 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'silver' },
+          { id: 'combo_mastery', name: '연속기 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'somersault', name: '섬머 솔트 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
+          { id: 'drop_kick', name: '드롭킥 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
           { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
           { id: 'knuckle_mastery', name: '너클 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'silver' },
           { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
@@ -574,7 +572,7 @@
 
           row.innerHTML = `
             <div class="flex-1">
-              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
+              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
             </div>
             <div class="w-24 flex items-center gap-1">
               <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
@@ -602,7 +600,7 @@
         row.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
-            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
+            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
               <option value="none" ${item.color === 'none' ? 'selected' : ''}>-- 장착 안 함 --</option>
               <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤</option>
               <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤</option>
@@ -625,7 +623,7 @@
 
         row.innerHTML += `
           <div class="flex items-center gap-2 pl-6">
-            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
+            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
               ${abilityHtml}
             </select>
             <div class="w-24 flex items-center gap-1">
@@ -703,9 +701,9 @@
       renderReforgeList();
     }
 
-    // 진정한 의미의 "환산 최대 대미지" 엔진으로 재작성
+    // 환산 계산기 본연의 목적인 직관적인 "합연산" 공식으로 복구 (1% = 베이스 스탯 비례)
     function calculateTotal() {
-      const rawBaseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
+      const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
       const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
       
@@ -716,7 +714,9 @@
       const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
       const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3);
       
-      // 1. R강 크뎀 계산
+      // 피어싱 관통 환산치 계산 (비례 계수 적용)
+      const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
+
       let rawCritDmg = 0;
       if (weaponType === 'dual_wield') {
         const rMain = document.getElementById('mainHandUpgradeSelect').value;
@@ -726,84 +726,64 @@
         rawCritDmg = R_GRADE_DATA[weaponType][document.getElementById('upgradeSelect').value] || 0;
       }
 
-      // 세공과 에코스톤 병합 (높은 수치 1개 적용)
-      let finalReforges = {};
-      activeReforges.forEach(r => { if (!finalReforges[r.id] || r.level > finalReforges[r.id]) finalReforges[r.id] = r.level; });
-      activeEchostones.forEach(e => { if (e.id && e.id !== 'none' && e.color !== 'none') { if (!finalReforges[e.id] || e.level > finalReforges[e.id]) finalReforges[e.id] = e.level; } });
-
-      const defs = ARCANAS[currentArcanaKey].validReforges;
-
-      // STEP 1. 합연산: 깡스탯 (베이스 스탯 + 마스터리/최공 세공)
-      let effectiveBase = rawBaseStat;
-      Object.keys(finalReforges).forEach(key => {
-        const def = defs.find(d => d.id === key);
-        if (def && def.flatAdd) effectiveBase += finalReforges[key] * def.flatAdd;
-      });
-
-      // STEP 2. 크리티컬 환산치 
+      // 크리티컬 대미지 환산치 계산 (추가 크뎀에 대해서만 기댓값 산출하여 베이스에 비례 증가)
       const critRateCap = 30 + nele;
-      const extraCritDmg = rawCritDmg + (yvona / 100) + (totemCrit / 100);
-      // 크리가 터졌을 때의 대미지 배율 = 1.5 + 추가크뎀. 따라서 평균 딜 상승 배율:
-      const expectedCritMult = 1 + ((critRateCap / 100) * (0.5 + extraCritDmg)); 
+      const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
+      const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
       
       document.getElementById('rGradeInfoText').textContent = 
-        `총 추가 크뎀: +${Math.round(extraCritDmg * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: ${expectedCritMult.toFixed(3)}배)`;
+        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
 
-      const addFromCrit = effectiveBase * (expectedCritMult - 1);
-      let runningTotal = effectiveBase + addFromCrit;
+      const addFromCrit = Math.round(baseStat * expectedCritMult);
 
-      // STEP 3. 스킬 세공 및 보뎀/아뎀 환산치
-      let skillMultiplier = 1.0 + bonusDmgRate + arcanaDmgRate;
+      // 보뎀 및 아뎀 환산치 계산
+      const combinedAddMult = bonusDmgRate + arcanaDmgRate;
+      const addFromMult = Math.round(baseStat * combinedAddMult);
+
+      // 세공 + 에코스톤 병합 (중복 시 높은 레벨만 적용)
+      let finalReforges = {};
+      activeReforges.forEach(r => {
+        if (!finalReforges[r.id] || r.level > finalReforges[r.id]) finalReforges[r.id] = r.level;
+      });
+      activeEchostones.forEach(e => {
+        if (e.id && e.id !== 'none' && e.color !== 'none') {
+          if (!finalReforges[e.id] || e.level > finalReforges[e.id]) finalReforges[e.id] = e.level;
+        }
+      });
+
+      // 세공 환산치 계산 (플랫 스탯 합산 또는 배율 비례 합산)
+      let addFromReforge = 0;
+      const defs = ARCANAS[currentArcanaKey].validReforges;
       Object.keys(finalReforges).forEach(key => {
         const def = defs.find(d => d.id === key);
-        if (def && def.multAdd) skillMultiplier += finalReforges[key] * def.multAdd;
+        if (def) {
+          const lvl = finalReforges[key];
+          if (def.flatAdd) addFromReforge += lvl * def.flatAdd;
+          else if (def.weightPerLevel) addFromReforge += Math.round(baseStat * (lvl * def.weightPerLevel));
+        }
       });
-      const addFromSkill = runningTotal * (skillMultiplier - 1);
-      runningTotal += addFromSkill;
 
-      // STEP 4. 포인셰 피어싱 관통 환산치 (포인셰 피어싱 저항 2레벨 차감)
-      let effPiercing = Math.max(0, piercing - 2);
-      const piercingMult = PIERCING_MULTIPLIERS[effPiercing] || 1.0;
-      const addFromPiercing = runningTotal * (piercingMult - 1);
-      runningTotal += addFromPiercing;
+      const totalScore = baseStat + addFromPiercing + addFromCrit + addFromMult + addFromReforge;
 
-      // 최종 종합 스탯 업데이트
-      const statName = ARCANAS[currentArcanaKey].statType;
-      document.getElementById('cardFinalLabel').textContent = `포인셰 기준 환산 ${statName}`;
-      
-      document.getElementById('totalScoreText').textContent = Math.round(runningTotal).toLocaleString();
-      document.getElementById('breakdownBase').textContent = Math.round(effectiveBase).toLocaleString();
-      document.getElementById('breakdownCrit').textContent = `+ ${Math.round(addFromCrit).toLocaleString()}`;
-      document.getElementById('breakdownMult').textContent = `+ ${Math.round(addFromSkill).toLocaleString()}`;
-      document.getElementById('breakdownPiercing').textContent = `+ ${Math.round(addFromPiercing).toLocaleString()}`;
+      document.getElementById('totalScoreText').textContent = Math.round(totalScore).toLocaleString();
+      document.getElementById('breakdownBase').textContent = Math.round(baseStat).toLocaleString();
+      document.getElementById('breakdownPiercing').textContent = `+ ${addFromPiercing.toLocaleString()}`;
+      document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
+      document.getElementById('breakdownReforge').textContent = `+ ${addFromReforge.toLocaleString()}`;
 
-      updateEfficiencyReport(effectiveBase, expectedCritMult, skillMultiplier, effPiercing);
+      updateEfficiencyReport(baseStat);
     }
 
-    function updateEfficiencyReport(effectiveBase, critMult, skillMult, currentEffPierce) {
+    function updateEfficiencyReport(baseStat) {
       const rep = document.getElementById('efficiencyReport');
-      
-      // 피어싱 1 증가 시 환산 스탯이 얼마나 오르는지
-      const currentPierceMult = PIERCING_MULTIPLIERS[currentEffPierce] || 1.0;
-      const nextPierceMult = PIERCING_MULTIPLIERS[currentEffPierce + 1] || currentPierceMult;
-      const valCurrentPierce = effectiveBase * critMult * skillMult * currentPierceMult;
-      const valNextPierce = effectiveBase * critMult * skillMult * nextPierceMult;
-      const pierceDiff = Math.round(valNextPierce - valCurrentPierce);
-
-      // 보뎀 1% 증가 시
-      const valNextBonus = effectiveBase * critMult * (skillMult + 0.01) * currentPierceMult;
-      const bonusDiff = Math.round(valNextBonus - valCurrentPierce);
-      
-      const statName = ARCANAS[currentArcanaKey].statType;
-
       rep.innerHTML = `
         <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
-          <span class="text-slate-300">피어싱 +1 오를 때마다 환산 가치</span>
-          <span class="font-bold text-theme-light">+${pierceDiff.toLocaleString()} ${statName}</span>
+          <span class="text-slate-300">피어싱 +1 증가 효율</span>
+          <span class="font-bold text-theme-light">+${Math.round(baseStat * PIERCING_BASE_MULT).toLocaleString()} 환산 스탯</span>
         </div>
         <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
-          <span class="text-slate-300">보너스 대미지 +1% 오를 때마다 환산 가치</span>
-          <span class="font-bold text-emerald-300">+${bonusDiff.toLocaleString()} ${statName}</span>
+          <span class="text-slate-300">보너스 대미지 +1% 효율</span>
+          <span class="font-bold text-emerald-300">+${Math.round(baseStat * 0.01).toLocaleString()} 환산 스탯</span>
         </div>
       `;
     }
@@ -913,7 +893,6 @@
         btn.disabled = true;
         lucide.createIcons();
         
-        // 캡처 중 스타일 깨짐 방지를 위한 클래스 추가
         exportArea.classList.add('exporting-mode');
 
         setTimeout(() => {
@@ -922,7 +901,6 @@
             scale: 2,
             useCORS: true
           }).then(canvas => {
-            // 캡처 완료 즉시 원복
             exportArea.classList.remove('exporting-mode');
             
             const link = document.createElement('a');
