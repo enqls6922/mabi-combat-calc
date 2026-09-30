@@ -10,7 +10,7 @@
     frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
     font-src https://fonts.gstatic.com; 
-    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com;
+    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.fal.media https://fal.media;
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
@@ -711,457 +711,10 @@
       document.getElementById('baseStatLabel').textContent = `노도핑 ${t.stat} (스탯세공 포함 직접 기입)`;
       document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
       
-      // [추가] 초기 진입 시 기본 아바타 플레이스홀더 아이콘 색상 강제 지정
       const defaultPlaceholderIcon = document.querySelector('#defaultAvatarPlaceholder i');
       if (defaultPlaceholderIcon) {
         defaultPlaceholderIcon.style.color = t.dark;
       }
-    }
-
-    function renderTagInputList() {
-      const container = document.getElementById('reforgeListContainer');
-      container.innerHTML = '';
-
-      if (userTags.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 장비 옵션이 없습니다.</p>`;
-        renderCardTags();
-        return;
-      }
-
-      userTags.forEach((item, index) => {
-        const options = memoryReforgeMap[item.part] || [];
-        let currentOpt = options.find(o => o.name === item.name) || options[0] || { 
-          name: item.name, 
-          min_level: 1, 
-          max_level: 20, 
-          limit_yn: 'N', 
-          limit_max_level: 20 
-        };
-        
-        item.min = currentOpt.min_level;
-        item.max = currentOpt.max_level;
-        item.limit_yn = currentOpt.limit_yn;
-        item.limit_max = currentOpt.limit_max_level;
-
-        const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
-
-        const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-800 text-xs w-full";
-        
-        row.innerHTML = `
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full relative">
-            
-            <div class="w-full sm:w-36 shrink-0 relative">
-              <button type="button" 
-                class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
-                data-index="${index}">
-                <span class="truncate">${Security.sanitizeString(item.part || '부위 선택')}</span>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
-              </button>
-
-              <div class="part-dropdown-menu hidden absolute top-full left-0 w-full sm:w-48 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
-                <div class="relative mb-2">
-                  <input type="text" 
-                    placeholder="부위 검색..." 
-                    class="part-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
-                    data-index="${index}">
-                </div>
-                <div class="part-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
-                  ${memoryPartList.map(p => `
-                    <div class="part-dropdown-item px-2 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${p === item.part ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
-                         data-part="${Security.sanitizeString(p)}">
-                      <span>${Security.sanitizeString(p)}</span>${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
-                    </div>
-                  `).join('')}
-                </div>
-              </div>
-            </div>
-            
-            <div class="flex-1 min-w-0 relative">
-              <button type="button" 
-                class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
-                data-index="${index}">
-                <span class="truncate">${Security.sanitizeString(item.name || '옵션 선택')}</span>
-                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
-              </button>
-
-              <div class="reforge-dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
-                <div class="relative mb-2">
-                  <input type="text" 
-                    placeholder="세공명 검색..." 
-                    class="reforge-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
-                    data-index="${index}">
-                </div>
-                <div class="reforge-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
-                  ${options.map(o => {
-                    const isSelected = (o.name === item.name);
-                    return `
-                      <div class="reforge-dropdown-item px-2.5 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${isSelected ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
-                           data-name="${Security.sanitizeString(o.name)}">
-                        <span class="truncate pr-2">${Security.sanitizeString(o.name)}</span>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                          <span class="text-[10px] text-slate-500">${o.max_level}Lv${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
-                          ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>' : ''}
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            </div>
-
-            <div class="hidden sm:flex items-center gap-2 shrink-0">
-              <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
-                <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                  <i data-lucide="minus" class="w-3 h-3"></i>
-                </button>
-                <input type="number" 
-                  min="${item.min}" 
-                  max="${allowedMaxLevel}" 
-                  value="${item.level}" 
-                  class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
-                  data-index="${index}">
-                <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
-                <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
-                </button>
-              </div>
-
-              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="flex sm:hidden items-center justify-between border-t border-slate-800/80 pt-2 mt-0.5">
-            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
-              <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
-              </button>
-              <input type="number" 
-                min="${item.min}" 
-                max="${allowedMaxLevel}" 
-                value="${item.level}" 
-                class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
-                data-index="${index}">
-              <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
-              <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
-              </button>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] text-slate-500 font-medium">
-                상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : ''}
-              </span>
-              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-1.5 rounded transition" data-index="${index}">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="hidden sm:flex justify-end pr-10">
-            <span class="text-[10px] text-slate-500 font-medium tracking-tighter">
-              상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : '(한돌 불가)'}
-            </span>
-          </div>
-        `;
-        container.appendChild(row);
-      });
-
-      lucide.createIcons();
-      attachTagEvents();
-      renderCardTags();
-    }
-
-    function attachTagEvents() {
-      const closeAllDropdowns = () => {
-        document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
-      };
-
-      document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const idx = btn.dataset.index;
-          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
-          const isHidden = menu.classList.contains('hidden');
-          
-          closeAllDropdowns();
-
-          if (isHidden) {
-            menu.classList.remove('hidden');
-            const searchInput = menu.querySelector('.part-dropdown-search');
-            searchInput.value = '';
-            searchInput.focus();
-            menu.querySelectorAll('.part-dropdown-item').forEach(it => it.classList.remove('hidden'));
-          }
-        });
-      });
-
-      document.querySelectorAll('.part-dropdown-search').forEach(input => {
-        input.addEventListener('click', (e) => e.stopPropagation());
-        input.addEventListener('input', (e) => {
-          const idx = input.dataset.index;
-          const query = e.target.value.toLowerCase().trim();
-          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
-          menu.querySelectorAll('.part-dropdown-item').forEach(item => {
-            const partName = item.dataset.part.toLowerCase();
-            if (partName.includes(query)) item.classList.remove('hidden');
-            else item.classList.add('hidden');
-          });
-        });
-      });
-
-      document.querySelectorAll('.part-dropdown-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const menu = item.closest('.part-dropdown-menu');
-          const idx = menu.dataset.index;
-          const selectedPart = item.dataset.part;
-
-          userTags[idx].part = selectedPart;
-          const options = memoryReforgeMap[selectedPart] || [];
-          const firstOpt = options[0] || { name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
-
-          userTags[idx].name = firstOpt.name;
-          userTags[idx].min = firstOpt.min_level;
-          userTags[idx].max = firstOpt.max_level;
-          userTags[idx].limit_yn = firstOpt.limit_yn;
-          userTags[idx].limit_max = firstOpt.limit_max_level;
-          userTags[idx].level = firstOpt.max_level;
-
-          closeAllDropdowns();
-          renderTagInputList();
-        });
-      });
-
-      document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const idx = btn.dataset.index;
-          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
-          const isHidden = menu.classList.contains('hidden');
-          
-          closeAllDropdowns();
-
-          if (isHidden) {
-            menu.classList.remove('hidden');
-            const searchInput = menu.querySelector('.reforge-dropdown-search');
-            searchInput.value = '';
-            searchInput.focus();
-            menu.querySelectorAll('.reforge-dropdown-item').forEach(it => it.classList.remove('hidden'));
-          }
-        });
-      });
-
-      document.querySelectorAll('.reforge-dropdown-search').forEach(input => {
-        input.addEventListener('click', (e) => e.stopPropagation());
-        input.addEventListener('input', (e) => {
-          const idx = input.dataset.index;
-          const query = e.target.value.toLowerCase().trim();
-          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
-          menu.querySelectorAll('.reforge-dropdown-item').forEach(item => {
-            const name = item.dataset.name.toLowerCase();
-            if (name.includes(query)) item.classList.remove('hidden');
-            else item.classList.add('hidden');
-          });
-        });
-      });
-
-      document.querySelectorAll('.reforge-dropdown-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const menu = item.closest('.reforge-dropdown-menu');
-          const idx = menu.dataset.index;
-          const selectedName = item.dataset.name;
-
-          userTags[idx].name = selectedName;
-          const options = memoryReforgeMap[userTags[idx].part] || [];
-          const opt = options.find(o => o.name === selectedName);
-
-          if (opt) {
-            userTags[idx].min = opt.min_level;
-            userTags[idx].max = opt.max_level;
-            userTags[idx].limit_yn = opt.limit_yn;
-            userTags[idx].limit_max = opt.limit_max_level;
-
-            const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
-            if (userTags[idx].level > allowedMax) {
-              userTags[idx].level = allowedMax;
-            }
-          }
-
-          closeAllDropdowns();
-          renderTagInputList();
-        });
-      });
-
-      document.querySelectorAll('.btn-step-down').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = btn.dataset.index;
-          const tag = userTags[idx];
-          const minLvl = tag.min || 1;
-          if (tag.level > minLvl) {
-            tag.level -= 1;
-            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
-            renderCardTags();
-          }
-        });
-      });
-
-      document.querySelectorAll('.btn-step-up').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = btn.dataset.index;
-          const tag = userTags[idx];
-          const maxLvl = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
-          if (tag.level < maxLvl) {
-            tag.level += 1;
-            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
-            renderCardTags();
-          }
-        });
-      });
-
-      document.querySelectorAll('.tag-level').forEach(inp => {
-        inp.addEventListener('input', (e) => { 
-          const idx = e.target.dataset.index;
-          const tag = userTags[idx];
-          const allowedMax = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
-          const allowedMin = tag.min || 1;
-
-          let val = parseInt(e.target.value);
-          if (isNaN(val)) val = allowedMin;
-
-          tag.level = Math.min(Math.max(val, allowedMin), allowedMax);
-          document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(i => i.value = tag.level);
-
-          renderCardTags(); 
-        });
-      });
-
-      document.querySelectorAll('.remove-tag-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => { 
-          userTags.splice(e.currentTarget.dataset.index, 1); 
-          renderTagInputList(); 
-        });
-      });
-    }
-
-    document.addEventListener('click', () => {
-      document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
-    });
-
-    document.getElementById('addReforgeBtn').addEventListener('click', () => {
-      if (memoryPartList.length === 0) return;
-      const defaultPart = memoryPartList[0];
-      const defaultOpt = (memoryReforgeMap[defaultPart] && memoryReforgeMap[defaultPart][0]) || { 
-        name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
-      };
-      userTags.push({ 
-        part: defaultPart, 
-        name: defaultOpt.name, 
-        level: defaultOpt.max_level, 
-        min: defaultOpt.min_level,
-        max: defaultOpt.max_level, 
-        limit_yn: defaultOpt.limit_yn,
-        limit_max: defaultOpt.limit_max_level 
-      });
-      renderTagInputList();
-    });
-
-    function renderCardTags() {
-      const area = document.getElementById('cardTagsArea');
-      area.innerHTML = '';
-      if (userTags.length === 0) {
-        area.innerHTML = `<span class="text-[10px] text-slate-600 italic">등록된 장비 옵션이 없습니다.</span>`;
-        return;
-      }
-      
-      userTags.forEach((t, index) => {
-        if (!t.name || !t.name.trim()) return;
-        
-        const maxLvl = t.max || 20;
-        const limitMaxLvl = t.limit_max || maxLvl;
-        const level = parseInt(t.level);
-
-        const span = document.createElement('span');
-        span.className = "tag-base ";
-        span.draggable = true;
-        span.dataset.index = index;
-        
-        let shortPart = t.part.replace('무기','').replace('/투구','').replace('/갑옷','').replace('/건틀렛','').replace(' 블레이드','');
-
-        if (t.part.includes('에코')) {
-          span.className += "tag-echo";
-          span.innerHTML = `<span class="opacity-70">[э코]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
-        } else if (level < maxLvl) {
-          span.className += "tag-normal";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
-        } else if (level === maxLvl) {
-          span.className += "tag-max font-bold";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
-        } else {
-          let diff = Math.max(limitMaxLvl - maxLvl, 1);
-          let ratio = (level - maxLvl) / diff;
-          if (ratio > 1) ratio = 1;
-          
-          const tiers = [
-            { bg: 'linear-gradient(135deg, #713f12, #a16207)', shadow: '0 0 6px rgba(234,179,8,0.5)', text: '#fef08a' },
-            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' },
-            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' },
-            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' },
-            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }
-          ];
-          
-          let tierIndex = Math.ceil(ratio * 5) - 1; 
-          if (tierIndex < 0) tierIndex = 0;
-          if (tierIndex > 4) tierIndex = 4;
-          
-          const styleConfig = tiers[tierIndex];
-          span.className += "tag-limit-break";
-          span.style.background = styleConfig.bg;
-          span.style.boxShadow = styleConfig.shadow;
-          span.style.color = styleConfig.text;
-          span.style.borderColor = styleConfig.text + '40';
-          
-          span.innerHTML = `<span class="opacity-80">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span> <span class="ml-0.5 text-[9px] drop-shadow-md">✨</span>`;
-        }
-
-        span.addEventListener('dragstart', (e) => {
-          draggedTagIndex = parseInt(span.dataset.index);
-          span.classList.add('dragging');
-          e.dataTransfer.effectAllowed = 'move';
-        });
-
-        span.addEventListener('dragend', () => {
-          span.classList.remove('dragging');
-          document.querySelectorAll('.tag-base').forEach(el => el.classList.remove('drag-over'));
-        });
-
-        span.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          e.dataTransfer.dropEffect = 'move';
-          span.classList.add('drag-over');
-        });
-
-        span.addEventListener('dragleave', () => {
-          span.classList.remove('drag-over');
-        });
-
-        span.addEventListener('drop', (e) => {
-          e.preventDefault();
-          span.classList.remove('drag-over');
-          const targetIndex = parseInt(span.dataset.index);
-
-          if (draggedTagIndex !== null && draggedTagIndex !== targetIndex) {
-            const movedItem = userTags.splice(draggedTagIndex, 1)[0];
-            userTags.splice(targetIndex, 0, movedItem);
-            renderTagInputList();
-          }
-        });
-
-        area.appendChild(span);
-      });
     }
 
     function calculateTotal() {
@@ -1221,6 +774,81 @@
       img.style.objectPosition = `center ${posY}%`;
     }
 
+    // -------------------------------------------------------------
+    // [핵심] Fal.ai FLUX.1 연동 AI 일러스트 생성 핸들러 (Edge Function 중계)
+    // -------------------------------------------------------------
+    async function handleAiIllustrationGeneration() {
+      const previewImg = document.getElementById('previewImage');
+      const bgImg = document.getElementById('bgBlurImage');
+      const aiBtn = document.getElementById('aiTransformBtn');
+
+      if (!previewImg.src || previewImg.src === '' || previewImg.classList.contains('hidden')) {
+        alert('먼저 4번 항목에서 캐릭터 스크린샷을 등록해 주세요!');
+        return;
+      }
+
+      // 일일 3회 이용 제한 체크 (로컬스토리지 기반 비용 보호)
+      const today = new Date().toISOString().slice(0, 10);
+      const usageKey = `ai_usage_${today}`;
+      let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+      if (usageCount >= 3) {
+        alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
+        return;
+      }
+
+      const originalBtnHtml = aiBtn.innerHTML;
+      aiBtn.disabled = true;
+
+      try {
+        // 1. 5초 카운트다운 (광고 시청 자리)
+        for (let i = 5; i > 0; i--) {
+          aiBtn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 광고 준비 중... (${i}초)`;
+          lucide.createIcons();
+          await new Promise(res => setTimeout(res, 1000));
+        }
+
+        aiBtn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4 animate-spin"></i> Fal.ai AI 일러스트 렌더링 중...`;
+        lucide.createIcons();
+
+        // 2. Supabase Edge Function 호출 (API Key 보안 중계)
+        const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+          body: {
+            imageBase64: previewImg.src,
+            arcana: currentArcanaKey
+          }
+        });
+
+        if (error) {
+          throw new Error(error.message || 'AI 변환 서버 응답 실패');
+        }
+
+        if (data && data.outputUrl) {
+          // 3. 변환된 이미지 프리뷰 교체
+          previewImg.src = data.outputUrl;
+          bgImg.src = data.outputUrl;
+
+          // AI Illustration 뱃지 노출
+          document.getElementById('animeOverlayBadge').classList.remove('hidden');
+
+          // 사용 횟수 증가
+          usageCount += 1;
+          localStorage.setItem(usageKey, usageCount.toString());
+
+          alert(`✨ AI 일러스트 생성이 완료되었습니다!\n(오늘 남은 횟수: ${3 - usageCount}회)`);
+        } else {
+          throw new Error('결과 이미지 URL을 수신하지 못했습니다.');
+        }
+      } catch (err) {
+        console.error('[AI 생성 실패]:', err);
+        alert('AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+      } finally {
+        aiBtn.innerHTML = originalBtnHtml;
+        aiBtn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
     const POLICY_DATA = {
       terms: {
         title: "이용약관 (Terms of Service)",
@@ -1247,13 +875,14 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // [핵심 수정] 페이지 로드 직후 엘레멘탈 나이트 기본 테마 색상 및 아이콘 컬러 즉시 적용
-      applyTheme(currentArcanaKey);
-      
+      // 1. 초기 진입 시 기본 테마(엘나) 적용 및 아이콘 렌더링
+      applyTheme(currentArcanaKey); 
       lucide.createIcons();
 
+      // 2. Supabase DB 세공 데이터 로드
       await initSupabaseDataOnce();
 
+      // 3. 베이스 스탯 Stepper 핸들러
       document.querySelectorAll('.stat-step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetId = btn.dataset.target;
@@ -1275,6 +904,7 @@
         });
       });
 
+      // 4. 아르카나 변경 핸들러
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -1293,6 +923,7 @@
         lucide.createIcons();
       });
 
+      // 5. 무기 타입 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -1319,6 +950,7 @@
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
 
+      // 6. 이미지 등록 & 조작 패널
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
@@ -1357,6 +989,10 @@
         updateImageTransform();
       });
 
+      // 7. AI 변환 버튼 이벤트 연결
+      document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
+
+      // 8. 스펙 카드 저장
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1395,6 +1031,7 @@
         }, 100);
       });
 
+      // 9. 정책 모달 이벤트
       const modal = document.getElementById('policyModal');
       document.querySelectorAll('.modal-open-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1403,7 +1040,6 @@
           if (data) {
             document.getElementById('modalTitle').textContent = data.title;
             document.getElementById('modalContent').innerHTML = data.content;
-            modal.classList.add('hidden'); // Fix toggle
             modal.classList.remove('hidden');
           }
         });
