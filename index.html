@@ -3,11 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
-  <title>에린 전투력 환산 계산기 (v4.2)</title>
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self'; 
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; 
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co;
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+    font-src https://fonts.gstatic.com; 
+    img-src 'self' data: blob:;
+  ">
+  <title>에린 전투력 환산 계산기 (v5.1 Supabase)</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -47,7 +57,6 @@
       transition: all 0.4s ease;
     }
     
-    /* 셀렉트박스 커스텀 디자인 (Datalist Input은 제외하여 네이티브 드롭다운 복구) */
     select {
       appearance: none;
       -webkit-appearance: none;
@@ -71,7 +80,6 @@
     }
     .exporting-mode .blur-3xl { display: none !important; }
 
-    /* 태그 렌더링 스타일 */
     .tag-base {
       padding: 0.25rem 0.625rem;
       border-radius: 0.25rem;
@@ -95,9 +103,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-  <!-- 자동완성 데이터리스트 -->
-  <datalist id="commonReforges"></datalist>
-
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
@@ -105,8 +110,11 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v4.2</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.1 DB</span></h1>
         </div>
+      </div>
+      <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> DB 연결 확인 중
       </div>
     </div>
   </header>
@@ -259,14 +267,14 @@
         </div>
       </div>
 
-      <!-- 3. 부위별 세공 리스트 입력 (V4.2 레이아웃 수정 및 클릭 오픈 구현) -->
+      <!-- 3. Supabase 연동 세공 리스트 등록 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">부위를 선택하고 빈칸을 <b>클릭</b>하면 목록이 열립니다. (직접 타이핑 검색 가능)</p>
+            <p class="text-[11px] text-slate-400 mt-1">Supabase DB(TCALC001)에서 부위별 세공 목록을 실시간으로 가져옵니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
@@ -357,6 +365,15 @@
   </main>
 
   <script>
+    // -------------------------------------------------------------
+    // 1. Supabase 클라이언트 초기화 (TCALC001 테이블 대상)
+    // -------------------------------------------------------------
+    const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+    let dbOptionsCache = {};
+
     const Security = {
       sanitizeString(str) {
         if (!str) return '';
@@ -390,25 +407,78 @@
     };
     const PIERCING_BASE_MULT = 0.03;
 
-    // 전투 관련 핵심 메이저 옵션 100여 개 우선순위 등록
-    const MASTER_OPTIONS = [
-      "스매시 대미지", "윈드밀 대미지", "다운 어택 대미지", "파이널 히트 최소 대미지", "파이널 히트 최대 대미지", "파이널 히트 쿨타임 감소", "파이널 히트 지속 시간", "자이언트 풀 스윙 대미지",
-      "파이어볼 최대 대미지", "파이어볼 최소 대미지", "썬더 최대 대미지", "라이트닝 마스터리 대미지", "파이어 마스터리 대미지", "아이스 마스터리 대미지", "헤일스톰 최대 대미지", "투아림 익스플로전 대미지",
-      "매그넘 샷 대미지", "크래시 샷 파편 대미지", "크래시 샷 최대 파편 수", "크래시 샷 발사체 대미지", "유효 사거리", "보우 마스터리 최대 대미지", "애로우 리볼버 최소 대미지",
-      "워터 캐논 최대 대미지", "플레이머 최대 대미지", "히트 버스터 최대 대미지", "물 속성 연금술 대미지", "불 연금술 마스터리 효율", "물 연금술 마스터리 효율", "레인 캐스팅 구름 지속 시간",
-      "랜스 차지 주 목표물 대미지", "랜스 차지 마상 돌진 대미지", "랜스 차지 대미지", "랜스 차지 쿨타임 감소",
-      "듀얼건 최대 대미지", "불릿 스톰 1발당 대미지 배율", "슈팅 러쉬 대미지", "크로스 버스터 대미지 배율", "프렌지 지속 시간", "슈팅 러쉬 1발당 대미지 배율",
-      "광란의 질주 대미지", "질투의 화신 대미지", "질투의 화신 공격 범위", "마리오네트 최대 대미지", "솟구치는 분노 대미지", "우연한 충돌 대미지",
-      "연속기 : 드롭킥 스플래시 거리", "연속기 : 섬머솔트 그로기 상태이상 시간", "대시 펀치 대미지", "파운딩 대미지",
-      "최대 공격력", "마법 공격력", "컴뱃 마스터리 최대 대미지", "체력", "지력", "솜씨", "의지", "행운", "최소부상률", "최대부상률", "최대생명력", "최대마나", "최대스태미나", "대미지밸런스", "크리티컬",
-      "불 속성", "얼음 속성", "전기 속성", "공격 속도 증가", "캐스팅 속도 증가", "이동 속도 증가", "보호", "마법 보호", "윈드 브레이커 보호", "방패 보호"
+    const FALLBACK_OPTIONS = [
+      { name: "스매시 대미지", max_level: 20, limit_level: 25 },
+      { name: "최대 공격력", max_level: 20, limit_level: 25 },
+      { name: "마법 공격력", max_level: 20, limit_level: 25 },
+      { name: "랜스 차지 쿨타임 감소", max_level: 5, limit_level: 5 },
+      { name: "크래시 샷 파편 대미지", max_level: 20, limit_level: 25 },
+      { name: "파이어볼 최대 대미지", max_level: 20, limit_level: 25 },
+      { name: "워터 캐논 최대 대미지", max_level: 20, limit_level: 25 },
+      { name: "속성 (불/얼음/전기)", max_level: 6, limit_level: 6 }
     ];
+
+    const PART_LIST = ["양손 검", "랜스", "활", "스태프", "실린더", "듀얼건", "핸들", "너클", "수리검", "체인 블레이드", "한손 검", "한손 둔기", "한손 도끼", "원드", "모자/투구", "옷/갑옷", "장갑/건틀렛", "신발", "악세서리", "에코스톤"];
 
     let currentArcanaKey = 'elemental_knight';
     let userTags = [ 
-      { part: '양손무기', name: '스매시 대미지', level: 20 },
-      { part: '모자', name: '랜스 차지 쿨타임 감소', level: 5 }
+      { part: '양손 검', name: '스매시 대미지', level: 20, max: 20, limit: 25 },
+      { part: '모자/투구', name: '랜스 차지 쿨타임 감소', level: 5, max: 5, limit: 5 }
     ];
+
+    // -------------------------------------------------------------
+    // 2. Supabase 데이터 조회 로직 (TCALC001 테이블 select('*'))
+    // -------------------------------------------------------------
+    async function loadReforgesFromSupabase(part) {
+      if (dbOptionsCache[part]) {
+        return dbOptionsCache[part];
+      }
+
+      if (!supabaseClient) {
+        return FALLBACK_OPTIONS;
+      }
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('TCALC001')
+          .select('*')
+          .eq('part', part);
+
+        if (error) {
+          console.error('TCALC001 조회 실패:', error);
+          throw error;
+        }
+
+        if (data && data.length > 0) {
+          const formatted = data.map(item => ({
+            name: item.name || item.option_name || item.opt_name || '옵션',
+            max_level: parseInt(item.max_level || item.max || 20),
+            limit_level: parseInt(item.limit_level || item.limit || item.max_level || 25)
+          }));
+
+          dbOptionsCache[part] = formatted;
+          updateDbStatus(true, `DB 연동 완료 (${part} ${formatted.length}개)`);
+          return formatted;
+        }
+      } catch (err) {
+        console.warn('Supabase 연동 실패, 기본 로컬 데이터 적용:', err);
+      }
+
+      updateDbStatus(false, '로컬 기본 데이터 모드');
+      return FALLBACK_OPTIONS;
+    }
+
+    function updateDbStatus(isSuccess, text) {
+      const badge = document.getElementById('dbStatusBadge');
+      if (!badge) return;
+      if (isSuccess) {
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${Security.sanitizeString(text)}`;
+        badge.className = "text-[11px] text-emerald-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-emerald-500/30";
+      } else {
+        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span> ${Security.sanitizeString(text)}`;
+        badge.className = "text-[11px] text-amber-300 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-amber-500/30";
+      }
+    }
 
     function applyTheme(key) {
       const t = THEMES[key] || THEMES.elemental_knight;
@@ -419,153 +489,113 @@
       document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
     }
 
-    function populateDatalist() {
-      const dl = document.getElementById('commonReforges');
-      dl.innerHTML = '';
-      MASTER_OPTIONS.forEach(opt => {
-        const el = document.createElement('option');
-        el.value = opt;
-        dl.appendChild(el);
-      });
-    }
-
-    // 마비노기 부위/옵션별 상한(Max) 및 한계돌파(Limit) 판별 알고리즘
-    function getLimits(part, name) {
-      let max = 20, limit = 25;
-      
-      // 1. 부위별 기본 규칙
-      if (part === "한손무기") { max = 10; limit = 13; }
-      else if (part === "악세서리") { max = 3; limit = 3; }
-      else if (part === "에코스톤") { max = 20; limit = 20; }
-      else { max = 20; limit = 25; }
-
-      // 2. 특수 옵션 절대 규칙 (부위 무관하게 이름 베이스)
-      if (name.includes("속성")) {
-        if (part === "한손무기") { max = 3; limit = 3; }
-        else { max = 6; limit = 6; }
-      }
-      else if (name === "크리티컬") {
-        max = 6; limit = 8;
-      }
-      else if (
-        name.includes("공격 속도") || 
-        name.includes("캐스팅 속도") || 
-        name.includes("이동 속도") || 
-        name.includes("최대 파편 수") || 
-        (name.includes("쿨타임 감소") && !name.includes("파이널 히트") && !name.includes("레이지 오브 윙스"))
-      ) {
-        max = 5; limit = 5; 
-      }
-      else if (name === "보호" || name === "마법 보호" || name.includes("방패 보호")) {
-        if(name !== "윈드 브레이커 보호") { max = 10; limit = 10; }
-      }
-      
-      return { max, limit };
-    }
-
-    function renderTagInputList() {
+    // -------------------------------------------------------------
+    // 3. UI 렌더링 및 이벤트 연결
+    // -------------------------------------------------------------
+    async function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
 
       if (userTags.length === 0) {
         container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 장비 옵션이 없습니다.</p>`;
-      } else {
-        userTags.forEach((item, index) => {
-          const limits = getLimits(item.part, item.name);
-
-          const row = document.createElement('div');
-          // 높낮이 정렬을 완벽하게 맞추기 위해 flex-col과 row 레이아웃 재배치 (V4.2)
-          row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
-          
-          row.innerHTML = `
-            <div class="flex flex-nowrap items-center gap-2 w-full">
-              <!-- 부위 선택 -->
-              <select class="tag-part w-24 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
-                <option value="양손무기" ${item.part === '양손무기' ? 'selected' : ''}>양손무기</option>
-                <option value="한손무기" ${item.part === '한손무기' ? 'selected' : ''}>한손무기</option>
-                <option value="모자" ${item.part === '모자' ? 'selected' : ''}>모자/투구</option>
-                <option value="옷" ${item.part === '옷' ? 'selected' : ''}>옷/갑옷</option>
-                <option value="장갑" ${item.part === '장갑' ? 'selected' : ''}>장갑</option>
-                <option value="신발" ${item.part === '신발' ? 'selected' : ''}>신발</option>
-                <option value="악세서리" ${item.part === '악세서리' ? 'selected' : ''}>악세서리</option>
-                <option value="에코스톤" ${item.part === '에코스톤' ? 'selected' : ''}>에코스톤</option>
-              </select>
-              <!-- 세공명 콤보박스 (네이티브) -->
-              <div class="flex-1 min-w-[100px]">
-                <input type="text" list="commonReforges" placeholder="옵션명 직접 입력 (더블클릭 시 목록)" value="${Security.sanitizeString(item.name)}" class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none" data-index="${index}">
-              </div>
-              
-              <!-- 레벨 및 휴지통 일직선 정렬 -->
-              <div class="w-16 shrink-0 flex items-center gap-1">
-                <input type="number" min="1" max="30" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
-                <span class="text-slate-400">Lv</span>
-              </div>
-              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-            </div>
-            <!-- 하단 안내 문구 (독립된 줄) -->
-            <div class="flex justify-end pr-10">
-              <span class="text-[10px] text-slate-500 font-medium tracking-tighter">Max: ${limits.max} / 한돌: ${limits.limit}</span>
-            </div>
-          `;
-          container.appendChild(row);
-        });
+        renderCardTags();
+        return;
       }
+
+      for (let index = 0; index < userTags.length; index++) {
+        const item = userTags[index];
+        const options = await loadReforgesFromSupabase(item.part);
+        
+        let currentOpt = options.find(o => o.name === item.name) || options[0] || { name: item.name, max_level: 20, limit_level: 25 };
+        item.max = currentOpt.max_level;
+        item.limit = currentOpt.limit_level;
+
+        const row = document.createElement('div');
+        row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
+        
+        row.innerHTML = `
+          <div class="flex flex-nowrap items-center gap-2 w-full">
+            <select class="tag-part w-28 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
+              ${PART_LIST.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
+            </select>
+            
+            <div class="flex-1 min-w-[120px]">
+              <select class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none cursor-pointer" data-index="${index}">
+                ${options.map(o => `<option value="${Security.sanitizeString(o.name)}" ${o.name === item.name ? 'selected' : ''}>${Security.sanitizeString(o.name)}</option>`).join('')}
+              </select>
+            </div>
+            
+            <div class="w-16 shrink-0 flex items-center gap-1">
+              <input type="number" min="1" max="${item.limit}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
+              <span class="text-slate-400">Lv</span>
+            </div>
+            <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="flex justify-end pr-10">
+            <span class="text-[10px] text-slate-500 font-medium tracking-tighter">Max: ${item.max} / 한돌: ${item.limit}</span>
+          </div>
+        `;
+        container.appendChild(row);
+      }
+
       lucide.createIcons();
       attachTagEvents();
       renderCardTags();
     }
 
     function attachTagEvents() {
-      // 부위 변경
       document.querySelectorAll('.tag-part').forEach(sel => {
-        sel.addEventListener('change', (e) => { 
+        sel.addEventListener('change', async (e) => { 
           const idx = e.target.dataset.index;
-          userTags[idx].part = e.target.value; 
-          const lim = getLimits(userTags[idx].part, userTags[idx].name);
-          if (userTags[idx].level > lim.limit) userTags[idx].level = lim.limit;
+          const newPart = e.target.value;
+          userTags[idx].part = newPart;
+          
+          const options = await loadReforgesFromSupabase(newPart);
+          const firstOpt = options[0] || { name: '스매시 대미지', max_level: 20, limit_level: 25 };
+          
+          userTags[idx].name = firstOpt.name;
+          userTags[idx].max = firstOpt.max_level;
+          userTags[idx].limit = firstOpt.limit_level;
+          userTags[idx].level = firstOpt.max_level;
+
           renderTagInputList(); 
         });
       });
 
-      // 콤보박스 변경 및 텍스트 강제 오픈
-      document.querySelectorAll('.tag-name').forEach(inp => {
-        inp.addEventListener('click', function() {
-            // 클릭 시 브라우저 내장 Datalist 강제 팝업 (최신 크롬, 엣지 등 지원)
-            if (typeof this.showPicker === 'function') {
-                try { this.showPicker(); } catch(err) {}
-            }
-        });
-        inp.addEventListener('change', (e) => { 
+      document.querySelectorAll('.tag-name').forEach(sel => {
+        sel.addEventListener('change', async (e) => { 
           const idx = e.target.dataset.index;
-          userTags[idx].name = e.target.value; 
-          const lim = getLimits(userTags[idx].part, userTags[idx].name);
-          if (userTags[idx].level > lim.limit) userTags[idx].level = lim.limit;
+          const selectedName = e.target.value;
+          userTags[idx].name = selectedName;
+          
+          const options = await loadReforgesFromSupabase(userTags[idx].part);
+          const opt = options.find(o => o.name === selectedName) || { max_level: 20, limit_level: 25 };
+          
+          userTags[idx].max = opt.max_level;
+          userTags[idx].limit = opt.limit_level;
+          if (userTags[idx].level > opt.limit_level) {
+            userTags[idx].level = opt.limit_level;
+          }
           renderTagInputList(); 
-        });
-        inp.addEventListener('input', (e) => {
-          userTags[e.target.dataset.index].name = e.target.value;
-          renderCardTags();
         });
       });
 
-      // 레벨 입력 (한돌 강제 방어 + 빈칸 방어)
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
-          const lim = getLimits(userTags[idx].part, userTags[idx].name);
-          
+          const limit = userTags[idx].limit || 25;
           let val = parseInt(e.target.value);
-          if(isNaN(val)) val = 1; // 빈칸 방지
-          
-          // 한계돌파 강제 억제
-          userTags[idx].level = Math.min(Math.max(val, 1), lim.limit);
-          e.target.value = userTags[idx].level; // UI 값 즉시 수정
+          if (isNaN(val)) val = 1;
+
+          userTags[idx].level = Math.min(Math.max(val, 1), limit);
+          e.target.value = userTags[idx].level;
 
           renderCardTags(); 
         });
       });
 
-      // 삭제
       document.querySelectorAll('.remove-tag-btn').forEach(btn => {
         btn.addEventListener('click', (e) => { 
           userTags.splice(e.currentTarget.dataset.index, 1); 
@@ -575,32 +605,29 @@
     }
 
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
-      userTags.push({ part: '양손무기', name: '', level: 20 });
+      userTags.push({ part: '양손 검', name: '스매시 대미지', level: 20, max: 20, limit: 25 });
       renderTagInputList();
     });
 
-    // 스펙 카드 하단 한계돌파 등급 컬러 이펙트
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
-      if(userTags.length === 0) {
+      if (userTags.length === 0) {
         area.innerHTML = `<span class="text-[10px] text-slate-600 italic">등록된 장비 옵션이 없습니다.</span>`;
         return;
       }
       
       userTags.forEach(t => {
-        if(!t.name.trim()) return;
+        if (!t.name || !t.name.trim()) return;
         
-        const limits = getLimits(t.part, t.name);
-        const maxLvl = limits.max;
-        const limitLvl = limits.limit;
+        const maxLvl = t.max || 20;
+        const limitLvl = t.limit || 25;
         const level = parseInt(t.level);
 
         const span = document.createElement('span');
         span.className = "tag-base ";
         
-        let shortPart = t.part.replace('무기','').replace('서리','').replace('스톤','');
-        if(shortPart === '') shortPart = t.part.substring(0,2);
+        let shortPart = t.part.replace('무기','').replace('/투구','').replace('/갑옷','').replace('/건틀렛','').replace(' 블레이드','');
 
         if (t.part === '에코스톤') {
           span.className += "tag-echo";
@@ -618,16 +645,16 @@
           if (ratio > 1) ratio = 1;
           
           const tiers = [
-            { bg: 'linear-gradient(135deg, #713f12, #a16207)', shadow: '0 0 6px rgba(234,179,8,0.5)', text: '#fef08a' }, // 연한 황금빛
-            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' }, // 짙은 오렌지
-            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' }, // 레드
-            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' }, // 마젠타
-            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }  // 진홍빛 네온(Max)
+            { bg: 'linear-gradient(135deg, #713f12, #a16207)', shadow: '0 0 6px rgba(234,179,8,0.5)', text: '#fef08a' },
+            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' },
+            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' },
+            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' },
+            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }
           ];
           
           let tierIndex = Math.ceil(ratio * 5) - 1; 
-          if(tierIndex < 0) tierIndex = 0;
-          if(tierIndex > 4) tierIndex = 4;
+          if (tierIndex < 0) tierIndex = 0;
+          if (tierIndex > 4) tierIndex = 4;
           
           const styleConfig = tiers[tierIndex];
           span.className += "tag-limit-break";
@@ -643,7 +670,6 @@
     }
 
     function calculateTotal() {
-      // 숫자입력칸 빈칸(Null) 에러 방지용 파서
       const parseInput = (val, defaultVal) => {
         if (val === '' || val === null || val === undefined) return defaultVal;
         let num = parseFloat(val);
@@ -676,7 +702,6 @@
       const addFromCrit = Math.round(baseStat * expectedCritMult);
 
       const addFromMult = Math.round(baseStat * (bonusDmgRate + arcanaDmgRate));
-
       const totalScore = baseStat + addFromPiercing + addFromCrit + addFromMult;
 
       document.getElementById('totalScoreText').textContent = Math.round(totalScore).toLocaleString();
@@ -687,8 +712,8 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      populateDatalist(); 
-      
+      applyTheme(currentArcanaKey); 
+
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -714,12 +739,10 @@
         calculateTotal();
       });
 
-      // 숫자 빈칸 0 자동입력 강제화
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
-            // 태그 레벨은 1, 스탯류는 0으로 치환
-            if(e.target.classList.contains('tag-level')) e.target.value = '1';
+            if (e.target.classList.contains('tag-level')) e.target.value = '1';
             else e.target.value = '0';
           }
           calculateTotal();
@@ -728,7 +751,6 @@
         inp.addEventListener('change', calculateTotal);
       });
 
-      // 피어싱, 개조창 등 Select 변경 감지
       ['piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect'].forEach(id => {
         document.getElementById(id).addEventListener('change', calculateTotal);
       });
@@ -754,7 +776,6 @@
         reader.readAsDataURL(file);
       });
 
-      // 스펙 카드 이미지 저장 기능 구현
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -786,7 +807,6 @@
         }, 100);
       });
 
-      applyTheme(currentArcanaKey);
       renderTagInputList();
       calculateTotal();
     });
