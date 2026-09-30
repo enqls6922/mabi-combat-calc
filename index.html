@@ -11,7 +11,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob:;
   ">
-  <title>에린 전투력 환산 계산기 (v5.7)</title>
+  <title>에린 전투력 환산 계산기 (v5.8 Double Search)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,7 +110,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.7</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.8</span></h1>
         </div>
       </div>
       <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
@@ -267,14 +267,14 @@
         </div>
       </div>
 
-      <!-- 3. Supabase 연동 세공 리스트 등록 (자체 드롭다운 검색창 탑재) -->
+      <!-- 3. Supabase 연동 세공 리스트 등록 (부위 + 세공 검색 드롭다운) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">상자를 클릭하면 검색창이 포함된 전체 세공 목록이 펼쳐집니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">장비 타입과 세공 내용 모두 클릭하여 검색 및 선택할 수 있습니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
@@ -491,7 +491,7 @@
             renderTagInputList();
           }
 
-          updateDbStatus(true, `DB 연동 완료 (총 ${data.length}개 옵션 로드됨)`);
+          updateDbStatus(true, `DB 연동 완료 (총 ${data.length}개 세공 로드됨)`);
         } else {
           updateDbStatus(false, 'TCALC001 테이블에 데이터가 없습니다 (0건)');
         }
@@ -523,7 +523,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링 (커스텀 검색 드롭다운 UI 탑재)
+    // 3. UI 렌더링 (장비 타입 + 세공 옵션 모두 검색형 드롭다운 적용)
     // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
@@ -557,31 +557,53 @@
         
         row.innerHTML = `
           <div class="flex flex-nowrap items-center gap-2 w-full relative">
-            <!-- 1. 장비 타입 (EQ_TYPE) 드롭다운 -->
-            <select class="tag-part w-32 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
-              ${memoryPartList.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
-            </select>
             
-            <!-- 2. 커스텀 검색 드롭다운 버튼 -->
+            <!-- 1. 장비 타입 (EQ_TYPE) 커스텀 검색 드롭다운 -->
+            <div class="w-36 shrink-0 relative">
+              <button type="button" 
+                class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
+                data-index="${index}">
+                <span class="truncate">${Security.sanitizeString(item.part || '부위 선택')}</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+
+              <div class="part-dropdown-menu hidden absolute top-full left-0 w-44 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+                <div class="relative mb-2">
+                  <input type="text" 
+                    placeholder="부위 검색..." 
+                    class="part-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
+                    data-index="${index}">
+                </div>
+                <div class="part-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
+                  ${memoryPartList.map(p => `
+                    <div class="part-dropdown-item px-2 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors"
+                         data-part="${Security.sanitizeString(p)}">
+                      <span>${Security.sanitizeString(p)}</span>${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            
+            <!-- 2. 세공 옵션 (RF_NM) 커스텀 검색 드롭다운 -->
             <div class="flex-1 min-w-[120px] relative">
               <button type="button" 
-                class="dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
+                class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
                 data-index="${index}">
                 <span class="truncate">${Security.sanitizeString(item.name || '옵션 선택')}</span>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
               </button>
 
-              <!-- 펼쳐지는 드롭다운 메뉴 (검색창 내장) -->
-              <div class="dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+              <div class="reforge-dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
                 <div class="relative mb-2">
                   <input type="text" 
                     placeholder="세공명 검색..." 
-                    class="dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
+                    class="reforge-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
                     data-index="${index}">
                 </div>
-                <div class="dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
+                <div class="reforge-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
                   ${options.map(o => `
-                    <div class="dropdown-item px-2.5 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors"
+                    <div class="reforge-dropdown-item px-2.5 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors"
                          data-name="${Security.sanitizeString(o.name)}">
                       <span>${Security.sanitizeString(o.name)}</span>
                       <span class="text-[10px] text-slate-500">${o.max_level}Lv${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
@@ -616,16 +638,56 @@
     }
 
     function attachTagEvents() {
-      // 1. 장비 타입(EQ_TYPE) 변경
-      document.querySelectorAll('.tag-part').forEach(sel => {
-        sel.addEventListener('change', (e) => { 
-          const idx = e.target.dataset.index;
-          const newPart = e.target.value;
-          userTags[idx].part = newPart;
+      // 메뉴 전체 닫기 유틸
+      const closeAllDropdowns = () => {
+        document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
+      };
+
+      // 1. [장비 타입] 드롭다운 토글 및 검색
+      document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = btn.dataset.index;
+          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
+          const isHidden = menu.classList.contains('hidden');
           
-          const options = memoryReforgeMap[newPart] || [];
+          closeAllDropdowns();
+
+          if (isHidden) {
+            menu.classList.remove('hidden');
+            const searchInput = menu.querySelector('.part-dropdown-search');
+            searchInput.value = '';
+            searchInput.focus();
+            menu.querySelectorAll('.part-dropdown-item').forEach(it => it.classList.remove('hidden'));
+          }
+        });
+      });
+
+      document.querySelectorAll('.part-dropdown-search').forEach(input => {
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('input', (e) => {
+          const idx = input.dataset.index;
+          const query = e.target.value.toLowerCase().trim();
+          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
+          menu.querySelectorAll('.part-dropdown-item').forEach(item => {
+            const partName = item.dataset.part.toLowerCase();
+            if (partName.includes(query)) item.classList.remove('hidden');
+            else item.classList.add('hidden');
+          });
+        });
+      });
+
+      document.querySelectorAll('.part-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menu = item.closest('.part-dropdown-menu');
+          const idx = menu.dataset.index;
+          const selectedPart = item.dataset.part;
+
+          userTags[idx].part = selectedPart;
+          const options = memoryReforgeMap[selectedPart] || [];
           const firstOpt = options[0] || { name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
-          
+
           userTags[idx].name = firstOpt.name;
           userTags[idx].min = firstOpt.min_level;
           userTags[idx].max = firstOpt.max_level;
@@ -633,57 +695,49 @@
           userTags[idx].limit_max = firstOpt.limit_max_level;
           userTags[idx].level = firstOpt.max_level;
 
-          renderTagInputList(); 
+          closeAllDropdowns();
+          renderTagInputList();
         });
       });
 
-      // 2. 커스텀 드롭다운 토글 및 검색 기능
-      document.querySelectorAll('.dropdown-trigger').forEach(btn => {
+      // 2. [세공 내용] 드롭다운 토글 및 검색
+      document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const idx = btn.dataset.index;
-          const menu = document.querySelector(`.dropdown-menu[data-index="${idx}"]`);
+          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
           const isHidden = menu.classList.contains('hidden');
           
-          // 다른 열려있는 메뉴 닫기
-          document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+          closeAllDropdowns();
 
           if (isHidden) {
             menu.classList.remove('hidden');
-            const searchInput = menu.querySelector('.dropdown-search');
+            const searchInput = menu.querySelector('.reforge-dropdown-search');
             searchInput.value = '';
             searchInput.focus();
-            // 전체 아이템 보이기
-            menu.querySelectorAll('.dropdown-item').forEach(it => it.classList.remove('hidden'));
+            menu.querySelectorAll('.reforge-dropdown-item').forEach(it => it.classList.remove('hidden'));
           }
         });
       });
 
-      // 드롭다운 검색창 필터링
-      document.querySelectorAll('.dropdown-search').forEach(input => {
+      document.querySelectorAll('.reforge-dropdown-search').forEach(input => {
         input.addEventListener('click', (e) => e.stopPropagation());
         input.addEventListener('input', (e) => {
           const idx = input.dataset.index;
           const query = e.target.value.toLowerCase().trim();
-          const menu = document.querySelector(`.dropdown-menu[data-index="${idx}"]`);
-          const items = menu.querySelectorAll('.dropdown-item');
-
-          items.forEach(item => {
+          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
+          menu.querySelectorAll('.reforge-dropdown-item').forEach(item => {
             const name = item.dataset.name.toLowerCase();
-            if (name.includes(query)) {
-              item.classList.remove('hidden');
-            } else {
-              item.classList.add('hidden');
-            }
+            if (name.includes(query)) item.classList.remove('hidden');
+            else item.classList.add('hidden');
           });
         });
       });
 
-      // 드롭다운 아이템 클릭 시 선택
-      document.querySelectorAll('.dropdown-item').forEach(item => {
+      document.querySelectorAll('.reforge-dropdown-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
-          const menu = item.closest('.dropdown-menu');
+          const menu = item.closest('.reforge-dropdown-menu');
           const idx = menu.dataset.index;
           const selectedName = item.dataset.name;
 
@@ -703,7 +757,7 @@
             }
           }
 
-          menu.classList.add('hidden');
+          closeAllDropdowns();
           renderTagInputList();
         });
       });
@@ -737,7 +791,7 @@
 
     // 바깥 클릭 시 모든 드롭다운 닫기
     document.addEventListener('click', () => {
-      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+      document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
     });
 
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
