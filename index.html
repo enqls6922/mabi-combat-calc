@@ -11,7 +11,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob:;
   ">
-  <title>에린 전투력 환산 계산기 (v5.4)</title>
+  <title>에린 전투력 환산 계산기 (v5.5 TCALC001 Schema)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,7 +110,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.4</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.5</span></h1>
         </div>
       </div>
       <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
@@ -412,7 +412,8 @@
     let userTags = [];
 
     // -------------------------------------------------------------
-    // 2. [핵심 수정] ID 컬럼을 제외하고 장비 타입과 세공명 자동 감지
+    // 2. [TCALC001 실제 스키마 컬럼 1:1 매핑]
+    // EQ_TYPE, RF_NM, RF_MIN_LV, RF_MAX_LV, RF_LIMIT_YN, RF_LIMIT_MIN_LV, RF_LIMIT_MAX_LV
     // -------------------------------------------------------------
     async function initSupabaseDataOnce() {
       if (!supabaseClient) {
@@ -442,72 +443,44 @@
         console.log('[Supabase] 가져온 총 행 수:', data ? data.length : 0);
 
         if (data && data.length > 0) {
-          const sample = data[0];
-          const allKeys = Object.keys(sample);
-          console.log('[Supabase] 원본 컬럼 목록:', allKeys);
-          console.log('[Supabase] 1번 샘플 데이터:', sample);
-
-          // ID 계열 컬럼(id, idx, no 등) 완전 배제
-          const nonIdKeys = allKeys.filter(k => !/^(id|idx|no|seq|index|_id)$/i.test(k));
-
-          // 1. 장비 부위(타입) 컬럼 감지
-          let partKey = nonIdKeys.find(k => /part|부위|무기|타입|type|분류|장비/i.test(k));
-          if (!partKey) {
-            // 키워드가 없으면 nonIdKeys 중 첫 번째 텍스트 컬럼 사용
-            partKey = nonIdKeys[0];
-          }
-
-          // 2. 세공 옵션명 컬럼 감지
-          let nameKey = nonIdKeys.find(k => k !== partKey && /name|세공|옵션|명|opt|skill|스킬/i.test(k));
-          if (!nameKey) {
-            // 키워드가 없으면 partKey가 아닌 다음 컬럼 사용
-            nameKey = nonIdKeys.find(k => k !== partKey) || nonIdKeys[1];
-          }
-
-          // 3. 레벨/한돌 컬럼 감지
-          const levelKey = nonIdKeys.find(k => k !== partKey && k !== nameKey && /level|레벨|범위|한돌|max/i.test(k));
-
-          console.log(`[컬럼 매핑 결과] 장비타입: "${partKey}", 세공명: "${nameKey}", 레벨정보: "${levelKey || '없음'}"`);
-
           memoryReforgeMap = {};
 
           data.forEach(row => {
-            const rawPart = String(row[partKey] || '기타').trim();
-            const rawName = String(row[nameKey] || '옵션').trim();
+            // 제공된 실제 스키마 컬럼명 매핑 (대소문자 무관하게 처리)
+            const eqType = String(row.EQ_TYPE || row.eq_type || '').trim();
+            const rfNm = String(row.RF_NM || row.rf_nm || '').trim();
+
+            if (!eqType || !rfNm) return;
+
+            const minLvl = parseInt(row.RF_MIN_LV || row.rf_min_lv || 1);
+            const maxLvl = parseInt(row.RF_MAX_LV || row.rf_max_lv || 20);
+            const limitYn = String(row.RF_LIMIT_YN || row.rf_limit_yn || 'N').trim().toUpperCase();
             
-            // 유효하지 않은 데이터 건너뛰기
-            if (!rawPart || !rawName || rawName === 'undefined') return;
+            // 한계돌파 가능 여부(Y)에 따른 한돌 레벨 설정
+            let limitMinLvl = maxLvl + 1;
+            let limitMaxLvl = maxLvl;
 
-            let maxLvl = 20;
-            let limitLvl = 25;
-
-            if (levelKey && row[levelKey]) {
-              const strVal = String(row[levelKey]);
-              const matchMax = strVal.match(/~(\d+)/) || strVal.match(/^(\d+)/);
-              if (matchMax) maxLvl = parseInt(matchMax[1]);
-
-              const matchLimit = strVal.match(/한돌\s*:\s*(\d+)/);
-              if (matchLimit) limitLvl = parseInt(matchLimit[1]);
-              else limitLvl = maxLvl;
-            } else {
-              maxLvl = parseInt(row.max_level || row.max || 20);
-              limitLvl = parseInt(row.limit_level || row.limit || maxLvl);
+            if (limitYn === 'Y') {
+              limitMinLvl = parseInt(row.RF_LIMIT_MIN_LV || row.rf_limit_min_lv || (maxLvl + 1));
+              limitMaxLvl = parseInt(row.RF_LIMIT_MAX_LV || row.rf_limit_max_lv || maxLvl);
             }
 
-            if (!memoryReforgeMap[rawPart]) {
-              memoryReforgeMap[rawPart] = [];
+            if (!memoryReforgeMap[eqType]) {
+              memoryReforgeMap[eqType] = [];
             }
 
-            memoryReforgeMap[rawPart].push({
-              name: rawName,
+            memoryReforgeMap[eqType].push({
+              name: rfNm,
+              min_level: minLvl,
               max_level: maxLvl,
-              limit_level: limitLvl
+              limit_yn: limitYn,
+              limit_min_level: limitMinLvl,
+              limit_max_level: limitMaxLvl
             });
           });
 
           memoryPartList = Object.keys(memoryReforgeMap);
 
-          // 첫 번째 항목 기본 바인딩
           if (memoryPartList.length > 0) {
             const firstPart = memoryPartList[0];
             const firstOpt = memoryReforgeMap[firstPart][0];
@@ -515,8 +488,10 @@
               part: firstPart,
               name: firstOpt.name,
               level: firstOpt.max_level,
+              min: firstOpt.min_level,
               max: firstOpt.max_level,
-              limit: firstOpt.limit_level
+              limit_yn: firstOpt.limit_yn,
+              limit_max: firstOpt.limit_max_level
             }];
             renderTagInputList();
           }
@@ -567,39 +542,53 @@
 
       userTags.forEach((item, index) => {
         const options = memoryReforgeMap[item.part] || [];
-        let currentOpt = options.find(o => o.name === item.name) || options[0] || { name: item.name, max_level: 20, limit_level: 25 };
+        let currentOpt = options.find(o => o.name === item.name) || options[0] || { 
+          name: item.name, 
+          min_level: 1, 
+          max_level: 20, 
+          limit_yn: 'N', 
+          limit_max_level: 20 
+        };
         
+        item.min = currentOpt.min_level;
         item.max = currentOpt.max_level;
-        item.limit = currentOpt.limit_level;
+        item.limit_yn = currentOpt.limit_yn;
+        item.limit_max = currentOpt.limit_max_level;
+
+        // 허용되는 최대 입력 레벨 (한돌 가능 시 limit_max_level, 불가 시 max_level)
+        const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
 
         const row = document.createElement('div');
         row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
         
         row.innerHTML = `
           <div class="flex flex-nowrap items-center gap-2 w-full">
-            <!-- 장비 타입(부위) 드롭다운 (ID 제외됨) -->
+            <!-- 1. 장비 타입 (EQ_TYPE) 드롭다운 -->
             <select class="tag-part w-32 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
               ${memoryPartList.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
             
-            <!-- 세공 옵션명 드롭다운 -->
+            <!-- 2. 세공 내용 (RF_NM) 드롭다운 -->
             <div class="flex-1 min-w-[120px]">
               <select class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none cursor-pointer" data-index="${index}">
                 ${options.map(o => `<option value="${Security.sanitizeString(o.name)}" ${o.name === item.name ? 'selected' : ''}>${Security.sanitizeString(o.name)}</option>`).join('')}
               </select>
             </div>
             
-            <!-- 레벨 및 삭제 버튼 -->
+            <!-- 3. 세공 레벨 입력칸 (한돌 최대 레벨 이상 입력 불가) -->
             <div class="w-16 shrink-0 flex items-center gap-1">
-              <input type="number" min="1" max="${item.limit}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
+              <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
               <span class="text-slate-400">Lv</span>
             </div>
             <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
+          <!-- 하단 상한 및 한계돌파 정보 표시 -->
           <div class="flex justify-end pr-10">
-            <span class="text-[10px] text-slate-500 font-medium tracking-tighter">Max: ${item.max} / 한돌: ${item.limit}</span>
+            <span class="text-[10px] text-slate-500 font-medium tracking-tighter">
+              상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : '(한돌 불가)'}
+            </span>
           </div>
         `;
         container.appendChild(row);
@@ -611,7 +600,7 @@
     }
 
     function attachTagEvents() {
-      // 장비 타입(부위) 변경 시 세공 목록 갱신
+      // 1. 장비 타입(EQ_TYPE) 변경
       document.querySelectorAll('.tag-part').forEach(sel => {
         sel.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
@@ -619,18 +608,20 @@
           userTags[idx].part = newPart;
           
           const options = memoryReforgeMap[newPart] || [];
-          const firstOpt = options[0] || { name: '옵션', max_level: 20, limit_level: 25 };
+          const firstOpt = options[0] || { name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
           
           userTags[idx].name = firstOpt.name;
+          userTags[idx].min = firstOpt.min_level;
           userTags[idx].max = firstOpt.max_level;
-          userTags[idx].limit = firstOpt.limit_level;
+          userTags[idx].limit_yn = firstOpt.limit_yn;
+          userTags[idx].limit_max = firstOpt.limit_max_level;
           userTags[idx].level = firstOpt.max_level;
 
           renderTagInputList(); 
         });
       });
 
-      // 세공명 변경 시 상한선 갱신
+      // 2. 세공 옵션(RF_NM) 변경
       document.querySelectorAll('.tag-name').forEach(sel => {
         sel.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
@@ -638,33 +629,41 @@
           userTags[idx].name = selectedName;
           
           const options = memoryReforgeMap[userTags[idx].part] || [];
-          const opt = options.find(o => o.name === selectedName) || { max_level: 20, limit_level: 25 };
+          const opt = options.find(o => o.name === selectedName) || { min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
           
+          userTags[idx].min = opt.min_level;
           userTags[idx].max = opt.max_level;
-          userTags[idx].limit = opt.limit_level;
-          if (userTags[idx].level > opt.limit_level) {
-            userTags[idx].level = opt.limit_level;
+          userTags[idx].limit_yn = opt.limit_yn;
+          userTags[idx].limit_max = opt.limit_max_level;
+          
+          const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
+          if (userTags[idx].level > allowedMax) {
+            userTags[idx].level = allowedMax;
           }
           renderTagInputList(); 
         });
       });
 
-      // 레벨 입력 (한돌 수치 제한)
+      // 3. 레벨 입력 (한돌 여부에 따른 절대 한도 제어)
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
-          const limit = userTags[idx].limit || 25;
-          let val = parseInt(e.target.value);
-          if (isNaN(val)) val = 1;
+          const tag = userTags[idx];
+          const allowedMax = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
+          const allowedMin = tag.min || 1;
 
-          userTags[idx].level = Math.min(Math.max(val, 1), limit);
-          e.target.value = userTags[idx].level;
+          let val = parseInt(e.target.value);
+          if (isNaN(val)) val = allowedMin;
+
+          // 상한 및 한돌 초과 불가 강제 clamp
+          tag.level = Math.min(Math.max(val, allowedMin), allowedMax);
+          e.target.value = tag.level;
 
           renderCardTags(); 
         });
       });
 
-      // 삭제
+      // 4. 삭제 버튼
       document.querySelectorAll('.remove-tag-btn').forEach(btn => {
         btn.addEventListener('click', (e) => { 
           userTags.splice(e.currentTarget.dataset.index, 1); 
@@ -676,17 +675,24 @@
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
       if (memoryPartList.length === 0) return;
       const defaultPart = memoryPartList[0];
-      const defaultOpt = (memoryReforgeMap[defaultPart] && memoryReforgeMap[defaultPart][0]) || { name: '옵션', max_level: 20, limit_level: 25 };
+      const defaultOpt = (memoryReforgeMap[defaultPart] && memoryReforgeMap[defaultPart][0]) || { 
+        name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
+      };
       userTags.push({ 
         part: defaultPart, 
         name: defaultOpt.name, 
         level: defaultOpt.max_level, 
+        min: defaultOpt.min_level,
         max: defaultOpt.max_level, 
-        limit: defaultOpt.limit_level 
+        limit_yn: defaultOpt.limit_yn,
+        limit_max: defaultOpt.limit_max_level 
       });
       renderTagInputList();
     });
 
+    // -------------------------------------------------------------
+    // 4. 스펙 카드 한계돌파 차등 네온 태그 렌더러
+    // -------------------------------------------------------------
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
@@ -699,7 +705,7 @@
         if (!t.name || !t.name.trim()) return;
         
         const maxLvl = t.max || 20;
-        const limitLvl = t.limit || 25;
+        const limitMaxLvl = t.limit_max || maxLvl;
         const level = parseInt(t.level);
 
         const span = document.createElement('span');
@@ -717,9 +723,9 @@
           span.className += "tag-max font-bold";
           span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
         } else {
-          let diffMaxLimit = Math.max(limitLvl - maxLvl, 1);
-          let over = level - maxLvl;
-          let ratio = over / diffMaxLimit;
+          // 한계돌파 구간 (maxLvl 초과 ~ limitMaxLvl): 초과 비율에 따른 5단계 차등 네온
+          let diff = Math.max(limitMaxLvl - maxLvl, 1);
+          let ratio = (level - maxLvl) / diff;
           if (ratio > 1) ratio = 1;
           
           const tiers = [
@@ -792,10 +798,9 @@
       lucide.createIcons();
       applyTheme(currentArcanaKey); 
 
-      // 1. TCALC001 전체 데이터 1회 로드 (ID 제외 처리)
+      // TCALC001 전체 데이터 1회 로드
       await initSupabaseDataOnce();
 
-      // 2. 아르카나 선택 변경
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -814,7 +819,6 @@
         lucide.createIcons();
       });
 
-      // 무기 타입 선택 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -822,7 +826,6 @@
         calculateTotal();
       });
 
-      // 숫자 입력칸 블러 시 0 자동 보정
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
