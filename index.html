@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
-  <title>에린 전투력 환산 계산기 (v3.0)</title>
+  <title>에린 전투력 환산 계산기 (v4.0)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -47,10 +47,12 @@
       transition: all 0.4s ease;
     }
     
-    select {
+    select, input[list] {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
+    }
+    select {
       background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
       background-position: right 10px center;
@@ -70,7 +72,7 @@
     }
     .exporting-mode .blur-3xl { display: none !important; }
 
-    /* 세공 태그 베이스 스타일 */
+    /* 태그 렌더링 스타일 */
     .tag-base {
       padding: 0.25rem 0.625rem;
       border-radius: 0.25rem;
@@ -101,7 +103,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v3.0</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v4.0</span></h1>
         </div>
       </div>
     </div>
@@ -255,20 +257,22 @@
         </div>
       </div>
 
-      <!-- 3. 부위별 세공 리스트 입력 -->
+      <!-- 3. 자유 입력 세공 리스트 (점수 반영 X, 스펙 자랑용 한돌 태그) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">부위를 선택하면 해당 부위의 상한 레벨과 한계돌파 한도가 자동 지정됩니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">부위를 선택하면 해당 부위의 <b>상한선/한계돌파 제한</b>이 자동으로 설정됩니다. (자동완성 지원)</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
           </button>
         </div>
         <div id="reforgeListContainer" class="space-y-3"></div>
+        <!-- 자동완성 데이터리스트 -->
+        <datalist id="commonReforges"></datalist>
       </div>
 
       <!-- 4. 캐릭터 외형 등록 -->
@@ -331,11 +335,11 @@
           </div>
         </div>
 
-        <!-- 세공 Flex 태그 렌더링 영역 -->
+        <!-- 한돌 프리미엄 태그 영역 -->
         <div class="border-t border-slate-800/80 pt-3">
-          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-2">Equipment Limit Break</span>
+          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-2">Equipment Options</span>
           <div id="cardTagsArea" class="flex flex-wrap gap-1.5">
-            <!-- JS 렌더링 영역 -->
+            <!-- JS 동적 렌더링 -->
           </div>
         </div>
       </div>
@@ -385,75 +389,25 @@
     };
     const PIERCING_BASE_MULT = 0.03;
 
-    // [핵심] 부위별 유효 세공 DB (상한(Max), 한계돌파(Limit) 기준표)
-    const REFORGE_DB = {
-      "양손/원거리 무기": [
-        { n: "스매시 대미지", m: 20, l: 25 },
-        { n: "매그넘 샷 대미지", m: 20, l: 25 },
-        { n: "랜스 차지 대미지", m: 20, l: 25 },
-        { n: "파이널 히트 최소 대미지", m: 20, l: 25 },
-        { n: "파이어볼 최대 대미지", m: 20, l: 25 },
-        { n: "워터 캐논 최대 대미지", m: 20, l: 25 },
-        { n: "최대 공격력", m: 20, l: 25 },
-        { n: "마법 공격력", m: 20, l: 25 },
-        { n: "속성 (불/얼음/전기)", m: 6, l: 6 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 25 }
-      ],
-      "한손 무기류": [
-        { n: "스매시 대미지", m: 10, l: 13 },
-        { n: "파이널 히트 최대 대미지", m: 10, l: 13 },
-        { n: "최대 공격력", m: 10, l: 13 },
-        { n: "마법 공격력", m: 10, l: 13 },
-        { n: "속성 (불/얼음/전기)", m: 3, l: 3 },
-        { n: "직접 입력 (사용자 지정)", m: 10, l: 13 }
-      ],
-      "모자/투구": [
-        { n: "랜스 차지 쿨타임 감소", m: 5, l: 5 },
-        { n: "크래시 샷 최대 파편 수", m: 5, l: 5 },
-        { n: "파이널 히트 쿨타임 감소", m: 20, l: 25 },
-        { n: "레인 캐스팅 구름 지속 시간", m: 20, l: 25 },
-        { n: "볼트 마스터리 대미지", m: 20, l: 25 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 25 }
-      ],
-      "옷/갑옷": [
-        { n: "파이널 히트 지속 시간", m: 20, l: 25 },
-        { n: "크래시 샷 최대 파편 대미지", m: 20, l: 25 },
-        { n: "헤일스톰 최대 대미지", m: 20, l: 25 },
-        { n: "윈드 브레이커 보호", m: 20, l: 25 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 25 }
-      ],
-      "장갑/건틀렛": [
-        { n: "컴뱃 마스터리 대미지", m: 20, l: 25 },
-        { n: "보우 마스터리 대미지", m: 20, l: 25 },
-        { n: "마그네틱 스텝 범위", m: 20, l: 25 },
-        { n: "크래시 샷 파편 대미지", m: 20, l: 25 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 25 }
-      ],
-      "신발": [
-        { n: "이동 속도 증가", m: 5, l: 5 },
-        { n: "연속기 : 드롭킥 스플래시 거리", m: 20, l: 25 },
-        { n: "슈팅 러쉬 1발당 대미지 배율", m: 20, l: 25 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 25 }
-      ],
-      "악세서리": [
-        { n: "스매시 대미지", m: 3, l: 3 },
-        { n: "최대 공격력", m: 3, l: 3 },
-        { n: "마법 공격력", m: 3, l: 3 },
-        { n: "이동 속도 증가", m: 3, l: 3 },
-        { n: "직접 입력 (사용자 지정)", m: 3, l: 3 }
-      ],
-      "에코스톤": [
-        { n: "스매시 대미지", m: 20, l: 20 },
-        { n: "매그넘 샷 대미지", m: 20, l: 20 },
-        { n: "랜스 차지 쿨타임 감소", m: 5, l: 5 },
-        { n: "크래시 샷 최대 파편 수", m: 5, l: 5 },
-        { n: "속성 (불/얼음/전기)", m: 3, l: 3 },
-        { n: "직접 입력 (사용자 지정)", m: 20, l: 20 }
-      ]
-    };
+    // [마비노기 세공 옵션 마스터 리스트 (자동완성용)]
+    const MASTER_OPTIONS = [
+      "스매시 대미지", "윈드밀 대미지", "다운 어택 대미지", "파이널 히트 최소 대미지", "파이널 히트 최대 대미지", "파이널 히트 쿨타임 감소", "파이널 히트 지속 시간", "자이언트 풀 스윙 대미지",
+      "파이어볼 최대 대미지", "파이어볼 최소 대미지", "썬더 최대 대미지", "라이트닝 마스터리 대미지", "파이어 마스터리 대미지", "아이스 마스터리 대미지", "헤일스톰 최대 대미지", "투아림 익스플로전 대미지",
+      "매그넘 샷 대미지", "크래시 샷 파편 대미지", "크래시 샷 최대 파편 수", "크래시 샷 발사체 대미지", "유효 사거리", "보우 마스터리 최대 대미지", "애로우 리볼버 최소 대미지",
+      "워터 캐논 최대 대미지", "플레이머 최대 대미지", "히트 버스터 최대 대미지", "물 속성 연금술 대미지", "불 연금술 마스터리 효율", "물 연금술 마스터리 효율", "레인 캐스팅 구름 지속 시간",
+      "랜스 차지 주 목표물 대미지", "랜스 차지 마상 돌진 대미지", "랜스 차지 대미지", "랜스 차지 쿨타임 감소",
+      "듀얼건 최대 대미지", "불릿 스톰 1발당 대미지 배율", "슈팅 러쉬 대미지", "크로스 버스터 대미지 배율", "프렌지 지속 시간", "슈팅 러쉬 1발당 대미지 배율",
+      "광란의 질주 대미지", "질투의 화신 대미지", "질투의 화신 공격 범위", "마리오네트 최대 대미지", "솟구치는 분노 대미지", "우연한 충돌 대미지",
+      "연속기 : 드롭킥 스플래시 거리", "연속기 : 섬머솔트 그로기 상태이상 시간", "대시 펀치 대미지", "파운딩 대미지",
+      "최대 공격력", "마법 공격력", "컴뱃 마스터리 최대 대미지", "체력", "지력", "솜씨", "의지", "행운", "최소부상률", "최대부상률", "최대생명력", "최대마나", "최대스태미나", "대미지밸런스", "크리티컬",
+      "불 속성", "얼음 속성", "전기 속성", "공격 속도 증가", "캐스팅 속도 증가", "이동 속도 증가", "보호", "마법 보호", "윈드 브레이커 보호", "방패 보호"
+    ];
 
     let currentArcanaKey = 'elemental_knight';
-    let userTags = [ { part: '양손/원거리 무기', name: '스매시 대미지', customName: '', level: 20 } ];
+    let userTags = [ 
+      { part: '양손무기', name: '스매시 대미지', level: 20 },
+      { part: '모자', name: '랜스 차지 쿨타임 감소', level: 5 }
+    ];
 
     function applyTheme(key) {
       const t = THEMES[key] || THEMES.elemental_knight;
@@ -464,6 +418,52 @@
       document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
     }
 
+    function populateDatalist() {
+      const dl = document.getElementById('commonReforges');
+      dl.innerHTML = '';
+      MASTER_OPTIONS.forEach(opt => {
+        const el = document.createElement('option');
+        el.value = opt;
+        dl.appendChild(el);
+      });
+    }
+
+    // 마비노기 부위/옵션별 상한(Max) 및 한계돌파(Limit) 판별 알고리즘
+    function getLimits(part, name) {
+      let max = 20, limit = 25;
+      
+      // 1. 부위별 기본 규칙
+      if (part === "한손무기") { max = 10; limit = 13; }
+      else if (part === "악세서리") { max = 3; limit = 3; }
+      else if (part === "에코스톤") { max = 20; limit = 20; }
+      else { max = 20; limit = 25; } // 양손무기, 방어구류
+
+      // 2. 특수 옵션 절대 규칙 (부위 무관)
+      if (name.includes("속성")) {
+        // 한손무기는 속성 3이 끝, 나머지는 6
+        if (part === "한손무기") { max = 3; limit = 3; }
+        else { max = 6; limit = 6; }
+      }
+      else if (name === "크리티컬") {
+        max = 6; limit = 8;
+      }
+      else if (
+        name.includes("공격 속도") || 
+        name.includes("캐스팅 속도") || 
+        name.includes("이동 속도") || 
+        name.includes("최대 파편 수") || 
+        (name.includes("쿨타임 감소") && !name.includes("파이널 히트") && !name.includes("레이지 오브 윙스"))
+      ) {
+        max = 5; limit = 5; 
+      }
+      else if (name === "보호" || name === "마법 보호" || name.includes("방패 보호")) {
+        // 윈드 브레이커 보호 등 예외 제외한 기본 보호류
+        if(name !== "윈드 브레이커 보호") { max = 10; limit = 10; }
+      }
+      
+      return { max, limit };
+    }
+
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
@@ -472,29 +472,31 @@
         container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 장비 옵션이 없습니다.</p>`;
       } else {
         userTags.forEach((item, index) => {
-          const optList = REFORGE_DB[item.part] || [];
-          const currentOpt = optList.find(o => o.n === item.name) || optList[0];
-          const isCustom = item.name.includes("사용자 지정");
+          const limits = getLimits(item.part, item.name);
 
           const row = document.createElement('div');
           row.className = "flex flex-wrap md:flex-nowrap items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs";
           
           row.innerHTML = `
-            <select class="tag-part w-full md:w-36 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer shrink-0" data-index="${index}">
-              ${Object.keys(REFORGE_DB).map(k => `<option value="${k}" ${k === item.part ? 'selected' : ''}>${k}</option>`).join('')}
+            <select class="tag-part w-full md:w-28 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
+              <option value="양손무기" ${item.part === '양손무기' ? 'selected' : ''}>양손무기</option>
+              <option value="한손무기" ${item.part === '한손무기' ? 'selected' : ''}>한손무기</option>
+              <option value="모자" ${item.part === '모자' ? 'selected' : ''}>모자/투구</option>
+              <option value="옷" ${item.part === '옷' ? 'selected' : ''}>옷/갑옷</option>
+              <option value="장갑" ${item.part === '장갑' ? 'selected' : ''}>장갑</option>
+              <option value="신발" ${item.part === '신발' ? 'selected' : ''}>신발</option>
+              <option value="악세서리" ${item.part === '악세서리' ? 'selected' : ''}>악세서리</option>
+              <option value="에코스톤" ${item.part === '에코스톤' ? 'selected' : ''}>에코스톤</option>
             </select>
             <div class="flex-1 flex flex-col sm:flex-row gap-2 w-full">
-              <select class="tag-name w-full bg-slate-900 border border-slate-700 rounded pl-2 pr-8 py-2 text-slate-200 focus:border-theme-main focus:outline-none" data-index="${index}">
-                ${optList.map(o => `<option value="${o.n}" ${o.n === item.name ? 'selected' : ''}>${o.n}</option>`).join('')}
-              </select>
-              ${isCustom ? `<input type="text" placeholder="옵션명 직접 기입" value="${Security.sanitizeString(item.customName)}" class="tag-custom w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-200 focus:outline-none" data-index="${index}">` : ''}
+              <input type="text" list="commonReforges" placeholder="옵션명 직접 입력 (예: 스매시 대미지)" value="${Security.sanitizeString(item.name)}" class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none" data-index="${index}">
             </div>
-            <div class="w-full md:w-28 shrink-0 flex flex-col items-center justify-center">
+            <div class="w-full md:w-24 shrink-0 flex flex-col items-center justify-center">
               <div class="flex items-center gap-1 w-full">
                 <input type="number" min="1" max="30" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
                 <span class="text-slate-400">Lv</span>
               </div>
-              <span class="text-[9px] text-slate-500 font-bold mt-1">상한${currentOpt.m} / 한돌${currentOpt.l}</span>
+              <span class="text-[9px] text-slate-500 font-bold mt-1 tracking-tighter">Max:${limits.max} / 한돌:${limits.limit}</span>
             </div>
             <button class="remove-tag-btn shrink-0 text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           `;
@@ -511,32 +513,31 @@
         sel.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
           userTags[idx].part = e.target.value; 
-          userTags[idx].name = REFORGE_DB[e.target.value][0].n;
-          userTags[idx].customName = "";
-          userTags[idx].level = REFORGE_DB[e.target.value][0].m;
+          // 부위가 바뀌면 한계 상한선이 바뀌므로 레벨 강제 조정
+          const lim = getLimits(userTags[idx].part, userTags[idx].name);
+          if (userTags[idx].level > lim.limit) userTags[idx].level = lim.limit;
           renderTagInputList(); 
         });
       });
-      document.querySelectorAll('.tag-name').forEach(sel => {
-        sel.addEventListener('change', (e) => { 
+      document.querySelectorAll('.tag-name').forEach(inp => {
+        inp.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
           userTags[idx].name = e.target.value; 
-          const opt = REFORGE_DB[userTags[idx].part].find(o => o.n === e.target.value);
-          if(userTags[idx].level > opt.l) userTags[idx].level = opt.l;
+          const lim = getLimits(userTags[idx].part, userTags[idx].name);
+          if (userTags[idx].level > lim.limit) userTags[idx].level = lim.limit;
           renderTagInputList(); 
         });
-      });
-      document.querySelectorAll('.tag-custom').forEach(inp => {
         inp.addEventListener('input', (e) => {
-          userTags[e.target.dataset.index].customName = e.target.value;
+          userTags[e.target.dataset.index].name = e.target.value;
           renderCardTags();
         });
       });
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
-          const opt = REFORGE_DB[userTags[idx].part].find(o => o.n === userTags[idx].name);
-          userTags[idx].level = Security.clampNumber(e.target.value, 1, opt.l, opt.m); 
+          const lim = getLimits(userTags[idx].part, userTags[idx].name);
+          // 입력한 숫자가 한돌 리미트를 넘지 않게 강제
+          userTags[idx].level = Security.clampNumber(e.target.value, 1, lim.limit, lim.max); 
           renderCardTags(); 
         });
       });
@@ -549,11 +550,11 @@
     }
 
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
-      userTags.push({ part: '양손/원거리 무기', name: '스매시 대미지', customName: '', level: 20 });
+      userTags.push({ part: '양손무기', name: '', level: 20 });
       renderTagInputList();
     });
 
-    // 한계돌파 색상 및 등급 차등 적용 렌더러
+    // 한계돌파 5단계 티어 색상/글로우 렌더러
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
@@ -563,40 +564,42 @@
       }
       
       userTags.forEach(t => {
-        let displayName = t.name.includes("사용자 지정") ? t.customName.trim() : t.name;
-        if(!displayName) return;
+        if(!t.name.trim()) return;
         
-        const opt = REFORGE_DB[t.part].find(o => o.n === t.name);
-        const maxLvl = opt.m;
-        const limitLvl = opt.l;
+        const limits = getLimits(t.part, t.name);
+        const maxLvl = limits.max;
+        const limitLvl = limits.limit;
         const level = parseInt(t.level);
 
         const span = document.createElement('span');
         span.className = "tag-base ";
         
-        let shortPart = t.part.split('/')[0].replace(' 무기류','무기').substring(0, 4);
+        // 부위명 축약 (예: 양손무기 -> 양손)
+        let shortPart = t.part.replace('무기','').replace('서리','').replace('스톤','');
+        if(shortPart === '') shortPart = t.part.substring(0,2);
 
         if (t.part === '에코스톤') {
           span.className += "tag-echo";
-          span.innerHTML = `<span class="opacity-70">[에코]</span> ${Security.sanitizeString(displayName)} <span class="font-black ml-0.5">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70">[에코]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
         } else if (level < maxLvl) {
           span.className += "tag-normal";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(displayName)} <span class="font-black ml-0.5">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
         } else if (level === maxLvl) {
           span.className += "tag-max font-bold";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(displayName)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
         } else {
-          // 한돌 로직: 한돌 한도(limitLvl - maxLvl)에 대한 초과 비율 계산하여 5단계 네온스케일 적용
+          // 한돌 로직: (현재레벨 - 상한레벨)이 한계돌파 갭에서 차지하는 비율로 5단계 티어 적용
           let diffMaxLimit = Math.max(limitLvl - maxLvl, 1);
-          let ratio = (level - maxLvl) / diffMaxLimit;
+          let over = level - maxLvl;
+          let ratio = over / diffMaxLimit;
           if (ratio > 1) ratio = 1;
           
           const tiers = [
             { bg: 'linear-gradient(135deg, #713f12, #a16207)', shadow: '0 0 6px rgba(234,179,8,0.5)', text: '#fef08a' }, // 연한 황금빛
-            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' },
-            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' },
-            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' },
-            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }  // 진홍빛 끝판왕
+            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' }, // 짙은 오렌지
+            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' }, // 레드
+            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' }, // 마젠타
+            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }  // 진홍빛 네온(Max)
           ];
           
           let tierIndex = Math.ceil(ratio * 5) - 1; 
@@ -610,7 +613,7 @@
           span.style.color = styleConfig.text;
           span.style.borderColor = styleConfig.text + '40';
           
-          span.innerHTML = `<span class="opacity-80">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(displayName)} <span class="font-black ml-0.5 text-[11px]">${level}</span> <span class="ml-0.5 text-[9px] drop-shadow-md">✨</span>`;
+          span.innerHTML = `<span class="opacity-80">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span> <span class="ml-0.5 text-[9px] drop-shadow-md">✨</span>`;
         }
         area.appendChild(span);
       });
@@ -654,6 +657,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      populateDatalist();
       
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
@@ -695,7 +699,7 @@
       imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        if (!file.type.startsWith('image/')) { alert('이미지 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
+        if (!file.type.startsWith('image/')) { alert('보안상의 이유로 이미지 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
         const reader = new FileReader();
         reader.onload = (event) => {
           const img = document.getElementById('previewImage');
@@ -704,6 +708,31 @@
           document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
         };
         reader.readAsDataURL(file);
+      });
+
+      document.getElementById('aiTransformBtn').addEventListener('click', () => {
+        const modal = document.getElementById('adModal');
+        const progress = document.getElementById('adProgress');
+        const countText = document.getElementById('adCountdownText');
+        modal.classList.remove('hidden');
+        progress.style.width = '0%';
+
+        let sec = 5;
+        const timer = setInterval(() => {
+          sec--;
+          countText.textContent = `남은 시간: ${sec}초`;
+          progress.style.width = `${((5 - sec) / 5) * 100}%`;
+          if (sec <= 0) {
+            clearInterval(timer);
+            modal.classList.add('hidden');
+            document.getElementById('animeOverlayBadge').classList.remove('hidden');
+            const preview = document.getElementById('previewImage');
+            if (!preview.classList.contains('hidden')) {
+              preview.style.filter = 'contrast(120%) saturate(130%) brightness(110%)';
+            }
+            alert('🎉 광고 시청 완료! AI 변환 일러스트가 적용되었습니다.');
+          }
+        }, 1000);
       });
 
       document.getElementById('saveCardBtn').addEventListener('click', () => {
@@ -730,6 +759,7 @@
             lucide.createIcons();
           }).catch(err => {
             console.error(err);
+            alert("이미지 저장 중 오류가 발생했습니다.");
             exportArea.classList.remove('exporting-mode');
             btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons();
           });
