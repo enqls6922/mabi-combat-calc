@@ -11,7 +11,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob:;
   ">
-  <title>에린 전투력 환산 계산기 (v5.1 Supabase)</title>
+  <title>에린 전투력 환산 계산기 (v5.2 Memory Cache)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,11 +110,11 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.1 DB</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.2 DB</span></h1>
         </div>
       </div>
       <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> DB 연결 확인 중
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> DB 데이터 1회 불러오는 중...
       </div>
     </div>
   </header>
@@ -274,7 +274,7 @@
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">Supabase DB(TCALC001)에서 부위별 세공 목록을 실시간으로 가져옵니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">DB 전체 데이터를 1회 로드하여 메모리에 보관하므로 변경 시 즉시 반영됩니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
@@ -366,13 +366,15 @@
 
   <script>
     // -------------------------------------------------------------
-    // 1. Supabase 클라이언트 초기화 (TCALC001 테이블 대상)
+    // 1. Supabase 클라이언트 초기화 및 메모리 전역 캐시
     // -------------------------------------------------------------
     const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-    let dbOptionsCache = {};
+    // 전체 DB 데이터를 메모리에 보관할 캐시 (부위별 그룹화)
+    let memoryReforgeMap = {};
+    let memoryPartList = [];
 
     const Security = {
       sanitizeString(str) {
@@ -407,65 +409,119 @@
     };
     const PIERCING_BASE_MULT = 0.03;
 
+    // 만약 DB 로드 실패 시 적용될 안전 폴백 목록
+    const FALLBACK_PARTS = ["양손 검", "한손 검", "모자/투구", "옷/갑옷", "장갑/건틀렛", "신발", "악세서리", "에코스톤"];
     const FALLBACK_OPTIONS = [
       { name: "스매시 대미지", max_level: 20, limit_level: 25 },
       { name: "최대 공격력", max_level: 20, limit_level: 25 },
       { name: "마법 공격력", max_level: 20, limit_level: 25 },
       { name: "랜스 차지 쿨타임 감소", max_level: 5, limit_level: 5 },
       { name: "크래시 샷 파편 대미지", max_level: 20, limit_level: 25 },
-      { name: "파이어볼 최대 대미지", max_level: 20, limit_level: 25 },
-      { name: "워터 캐논 최대 대미지", max_level: 20, limit_level: 25 },
       { name: "속성 (불/얼음/전기)", max_level: 6, limit_level: 6 }
     ];
 
-    const PART_LIST = ["양손 검", "랜스", "활", "스태프", "실린더", "듀얼건", "핸들", "너클", "수리검", "체인 블레이드", "한손 검", "한손 둔기", "한손 도끼", "원드", "모자/투구", "옷/갑옷", "장갑/건틀렛", "신발", "악세서리", "에코스톤"];
-
     let currentArcanaKey = 'elemental_knight';
     let userTags = [ 
-      { part: '양손 검', name: '스매시 대미지', level: 20, max: 20, limit: 25 },
-      { part: '모자/투구', name: '랜스 차지 쿨타임 감소', level: 5, max: 5, limit: 5 }
+      { part: '양손 검', name: '스매시 대미지', level: 20, max: 20, limit: 25 }
     ];
 
     // -------------------------------------------------------------
-    // 2. Supabase 데이터 조회 로직 (TCALC001 테이블 select('*'))
+    // 2. [핵심] 페이지 로드 시 TCALC001 전체 데이터 1회만 조회하여 메모리에 적재
     // -------------------------------------------------------------
-    async function loadReforgesFromSupabase(part) {
-      if (dbOptionsCache[part]) {
-        return dbOptionsCache[part];
-      }
-
+    async function initSupabaseDataOnce() {
       if (!supabaseClient) {
-        return FALLBACK_OPTIONS;
+        useFallbackData();
+        return;
       }
 
       try {
+        // 조건절 없이 TCALC001 테이블의 모든 열과 행을 단 1회 전건 조회
         const { data, error } = await supabaseClient
           .from('TCALC001')
-          .select('*')
-          .eq('part', part);
+          .select('*');
 
         if (error) {
-          console.error('TCALC001 조회 실패:', error);
+          console.error('TCALC001 전건 조회 실패:', error);
           throw error;
         }
 
         if (data && data.length > 0) {
-          const formatted = data.map(item => ({
-            name: item.name || item.option_name || item.opt_name || '옵션',
-            max_level: parseInt(item.max_level || item.max || 20),
-            limit_level: parseInt(item.limit_level || item.limit || item.max_level || 25)
-          }));
+          // 컬럼명 자동 감지 파서
+          const sample = data[0];
+          const keys = Object.keys(sample);
 
-          dbOptionsCache[part] = formatted;
-          updateDbStatus(true, `DB 연동 완료 (${part} ${formatted.length}개)`);
-          return formatted;
+          // 부위 컬럼 찾기 (part, 부위, 무기, 카테고리 등)
+          const partKey = keys.find(k => /part|부위|무기|분류|장비/i.test(k)) || keys[0];
+          // 세공명 컬럼 찾기 (name, 세공, 옵션, opt 등)
+          const nameKey = keys.find(k => k !== partKey && /name|세공|옵션|명|opt/i.test(k)) || keys[1];
+          // 레벨/한돌 컬럼 찾기
+          const levelKey = keys.find(k => k !== partKey && k !== nameKey && /level|레벨|범위|한돌/i.test(k));
+
+          memoryReforgeMap = {};
+
+          data.forEach(row => {
+            const rawPart = String(row[partKey] || '기타').trim();
+            const rawName = String(row[nameKey] || '옵션').trim();
+            
+            // 레벨 및 한돌 추출 (문자열 또는 숫자형 대응)
+            let maxLvl = 20;
+            let limitLvl = 25;
+
+            if (levelKey && row[levelKey]) {
+              const strVal = String(row[levelKey]);
+              // 예: "7~20 (한돌: 25)" 또는 "20"
+              const matchMax = strVal.match(/~(\d+)/) || strVal.match(/^(\d+)/);
+              if (matchMax) maxLvl = parseInt(matchMax[1]);
+
+              const matchLimit = strVal.match(/한돌\s*:\s*(\d+)/);
+              if (matchLimit) limitLvl = parseInt(matchLimit[1]);
+              else limitLvl = maxLvl;
+            } else {
+              // 개별 컬럼으로 존재할 경우
+              maxLvl = parseInt(row.max_level || row.max || 20);
+              limitLvl = parseInt(row.limit_level || row.limit || maxLvl);
+            }
+
+            if (!memoryReforgeMap[rawPart]) {
+              memoryReforgeMap[rawPart] = [];
+            }
+
+            memoryReforgeMap[rawPart].push({
+              name: rawName,
+              max_level: maxLvl,
+              limit_level: limitLvl
+            });
+          });
+
+          memoryPartList = Object.keys(memoryReforgeMap);
+          if (memoryPartList.length === 0) throw new Error('데이터 파싱 결과가 비어있음');
+
+          // 초기 태그의 부위가 목록에 없으면 첫 번째 부위로 보정
+          if (!memoryReforgeMap[userTags[0].part]) {
+            userTags[0].part = memoryPartList[0];
+            userTags[0].name = memoryReforgeMap[memoryPartList[0]][0].name;
+            userTags[0].max = memoryReforgeMap[memoryPartList[0]][0].max_level;
+            userTags[0].limit = memoryReforgeMap[memoryPartList[0]][0].limit_level;
+            userTags[0].level = userTags[0].max;
+          }
+
+          updateDbStatus(true, `DB 1회 전건 로드 완료 (총 ${data.length}개 옵션 보관 중)`);
+          return;
         }
       } catch (err) {
-        console.warn('Supabase 연동 실패, 기본 로컬 데이터 적용:', err);
+        console.warn('전체 조회 실패로 기본 폴백 데이터를 사용합니다:', err);
       }
 
-      updateDbStatus(false, '로컬 기본 데이터 모드');
-      return FALLBACK_OPTIONS;
+      useFallbackData();
+    }
+
+    function useFallbackData() {
+      memoryPartList = FALLBACK_PARTS;
+      memoryReforgeMap = {};
+      FALLBACK_PARTS.forEach(p => {
+        memoryReforgeMap[p] = FALLBACK_OPTIONS;
+      });
+      updateDbStatus(false, '로컬 기본 데이터 모드 작동');
     }
 
     function updateDbStatus(isSuccess, text) {
@@ -490,9 +546,9 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링 및 이벤트 연결
+    // 3. UI 렌더링 (메모리 캐시에서 즉시 가져오므로 딜레이 없음)
     // -------------------------------------------------------------
-    async function renderTagInputList() {
+    function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
 
@@ -502,11 +558,11 @@
         return;
       }
 
-      for (let index = 0; index < userTags.length; index++) {
-        const item = userTags[index];
-        const options = await loadReforgesFromSupabase(item.part);
-        
+      userTags.forEach((item, index) => {
+        // 메모리에 보관된 데이터에서 해당 부위의 옵션 목록 추출
+        const options = memoryReforgeMap[item.part] || FALLBACK_OPTIONS;
         let currentOpt = options.find(o => o.name === item.name) || options[0] || { name: item.name, max_level: 20, limit_level: 25 };
+        
         item.max = currentOpt.max_level;
         item.limit = currentOpt.limit_level;
 
@@ -515,16 +571,19 @@
         
         row.innerHTML = `
           <div class="flex flex-nowrap items-center gap-2 w-full">
+            <!-- 메모리 부위 목록 바인딩 -->
             <select class="tag-part w-28 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
-              ${PART_LIST.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
+              ${memoryPartList.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
             
+            <!-- 메모리 세공 옵션 바인딩 -->
             <div class="flex-1 min-w-[120px]">
               <select class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none cursor-pointer" data-index="${index}">
                 ${options.map(o => `<option value="${Security.sanitizeString(o.name)}" ${o.name === item.name ? 'selected' : ''}>${Security.sanitizeString(o.name)}</option>`).join('')}
               </select>
             </div>
             
+            <!-- 레벨 및 삭제 버튼 일직선 정렬 -->
             <div class="w-16 shrink-0 flex items-center gap-1">
               <input type="number" min="1" max="${item.limit}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
               <span class="text-slate-400">Lv</span>
@@ -538,7 +597,7 @@
           </div>
         `;
         container.appendChild(row);
-      }
+      });
 
       lucide.createIcons();
       attachTagEvents();
@@ -546,14 +605,15 @@
     }
 
     function attachTagEvents() {
+      // 부위 변경 시 메모리에서 즉시 옵션 교체
       document.querySelectorAll('.tag-part').forEach(sel => {
-        sel.addEventListener('change', async (e) => { 
+        sel.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
           const newPart = e.target.value;
           userTags[idx].part = newPart;
           
-          const options = await loadReforgesFromSupabase(newPart);
-          const firstOpt = options[0] || { name: '스매시 대미지', max_level: 20, limit_level: 25 };
+          const options = memoryReforgeMap[newPart] || FALLBACK_OPTIONS;
+          const firstOpt = options[0] || { name: '옵션', max_level: 20, limit_level: 25 };
           
           userTags[idx].name = firstOpt.name;
           userTags[idx].max = firstOpt.max_level;
@@ -564,13 +624,14 @@
         });
       });
 
+      // 세공명 변경 시 상한선 즉시 갱신
       document.querySelectorAll('.tag-name').forEach(sel => {
-        sel.addEventListener('change', async (e) => { 
+        sel.addEventListener('change', (e) => { 
           const idx = e.target.dataset.index;
           const selectedName = e.target.value;
           userTags[idx].name = selectedName;
           
-          const options = await loadReforgesFromSupabase(userTags[idx].part);
+          const options = memoryReforgeMap[userTags[idx].part] || FALLBACK_OPTIONS;
           const opt = options.find(o => o.name === selectedName) || { max_level: 20, limit_level: 25 };
           
           userTags[idx].max = opt.max_level;
@@ -582,6 +643,7 @@
         });
       });
 
+      // 레벨 입력 (한돌 수치 강제 제한)
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
@@ -596,6 +658,7 @@
         });
       });
 
+      // 삭제
       document.querySelectorAll('.remove-tag-btn').forEach(btn => {
         btn.addEventListener('click', (e) => { 
           userTags.splice(e.currentTarget.dataset.index, 1); 
@@ -605,10 +668,19 @@
     }
 
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
-      userTags.push({ part: '양손 검', name: '스매시 대미지', level: 20, max: 20, limit: 25 });
+      const defaultPart = memoryPartList[0] || '양손 검';
+      const defaultOpt = (memoryReforgeMap[defaultPart] && memoryReforgeMap[defaultPart][0]) || { name: '스매시 대미지', max_level: 20, limit_level: 25 };
+      userTags.push({ 
+        part: defaultPart, 
+        name: defaultOpt.name, 
+        level: defaultOpt.max_level, 
+        max: defaultOpt.max_level, 
+        limit: defaultOpt.limit_level 
+      });
       renderTagInputList();
     });
 
+    // 스펙 카드 하단 한계돌파 네온 태그 렌더러
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
@@ -710,10 +782,14 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
       applyTheme(currentArcanaKey); 
 
+      // 1. 페이지 로드 시점에 Supabase TCALC001 전체 데이터 1회만 조회
+      await initSupabaseDataOnce();
+
+      // 2. 아르카나 선택 변경
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -732,6 +808,7 @@
         lucide.createIcons();
       });
 
+      // 무기 타입 선택 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -739,6 +816,7 @@
         calculateTotal();
       });
 
+      // 숫자 입력칸 블러 시 0 자동 보정
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
@@ -776,6 +854,7 @@
         reader.readAsDataURL(file);
       });
 
+      // 스펙 카드 저장
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -807,6 +886,7 @@
         }, 100);
       });
 
+      // 3. 적재된 메모리 데이터를 이용해 UI 렌더링
       renderTagInputList();
       calculateTotal();
     });
