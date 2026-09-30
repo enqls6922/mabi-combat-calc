@@ -11,7 +11,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob:;
   ">
-  <title>에린 전투력 환산 계산기 (v5.6 Searchable)</title>
+  <title>에린 전투력 환산 계산기 (v5.7)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,7 +110,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.6</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.7</span></h1>
         </div>
       </div>
       <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
@@ -267,14 +267,14 @@
         </div>
       </div>
 
-      <!-- 3. Supabase 연동 세공 리스트 등록 (검색형 콤보박스 적용) -->
+      <!-- 3. Supabase 연동 세공 리스트 등록 (자체 드롭다운 검색창 탑재) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">세공 내용 입력창을 클릭하거나 타이핑하여 빠르게 옵션을 검색·선택할 수 있습니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">상자를 클릭하면 검색창이 포함된 전체 세공 목록이 펼쳐집니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
@@ -412,7 +412,7 @@
     let userTags = [];
 
     // -------------------------------------------------------------
-    // 2. TCALC001 전체 데이터 1회 전건 로드 (단일 SELECT 쿼리)
+    // 2. TCALC001 전체 데이터 1회 로드
     // -------------------------------------------------------------
     async function initSupabaseDataOnce() {
       if (!supabaseClient) {
@@ -438,8 +438,6 @@
           updateDbStatus(false, `조회 실패: ${error.message}`);
           return;
         }
-
-        console.log('[Supabase] 가져온 총 행 수:', data ? data.length : 0);
 
         if (data && data.length > 0) {
           memoryReforgeMap = {};
@@ -493,7 +491,7 @@
             renderTagInputList();
           }
 
-          updateDbStatus(true, `DB 연동 완료 (총 ${data.length}개 세공 로드됨)`);
+          updateDbStatus(true, `DB 연동 완료 (총 ${data.length}개 옵션 로드됨)`);
         } else {
           updateDbStatus(false, 'TCALC001 테이블에 데이터가 없습니다 (0건)');
         }
@@ -525,7 +523,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링 (검색형 콤보박스: Input + Datalist 적용)
+    // 3. UI 렌더링 (커스텀 검색 드롭다운 UI 탑재)
     // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
@@ -553,32 +551,44 @@
         item.limit_max = currentOpt.limit_max_level;
 
         const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
-        const datalistId = `datalist_reforge_${index}`;
 
         const row = document.createElement('div');
         row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
         
         row.innerHTML = `
-          <!-- 해당 항목 전용 자동완성 Datalist -->
-          <datalist id="${datalistId}">
-            ${options.map(o => `<option value="${Security.sanitizeString(o.name)}"></option>`).join('')}
-          </datalist>
-
-          <div class="flex flex-nowrap items-center gap-2 w-full">
+          <div class="flex flex-nowrap items-center gap-2 w-full relative">
             <!-- 1. 장비 타입 (EQ_TYPE) 드롭다운 -->
             <select class="tag-part w-32 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
               ${memoryPartList.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
             
-            <!-- 2. 세공 내용 검색형 콤보박스 (타이핑 검색 및 클릭 드롭다운 지원) -->
+            <!-- 2. 커스텀 검색 드롭다운 버튼 -->
             <div class="flex-1 min-w-[120px] relative">
-              <input type="text" 
-                list="${datalistId}" 
-                value="${Security.sanitizeString(item.name)}" 
-                placeholder="세공명 검색 또는 선택"
-                class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none"
-                data-index="${index}"
-                autocomplete="off">
+              <button type="button" 
+                class="dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
+                data-index="${index}">
+                <span class="truncate">${Security.sanitizeString(item.name || '옵션 선택')}</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
+              </button>
+
+              <!-- 펼쳐지는 드롭다운 메뉴 (검색창 내장) -->
+              <div class="dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+                <div class="relative mb-2">
+                  <input type="text" 
+                    placeholder="세공명 검색..." 
+                    class="dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
+                    data-index="${index}">
+                </div>
+                <div class="dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
+                  ${options.map(o => `
+                    <div class="dropdown-item px-2.5 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors"
+                         data-name="${Security.sanitizeString(o.name)}">
+                      <span>${Security.sanitizeString(o.name)}</span>
+                      <span class="text-[10px] text-slate-500">${o.max_level}Lv${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
             </div>
             
             <!-- 3. 세공 레벨 입력칸 -->
@@ -627,21 +637,57 @@
         });
       });
 
-      // 2. 검색형 세공 콤보박스 클릭 및 입력 이벤트
-      document.querySelectorAll('.tag-name').forEach(inp => {
-        // 클릭 시 바로 목록 열기 (showPicker 지원 브라우저)
-        inp.addEventListener('focus', function() {
-          if (typeof this.showPicker === 'function') {
-            try { this.showPicker(); } catch(err) {}
+      // 2. 커스텀 드롭다운 토글 및 검색 기능
+      document.querySelectorAll('.dropdown-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = btn.dataset.index;
+          const menu = document.querySelector(`.dropdown-menu[data-index="${idx}"]`);
+          const isHidden = menu.classList.contains('hidden');
+          
+          // 다른 열려있는 메뉴 닫기
+          document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+
+          if (isHidden) {
+            menu.classList.remove('hidden');
+            const searchInput = menu.querySelector('.dropdown-search');
+            searchInput.value = '';
+            searchInput.focus();
+            // 전체 아이템 보이기
+            menu.querySelectorAll('.dropdown-item').forEach(it => it.classList.remove('hidden'));
           }
         });
+      });
 
-        // 사용자가 검색하여 옵션을 고르거나 입력을 마쳤을 때
-        const handleOptionChange = (e) => {
-          const idx = e.target.dataset.index;
-          const selectedName = e.target.value.trim();
+      // 드롭다운 검색창 필터링
+      document.querySelectorAll('.dropdown-search').forEach(input => {
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('input', (e) => {
+          const idx = input.dataset.index;
+          const query = e.target.value.toLowerCase().trim();
+          const menu = document.querySelector(`.dropdown-menu[data-index="${idx}"]`);
+          const items = menu.querySelectorAll('.dropdown-item');
+
+          items.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            if (name.includes(query)) {
+              item.classList.remove('hidden');
+            } else {
+              item.classList.add('hidden');
+            }
+          });
+        });
+      });
+
+      // 드롭다운 아이템 클릭 시 선택
+      document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menu = item.closest('.dropdown-menu');
+          const idx = menu.dataset.index;
+          const selectedName = item.dataset.name;
+
           userTags[idx].name = selectedName;
-          
           const options = memoryReforgeMap[userTags[idx].part] || [];
           const opt = options.find(o => o.name === selectedName);
 
@@ -650,22 +696,15 @@
             userTags[idx].max = opt.max_level;
             userTags[idx].limit_yn = opt.limit_yn;
             userTags[idx].limit_max = opt.limit_max_level;
-            
+
             const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
             if (userTags[idx].level > allowedMax) {
               userTags[idx].level = allowedMax;
             }
           }
-          renderCardTags();
-        };
 
-        inp.addEventListener('change', (e) => {
-          handleOptionChange(e);
-          renderTagInputList(); // 하단 Max/한돌 텍스트 갱신을 위해 재렌더링
-        });
-
-        inp.addEventListener('input', (e) => {
-          handleOptionChange(e);
+          menu.classList.add('hidden');
+          renderTagInputList();
         });
       });
 
@@ -695,6 +734,11 @@
         });
       });
     }
+
+    // 바깥 클릭 시 모든 드롭다운 닫기
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+    });
 
     document.getElementById('addReforgeBtn').addEventListener('click', () => {
       if (memoryPartList.length === 0) return;
@@ -889,7 +933,7 @@
         reader.readAsDataURL(file);
       });
 
-      // 스펙 카드 이미지 저장
+      // 스펙 카드 저장
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
