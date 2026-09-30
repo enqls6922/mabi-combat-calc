@@ -28,6 +28,7 @@
           colors: {
             theme: {
               main: 'var(--theme-main)',
+              dark: 'var(--theme-dark)',
               light: 'var(--theme-light)',
               bg: 'var(--theme-bg)',
               border: 'var(--theme-border)',
@@ -44,6 +45,7 @@
     
     :root {
       --theme-main: #f97316; 
+      --theme-dark: #c2410c; /* 아이콘 전용 짙은 컬러 */
       --theme-light: #fed7aa;
       --theme-bg: rgba(249, 115, 22, 0.15);
       --theme-border: rgba(249, 115, 22, 0.35);
@@ -60,6 +62,13 @@
       transition: all 0.4s ease;
     }
     
+    /* 섹션 헤더 아이콘 전용 짙은 스타일 */
+    .section-icon {
+      color: var(--theme-dark);
+      filter: drop-shadow(0 0 1px var(--theme-dark));
+      transition: color 0.4s ease, filter 0.4s ease;
+    }
+
     select {
       appearance: none;
       -webkit-appearance: none;
@@ -137,7 +146,7 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg text-theme-main transition-all duration-500">
+        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg section-icon transition-all duration-500">
           <i data-lucide="shield-check" class="w-6 h-6"></i>
         </div>
         <div>
@@ -174,7 +183,7 @@
       <!-- 1. 캐릭터 정보 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
         <h2 class="text-sm font-semibold theme-gradient-text mb-4 flex items-center gap-2">
-          <i data-lucide="swords" class="w-4 h-4 text-theme-main transition-colors duration-500"></i> 1. 캐릭터 & 아르카나 정보
+          <i data-lucide="swords" class="w-4 h-4 section-icon"></i> 1. 캐릭터 & 아르카나 정보
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
@@ -211,7 +220,7 @@
       <!-- 2. 베이스 스탯 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-theme-main transition-colors duration-500"></i> 2. 노도핑 전투 베이스 스펙
+          <i data-lucide="activity" class="w-4 h-4 section-icon"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -374,7 +383,7 @@
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-              <i data-lucide="sparkles" class="w-4 h-4 text-theme-main transition-colors duration-500"></i> 3. 장비 세공 및 에코스톤 등록
+              <i data-lucide="sparkles" class="w-4 h-4 section-icon"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
             <p class="text-[11px] text-slate-400 mt-1">장비 타입과 세공 내용 모두 클릭하여 검색 및 선택할 수 있습니다.</p>
           </div>
@@ -388,7 +397,7 @@
       <!-- 4. 캐릭터 외형 등록 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-          <i data-lucide="image" class="w-4 h-4 text-theme-main transition-colors duration-500"></i> 4. 캐릭터 외형 등록 (선택)
+          <i data-lucide="image" class="w-4 h-4 section-icon"></i> 4. 캐릭터 외형 등록 (선택)
         </h2>
         <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
@@ -431,7 +440,7 @@
         <!-- [구도 & 줌 조작 패널] -->
         <div id="imageControlPanel" class="hidden bg-slate-950/80 border border-slate-800 rounded-xl p-3 mb-4 space-y-2">
           <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium">
-            <span class="flex items-center gap-1.5"><i data-lucide="crop" class="w-3.5 h-3.5 text-theme-main"></i> 캐릭터 구도 미세조절</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="crop" class="w-3.5 h-3.5 section-icon"></i> 캐릭터 구도 미세조절</span>
             <button id="resetImageControlBtn" class="text-[10px] text-slate-400 hover:text-theme-light flex items-center gap-1 transition">
               <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 초기화
             </button>
@@ -584,17 +593,17 @@
       }
     };
 
-    // 각 아르카나 테마별 색상 및 그라디언트(from, to) 정의
+    // 각 아르카나 테마별 색상: main, dark(아이콘 전용 짙은색), light, from, to
     const THEMES = {
-      elemental_knight:    { main: '#f97316', light: '#fed7aa', from: '#fb923c', to: '#ea580c', stat: '최대 공격력' },
-      dark_mage:           { main: '#a855f7', light: '#e9d5ff', from: '#c084fc', to: '#7e22ce', stat: '마법 공격력' },
-      alchemic_stinger:    { main: '#eab308', light: '#fef08a', from: '#facc15', to: '#ca8a04', stat: '최대 공격력' },
-      sacred_guard:        { main: '#ea580c', light: '#ffedd5', from: '#f97316', to: '#c2410c', stat: '최대 공격력' },
-      blader:              { main: '#06b6d4', light: '#cffafe', from: '#22d3ee', to: '#0891b2', stat: '최대 공격력' },
-      variable_gunner:     { main: '#3b82f6', light: '#dbeafe', from: '#60a5fa', to: '#1d4ed8', stat: '최대 공격력' },
-      forbidden_alchemist: { main: '#ca8a04', light: '#fef08a', from: '#eab308', to: '#a16207', stat: '연금술 대미지' },
-      melodic_puppeteer:   { main: '#ec4899', light: '#fce7f3', from: '#f472b6', to: '#be185d', stat: '최대 공격력' },
-      fury_fighter:        { main: '#dc2626', light: '#fee2e2', from: '#ef4444', to: '#b91c1c', stat: '최대 공격력' }
+      elemental_knight:    { main: '#f97316', dark: '#c2410c', light: '#fed7aa', from: '#fb923c', to: '#ea580c', stat: '최대 공격력' },
+      dark_mage:           { main: '#a855f7', dark: '#6b21a8', light: '#e9d5ff', from: '#c084fc', to: '#7e22ce', stat: '마법 공격력' },
+      alchemic_stinger:    { main: '#eab308', dark: '#a16207', light: '#fef08a', from: '#facc15', to: '#ca8a04', stat: '최대 공격력' },
+      sacred_guard:        { main: '#ea580c', dark: '#9a3412', light: '#ffedd5', from: '#f97316', to: '#c2410c', stat: '최대 공격력' },
+      blader:              { main: '#06b6d4', dark: '#0e7490', light: '#cffafe', from: '#22d3ee', to: '#0891b2', stat: '최대 공격력' },
+      variable_gunner:     { main: '#3b82f6', dark: '#1d4ed8', light: '#dbeafe', from: '#60a5fa', to: '#2563eb', stat: '최대 공격력' },
+      forbidden_alchemist: { main: '#ca8a04', dark: '#854d0e', light: '#fef08a', from: '#eab308', to: '#a16207', stat: '연금술 대미지' },
+      melodic_puppeteer:   { main: '#ec4899', dark: '#be185d', light: '#fce7f3', from: '#f472b6', to: '#db2777', stat: '최대 공격력' },
+      fury_fighter:        { main: '#dc2626', dark: '#991b1b', light: '#fee2e2', from: '#ef4444', to: '#b91c1c', stat: '최대 공격력' }
     };
 
     const R_GRADE_DATA = {
@@ -685,11 +694,11 @@
       }
     }
 
-    // 아르카나 변경 시 타이틀 텍스트 그라디언트 색상까지 함께 동기화
     function applyTheme(key) {
       const t = THEMES[key] || THEMES.elemental_knight;
       const root = document.documentElement;
       root.style.setProperty('--theme-main', t.main);
+      root.style.setProperty('--theme-dark', t.dark);
       root.style.setProperty('--theme-light', t.light);
       root.style.setProperty('--theme-from', t.from);
       root.style.setProperty('--theme-to', t.to);
@@ -1241,7 +1250,7 @@
         if(currentArcanaKey === 'forbidden_alchemist') iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
 
         const arcName = e.target.options[e.target.selectedIndex].text;
-        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)">${iconHtml}</div><span class="text-xs font-semibold text-slate-400">${arcName}</span>`;
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-dark)">${iconHtml}</div><span class="text-xs font-semibold text-slate-400">${arcName}</span>`;
         lucide.createIcons();
       });
 
