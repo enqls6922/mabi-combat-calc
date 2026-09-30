@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
-  <title>에린 전투력 환산 계산기 (v1.0)</title>
+  <title>에린 전투력 환산 계산기 (v3.0)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -47,10 +47,12 @@
       transition: all 0.4s ease;
     }
     
-    select {
+    select, input[list] {
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
+    }
+    select {
       background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
       background-position: right 12px center;
@@ -60,23 +62,34 @@
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     
     #cardExportArea { position: relative; }
-    .image-ratio-container {
-      aspect-ratio: 3 / 4; 
-      width: 100%;
-      max-height: 400px;
-    }
+    .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
 
-    .exporting-mode {
-      width: 400px !important;
-      border-radius: 0 !important; 
-    }
+    .exporting-mode { width: 400px !important; border-radius: 0 !important; }
     .exporting-mode .theme-gradient-text {
       background: none !important;
       -webkit-text-fill-color: var(--theme-main) !important;
       color: var(--theme-main) !important;
     }
-    .exporting-mode .blur-3xl {
-      display: none !important;
+    .exporting-mode .blur-3xl { display: none !important; }
+
+    /* 태그 기본 스타일 */
+    .tag-normal {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+    }
+    /* 상한 레벨 (예: 20렙) 도달 시 */
+    .tag-max {
+      background: linear-gradient(135deg, #2e1065, #4c1d95);
+      border: 1px solid #a855f7;
+      color: #e9d5ff;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+    }
+    /* 에코스톤 전용 색상 */
+    .tag-echo {
+      background: linear-gradient(135deg, #064e3b, #065f46);
+      border: 1px solid #34d399;
+      color: #d1fae5;
     }
   </style>
 </head>
@@ -89,7 +102,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v2.0</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v3.0</span></h1>
         </div>
       </div>
     </div>
@@ -99,7 +112,7 @@
     
     <section class="lg:col-span-7 space-y-6">
       
-      <!-- 1. 캐릭터 & 아르카나 정보 -->
+      <!-- 1. 캐릭터 정보 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
         <h2 class="text-sm font-semibold theme-gradient-text mb-4 flex items-center gap-2">
           <i data-lucide="swords" class="w-4 h-4 text-theme-main"></i> 1. 캐릭터 & 아르카나 정보
@@ -136,16 +149,15 @@
         </div>
       </div>
 
-      <!-- 2. 전투 베이스 -->
+      <!-- 2. 깡스탯 입력 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
-        
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력</label>
-            <input type="number" id="baseStatInput" value="1500" min="0" max="5000"
+            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력 (세공포함)</label>
+            <input type="number" id="baseStatInput" value="1500" min="0" max="8000"
               class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-10 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
           </div>
           <div>
@@ -217,63 +229,54 @@
             <div>
               <label class="block text-xs text-slate-400 mb-1">아르카나 댐증 (%)</label>
               <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
               <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리상한 %)</label>
               <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
               <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">토템/농장 크뎀 (%)</label>
               <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
           </div>
         </div>
-        <p id="rGradeInfoText" class="text-[11px] text-emerald-400 text-right mt-1">현재 적용 크리 기댓값 환산 중...</p>
       </div>
 
-      <!-- 3. 장비 세공 -->
+      <!-- 3. 자유 입력 세공 리스트 (점수 반영 X, 스펙 자랑용 한돌 태그) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-              <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 옵션
+              <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
+            <p class="text-[11px] text-slate-400 mt-1">자랑하고 싶은 한돌 세공이나 유틸 옵션을 직접 입력하세요. (한돌 시 태그에 특수 이펙트가 붙습니다!)</p>
           </div>
-          <button id="addReforgeBtn" class="flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
-            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 세공 추가
+          <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
           </button>
         </div>
         <div id="reforgeListContainer" class="space-y-3"></div>
+        <!-- 자동완성 데이터리스트 (JS에서 동적 생성됨) -->
+        <datalist id="commonReforges"></datalist>
       </div>
 
-      <!-- 4. 에코스톤 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-        <div class="flex flex-col">
-          <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-            <i data-lucide="gem" class="w-4 h-4 text-theme-main"></i> 4. 에코스톤 각성 효과 (최대 3개)
-          </h2>
-          <p class="text-[11px] text-slate-400 mt-1">장비 세공과 동일한 옵션이 있을 경우 <span class="text-theme-main font-bold">더 높은 레벨 하나만 적용</span>됩니다.</p>
-        </div>
-        <div id="echostoneListContainer" class="space-y-3"></div>
-      </div>
-
-      <!-- 5. 캐릭터 외형 등록 -->
+      <!-- 4. 캐릭터 외형 등록 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
-          <i data-lucide="image" class="w-4 h-4 text-theme-main"></i> 5. 캐릭터 외형 등록 (선택)
+          <i data-lucide="image" class="w-4 h-4 text-theme-main"></i> 4. 캐릭터 외형 등록 (선택)
         </h2>
         <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
@@ -284,7 +287,7 @@
 
     </section>
 
-    <!-- 우측: 환산 결과 카드 -->
+    <!-- 우측: 결과 스펙 카드 -->
     <section class="lg:col-span-5 space-y-6">
       
       <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-colors duration-500" id="cardExportArea">
@@ -292,7 +295,7 @@
 
         <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
           <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-600 text-slate-300">
-            에린 표준 환산 기준
+            에린 표준 깡체급 환산 기준
           </span>
           <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
         </div>
@@ -315,8 +318,8 @@
           </div>
         </div>
 
-        <!-- 합연산 기반 환산 스탯 구조 -->
-        <div class="space-y-2 text-xs border-t border-slate-800 pt-3">
+        <!-- 깡스탯 기반 점수 구조 브레이크다운 -->
+        <div class="space-y-2 text-xs border-t border-slate-800 pt-3 mb-4">
           <div class="flex justify-between text-slate-400">
             <span>노도핑 순수 베이스 스탯</span>
             <span id="breakdownBase" class="text-slate-200 font-semibold">0</span>
@@ -329,9 +332,13 @@
             <span>크뎀/보뎀/아뎀 환산치</span>
             <span id="breakdownMult" class="text-sky-400 font-semibold">+ 0</span>
           </div>
-          <div class="flex justify-between text-slate-400">
-            <span>세공/에코스톤 환산치</span>
-            <span id="breakdownReforge" class="text-emerald-400 font-semibold">+ 0</span>
+        </div>
+
+        <!-- 세공 Flex (자랑용 태그) 영역 -->
+        <div class="border-t border-slate-800/80 pt-3">
+          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-2">Equipment Options</span>
+          <div id="cardTagsArea" class="flex flex-wrap gap-1.5">
+            <!-- JS 렌더링 태그 영역 -->
           </div>
         </div>
       </div>
@@ -345,16 +352,10 @@
         </button>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
-        <h3 class="text-xs font-bold theme-gradient-text uppercase tracking-wider mb-3 flex items-center gap-1.5">
-          <i data-lucide="trending-up" class="w-4 h-4 text-theme-main"></i> 옵션 1단위 가치 리포트
-        </h3>
-        <div class="space-y-2.5 text-xs" id="efficiencyReport"></div>
-      </div>
-
     </section>
   </main>
 
+  <!-- 광고 모달 생략(기존 동일) -->
   <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4">
       <div class="w-12 h-12 bg-theme-bg text-theme-main rounded-full flex items-center justify-center mx-auto border border-theme-border">
@@ -387,15 +388,47 @@
     };
 
     const THEMES = {
-      elemental_knight:    { main: '#f97316', light: '#fed7aa', bg: 'rgba(249, 115, 22, 0.15)', border: 'rgba(249, 115, 22, 0.35)', from: '#fb923c', to: '#c2410c' },
-      dark_mage:           { main: '#a855f7', light: '#e9d5ff', bg: 'rgba(168, 85, 247, 0.15)', border: 'rgba(168, 85, 247, 0.35)', from: '#c084fc', to: '#7e22ce' },
-      alchemic_stinger:    { main: '#eab308', light: '#fef08a', bg: 'rgba(234, 179, 8, 0.15)', border: 'rgba(234, 179, 8, 0.35)', from: '#facc15', to: '#a16207' },
-      sacred_guard:        { main: '#ea580c', light: '#ffedd5', bg: 'rgba(234, 88, 12, 0.15)', border: 'rgba(234, 88, 12, 0.35)', from: '#f97316', to: '#9a3412' },
-      blader:              { main: '#06b6d4', light: '#cffafe', bg: 'rgba(6, 182, 212, 0.15)', border: 'rgba(6, 182, 212, 0.35)', from: '#22d3ee', to: '#0e7490' },
-      variable_gunner:     { main: '#3b82f6', light: '#dbeafe', bg: 'rgba(59, 130, 246, 0.15)', border: 'rgba(59, 130, 246, 0.35)', from: '#60a5fa', to: '#1d4ed8' },
-      forbidden_alchemist: { main: '#ca8a04', light: '#fef08a', bg: 'rgba(202, 138, 4, 0.15)', border: 'rgba(202, 138, 4, 0.35)', from: '#eab308', to: '#854d0e' },
-      melodic_puppeteer:   { main: '#ec4899', light: '#fce7f3', bg: 'rgba(236, 72, 153, 0.15)', border: 'rgba(236, 72, 153, 0.35)', from: '#f472b6', to: '#be185d' },
-      fury_fighter:        { main: '#dc2626', light: '#fee2e2', bg: 'rgba(220, 38, 38, 0.15)', border: 'rgba(220, 38, 38, 0.35)', from: '#ef4444', to: '#991b1b' }
+      elemental_knight:    { main: '#f97316', light: '#fed7aa', stat: '최대 공격력' },
+      dark_mage:           { main: '#a855f7', light: '#e9d5ff', stat: '마법 공격력' },
+      alchemic_stinger:    { main: '#eab308', light: '#fef08a', stat: '최대 공격력' },
+      sacred_guard:        { main: '#ea580c', light: '#ffedd5', stat: '최대 공격력' },
+      blader:              { main: '#06b6d4', light: '#cffafe', stat: '최대 공격력' },
+      variable_gunner:     { main: '#3b82f6', light: '#dbeafe', stat: '최대 공격력' },
+      forbidden_alchemist: { main: '#ca8a04', light: '#fef08a', stat: '연금술 대미지' },
+      melodic_puppeteer:   { main: '#ec4899', light: '#fce7f3', stat: '최대 공격력' },
+      fury_fighter:        { main: '#dc2626', light: '#fee2e2', stat: '최대 공격력' }
+    };
+
+    const R_GRADE_DATA = {
+      two_handed: { 0: 0, 1: 0.06, 2: 0.16, 3: 0.26, 4: 0.38, 5: 0.50, 6: 0.62, 7: 0.74, 8: 0.89 },
+      one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
+    };
+    const PIERCING_BASE_MULT = 0.03; // 피어싱 1당 3% 체급 환산
+
+    let currentArcanaKey = 'elemental_knight';
+    let userTags = [ { part: '무기', name: '스매시 대미지', level: 20 } ];
+
+    // [마비노기 세공 상한선 DB]
+    // 목록에 없는 것을 입력하면 기본 상한 20레벨로 스마트하게 처리됨
+    const REFORGE_MAX_DB = {
+      // 5레벨 한계 특수 세공들
+      "랜스 차지 쿨타임 감소": 5,
+      "크래시 샷 최대 파편 수": 5,
+      "공격 속도 증가": 5, "캐스팅 속도 증가": 5, "이동 속도 증가": 5,
+      "방패 보호": 5, "방패 마법 보호": 5,
+      // 6레벨 한계 속성 세공
+      "전기 속성": 6, "불 속성": 6, "얼음 속성": 6,
+      // 10레벨 한계
+      "마법 보호": 10, "보호": 10,
+      // 기타 메이저 스킬들 (자동완성 추천을 위해 등록해둠, 기본 20한계)
+      "스매시 대미지": 20, "윈드밀 대미지": 20, "다운 어택 대미지": 20, "파이널 히트 쿨타임 감소": 20, "파이널 히트 지속 시간": 20,
+      "파이어볼 최대 대미지": 20, "라이트닝 마스터리 대미지": 20, "파이어 마스터리 대미지": 20, "아이스 마스터리 대미지": 20, "헤일스톰 최대 대미지": 20,
+      "매그넘 샷 대미지": 20, "크래시 샷 파편 대미지": 20, "유효 사거리": 20, "보우 마스터리 최대 대미지": 20,
+      "워터 캐논 최대 대미지": 20, "플레이머 최대 대미지": 20, "히트 버스터 최대 대미지": 20,
+      "랜스 차지 주 목표물 대미지": 20, "랜스 차지 마상 돌진 대미지": 20, "랜스 차지 대미지": 20,
+      "듀얼건 최대 대미지": 20, "불릿 스톰 1발당 대미지 배율": 20, "슈팅 러쉬 대미지": 20, "크로스 버스터 대미지 배율": 20, "프렌지 지속 시간": 20,
+      "광란의 질주 대미지": 20, "질투의 화신 대미지": 20, "질투의 화신 공격 범위": 20, "마리오네트 최대 대미지": 20,
+      "최대 공격력": 20, "마법 공격력": 20, "컴뱃 마스터리 최대 대미지": 20, "체력": 20, "지력": 20, "솜씨": 20, "의지": 20, "행운": 20
     };
 
     function applyTheme(key) {
@@ -403,318 +436,154 @@
       const root = document.documentElement;
       root.style.setProperty('--theme-main', t.main);
       root.style.setProperty('--theme-light', t.light);
-      root.style.setProperty('--theme-bg', t.bg);
-      root.style.setProperty('--theme-border', t.border);
-      root.style.setProperty('--theme-from', t.from);
-      root.style.setProperty('--theme-to', t.to);
+      document.getElementById('baseStatLabel').textContent = `노도핑 ${t.stat} (스탯세공 포함 직접 기입)`;
+      document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
     }
 
-    const R_GRADE_DATA = {
-      two_handed: { 0: 0, 1: 0.06, 2: 0.16, 3: 0.26, 4: 0.38, 5: 0.50, 6: 0.62, 7: 0.74, 8: 0.89 },
-      one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
-    };
-
-    // 마비노기 표준 피어싱 효율(1레벨당 베이스 스탯의 약 3% 환산 가치)로 복원
-    const PIERCING_BASE_MULT = 0.03;
-
-    // 합연산 기반 환산치 공식을 위한 데이터 롤백
-    const ARCANAS = {
-      elemental_knight: {
-        name: '엘레멘탈 나이트', statType: '최대 공격력', allowedWeapons: ['two_handed', 'one_handed', 'dual_wield'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'smash_dmg', name: '스매시 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'red' },
-          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
-          { id: 'down_attack', name: '다운 어택 대미지', maxLevel: 20, weightPerLevel: 0.001, echo: 'red' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
-          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'blunt_mastery', name: '블런트 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
-        ]
-      },
-      dark_mage: {
-        name: '다크 메이지', statType: '마법 공격력', allowedWeapons: ['two_handed', 'one_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'fireball_dmg', name: '파이어볼 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'blue' },
-          { id: 'thunder_dmg', name: '썬더 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'lightning_mastery', name: '라이트닝 마스터 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
-          { id: 'fire_mastery', name: '파이어 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'blue' },
-          { id: 'tuarim_explosion', name: '투아림 익스플로전 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
-          { id: 'magic_att', name: '마법 공격력', maxLevel: 20, flatAdd: 4, echo: 'blue' }
-        ]
-      },
-      alchemic_stinger: {
-        name: '알케믹 스팅어', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'magnum_dmg', name: '매그넘 샷 대미지', maxLevel: 20, weightPerLevel: 0.0045, echo: 'yellow' },
-          { id: 'crash_shot_frag', name: '크래시 샷 파편 대미지', maxLevel: 20, weightPerLevel: 0.0025, echo: 'yellow' },
-          { id: 'crash_shot_num', name: '크래시 샷 최대 파편 수', maxLevel: 20, weightPerLevel: 0.003, echo: 'yellow' },
-          { id: 'final_shot_dur', name: '파이널 샷 지속시간 증가', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
-          { id: 'effective_range', name: '유효 사거리', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
-          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'yellow' },
-          { id: 'range_combat_mastery', name: '레인지 컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'yellow' }
-        ]
-      },
-      sacred_guard: {
-        name: '세이크리드 가드', statType: '최대 공격력', allowedWeapons: ['two_handed', 'one_handed'], defaultWeapon: 'one_handed',
-        validReforges: [
-          { id: 'windmill_dmg', name: '윈드밀 대미지', maxLevel: 20, weightPerLevel: 0.0018, echo: 'red' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
-          { id: 'blunt_mastery', name: '블런트 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'axe_mastery', name: '엑스 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'sword_mastery', name: '소드 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' },
-          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
-        ]
-      },
-      blader: {
-        name: '블래스트 랜서', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'lance_charge_horse', name: '랜스 차지 마상 돌진 대미지', maxLevel: 20, weightPerLevel: 0.005, echo: 'red' },
-          { id: 'lance_charge_main', name: '랜스 차지 주 목표물 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
-          { id: 'lance_charge_dmg', name: '랜스 차지 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'red' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
-          { id: 'closer_dmg', name: '클로져 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' }
-        ]
-      },
-      variable_gunner: {
-        name: '배리어블 거너', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'dual_gun_max', name: '듀얼건 최대 대미지', maxLevel: 25, flatAdd: 5, echo: 'blue' },
-          { id: 'bullet_storm_limit', name: '불릿스톰 최대 대미지 배율 제한 증가', maxLevel: 20, weightPerLevel: 0.005, echo: 'blue' },
-          { id: 'bullet_storm_mult', name: '불릿스톰 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
-          { id: 'shooting_rush_mult', name: '슈팅러쉬 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'far_away', name: '파 어웨이 1발당 대미지 배율', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'cross_buster', name: '크로스 버스터 대미지 배율', maxLevel: 20, weightPerLevel: 0.004, echo: 'blue' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' }
-        ]
-      },
-      forbidden_alchemist: {
-        name: '포비든 알케미스트', statType: '연금술 대미지', allowedWeapons: ['one_handed'], defaultWeapon: 'one_handed',
-        validReforges: [
-          { id: 'water_cannon', name: '워터 캐논 최대 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'black' },
-          { id: 'flame_burst', name: '플레이머 최대 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'black' },
-          { id: 'rain_water_cannon', name: '레인 캐스팅 워터 캐논 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'heat_buster', name: '히트 버스터 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' },
-          { id: 'water_alch_eff', name: '물 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'fire_alch_eff', name: '불 연금술 마스터리 효율', maxLevel: 20, weightPerLevel: 0.002, echo: 'black' },
-          { id: 'hydra_prot', name: '하이드라 연성 마법 보호 감소 수치', maxLevel: 20, weightPerLevel: 0.004, echo: 'black' }
-        ]
-      },
-      melodic_puppeteer: {
-        name: '멜로딕 퍼펫티어', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'act_6', name: '광란의 질주 대미지 (6막)', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
-          { id: 'act_7', name: '질투의 화신 대미지 (7막)', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
-          { id: 'act_4', name: '솟구치는 분노 대미지 (4막)', maxLevel: 20, weightPerLevel: 0.003, echo: 'yellow' },
-          { id: 'act_1', name: '우연한 충돌 대미지 (1막)', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
-          { id: 'act_2', name: '솟구치는 분노 대미지 (2막)', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
-          { id: 'melody_shock', name: '멜로디 쇼크 순간 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'blue' },
-          { id: 'marionette_max', name: '마리오네트 최대 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'yellow' },
-          { id: 'marionette_conn_max', name: '마리오네트 연결시 최대 대미지', maxLevel: 20, weightPerLevel: 0.002, echo: 'yellow' },
-          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
-        ]
-      },
-      fury_fighter: {
-        name: '퓨리 파이터', statType: '최대 공격력', allowedWeapons: ['two_handed'], defaultWeapon: 'two_handed',
-        validReforges: [
-          { id: 'pounding', name: '파운딩 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'screw_upper', name: '스크류 어퍼 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'charging_fist', name: '차징 피스트 대미지', maxLevel: 20, weightPerLevel: 0.0035, echo: 'silver' },
-          { id: 'combo_mastery', name: '연속기 마스터리 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'somersault', name: '섬머 솔트 대미지', maxLevel: 20, weightPerLevel: 0.003, echo: 'silver' },
-          { id: 'drop_kick', name: '드롭킥 대미지', maxLevel: 20, weightPerLevel: 0.004, echo: 'silver' },
-          { id: 'max_att', name: '최대 공격력', maxLevel: 25, flatAdd: 2.5, echo: 'red' },
-          { id: 'knuckle_mastery', name: '너클 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'silver' },
-          { id: 'combat_mastery', name: '컴뱃 마스터리 최대 대미지', maxLevel: 20, flatAdd: 1.5, echo: 'red' }
-        ]
-      }
-    };
-
-    let currentArcanaKey = 'elemental_knight';
-    let activeReforges = []; 
-    let activeEchostones = [
-      { color: 'none', id: 'none', level: 0 },
-      { color: 'none', id: 'none', level: 0 },
-      { color: 'none', id: 'none', level: 0 }
-    ];
-
-    function updateWeaponTypeOptions() {
-      const arc = ARCANAS[currentArcanaKey];
-      const wpSelect = document.getElementById('weaponTypeSelect');
-      const labels = { two_handed: '양손무기', one_handed: '한손무기', dual_wield: '쌍수무기' };
-      
-      wpSelect.innerHTML = arc.allowedWeapons.map(w => 
-        `<option value="${w}" ${w === arc.defaultWeapon ? 'selected' : ''}>${labels[w]}</option>`
-      ).join('');
-
-      wpSelect.value = arc.defaultWeapon;
-      wpSelect.dispatchEvent(new Event('change'));
+    // 자동완성 데이터리스트 삽입
+    function populateDatalist() {
+      const dl = document.getElementById('commonReforges');
+      dl.innerHTML = '';
+      Object.keys(REFORGE_MAX_DB).forEach(key => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        dl.appendChild(opt);
+      });
     }
 
-    function renderReforgeList() {
+    function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
-      const validList = ARCANAS[currentArcanaKey].validReforges;
-      const selectedIds = activeReforges.map(r => r.id);
 
-      if (activeReforges.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 세공 옵션이 없습니다.</p>`;
+      if (userTags.length === 0) {
+        container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 장비 옵션이 없습니다.</p>`;
       } else {
-        activeReforges.forEach((item, index) => {
+        userTags.forEach((item, index) => {
           const row = document.createElement('div');
-          row.className = "flex items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs";
+          row.className = "flex flex-wrap sm:flex-nowrap items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs";
           
-          let optionsHtml = validList.map(opt => {
-            const isSelected = opt.id === item.id;
-            const isAlreadyUsed = selectedIds.includes(opt.id) && !isSelected;
-            return `<option value="${opt.id}" ${isSelected ? 'selected' : ''} ${isAlreadyUsed ? 'disabled' : ''}>${opt.name}</option>`;
-          }).join('');
-
           row.innerHTML = `
-            <div class="flex-1">
-              <select class="reforge-select w-full bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">${optionsHtml}</select>
-            </div>
-            <div class="w-24 flex items-center gap-1">
-              <input type="number" min="1" max="25" value="${item.level}" class="reforge-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
+            <select class="tag-part w-24 bg-slate-900 border border-slate-700 rounded pl-2 pr-6 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
+              <option value="무기" ${item.part === '무기' ? 'selected' : ''}>무기</option>
+              <option value="모자" ${item.part === '모자' ? 'selected' : ''}>모자</option>
+              <option value="옷" ${item.part === '옷' ? 'selected' : ''}>옷</option>
+              <option value="장갑" ${item.part === '장갑' ? 'selected' : ''}>장갑</option>
+              <option value="신발" ${item.part === '신발' ? 'selected' : ''}>신발</option>
+              <option value="악세" ${item.part === '악세' ? 'selected' : ''}>악세서리</option>
+              <option value="에코" ${item.part === '에코' ? 'selected' : ''}>에코스톤</option>
+            </select>
+            <input type="text" list="commonReforges" placeholder="옵션명 직접 입력 (자동완성 지원)" value="${Security.sanitizeString(item.name)}" class="tag-name flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none min-w-[120px]" data-index="${index}">
+            <div class="w-20 shrink-0 flex items-center gap-1">
+              <input type="number" min="1" max="30" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
               <span class="text-slate-400">Lv</span>
             </div>
-            <button class="remove-reforge-btn text-rose-400 hover:bg-rose-500/10 p-1 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+            <button class="remove-tag-btn shrink-0 text-rose-400 hover:bg-rose-500/10 p-1.5 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           `;
           container.appendChild(row);
         });
       }
       lucide.createIcons();
-      attachReforgeEvents();
-      calculateTotal();
+      attachTagEvents();
+      renderCardTags();
     }
 
-    function renderEchostoneList() {
-      const container = document.getElementById('echostoneListContainer');
-      container.innerHTML = '';
-      const allValidList = ARCANAS[currentArcanaKey].validReforges;
-
-      activeEchostones.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-slate-950/60 p-2.5 rounded-lg border border-slate-800 text-xs";
-        
-        row.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-4 h-4 rounded-full border border-slate-600 bg-slate-800 flex items-center justify-center text-[9px] text-slate-400">${index + 1}</span>
-            <select class="echostone-color-select flex-1 bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}">
-              <option value="none" ${item.color === 'none' ? 'selected' : ''}>-- 장착 안 함 --</option>
-              <option value="red" ${item.color === 'red' ? 'selected' : ''}>레드 에코스톤</option>
-              <option value="blue" ${item.color === 'blue' ? 'selected' : ''}>블루 에코스톤</option>
-              <option value="yellow" ${item.color === 'yellow' ? 'selected' : ''}>옐로우 에코스톤</option>
-              <option value="silver" ${item.color === 'silver' ? 'selected' : ''}>실버 에코스톤</option>
-              <option value="black" ${item.color === 'black' ? 'selected' : ''}>블랙 에코스톤</option>
-            </select>
-          </div>
-        `;
-
-        const filteredOptions = allValidList.filter(opt => opt.echo === item.color);
-        let abilityHtml = `<option value="none">-- 각성 능력 선택 --</option>`;
-        if (item.color !== 'none') {
-          if(filteredOptions.length > 0) {
-            abilityHtml += filteredOptions.map(opt => `<option value="${opt.id}" ${opt.id === item.id ? 'selected' : ''}>${opt.name}</option>`).join('');
-          } else {
-            abilityHtml = `<option value="none">해당 아르카나 유효 옵션 없음</option>`;
-          }
-        }
-
-        row.innerHTML += `
-          <div class="flex items-center gap-2 pl-6">
-            <select class="echostone-ability-select flex-1 bg-slate-900 border border-slate-700 rounded pl-3 pr-10 py-2 text-slate-200 focus:outline-none cursor-pointer" data-index="${index}" ${item.color === 'none' ? 'disabled' : ''}>
-              ${abilityHtml}
-            </select>
-            <div class="w-24 flex items-center gap-1">
-              <input type="number" min="0" max="20" value="${item.level}" class="echostone-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-2 text-sky-300 font-semibold text-center focus:outline-none" data-index="${index}" ${item.id === 'none' || item.color === 'none' ? 'disabled' : ''}>
-              <span class="text-slate-400">Lv</span>
-            </div>
-          </div>
-        `;
-        container.appendChild(row);
+    function attachTagEvents() {
+      document.querySelectorAll('.tag-part').forEach(sel => {
+        sel.addEventListener('change', (e) => { userTags[e.target.dataset.index].part = e.target.value; renderCardTags(); });
       });
-      attachEchostoneEvents();
-    }
-
-    function attachReforgeEvents() {
-      document.querySelectorAll('.reforge-select').forEach(sel => { 
-        sel.addEventListener('change', (e) => { 
-          activeReforges[e.target.dataset.index].id = e.target.value; 
-          renderReforgeList(); 
-        }); 
+      document.querySelectorAll('.tag-name').forEach(inp => {
+        inp.addEventListener('input', (e) => { userTags[e.target.dataset.index].name = e.target.value; renderCardTags(); });
       });
-      document.querySelectorAll('.reforge-level').forEach(inp => { 
-        inp.addEventListener('input', (e) => { 
-          activeReforges[e.target.dataset.index].level = Security.clampNumber(e.target.value, 0, 25, 0); 
-          calculateTotal(); 
-        }); 
+      document.querySelectorAll('.tag-level').forEach(inp => {
+        inp.addEventListener('input', (e) => { userTags[e.target.dataset.index].level = Security.clampNumber(e.target.value, 1, 30, 20); renderCardTags(); });
       });
-      document.querySelectorAll('.remove-reforge-btn').forEach(btn => { 
-        btn.addEventListener('click', (e) => { 
-          activeReforges.splice(e.currentTarget.dataset.index, 1); 
-          renderReforgeList(); 
-        }); 
+      document.querySelectorAll('.remove-tag-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => { userTags.splice(e.currentTarget.dataset.index, 1); renderTagInputList(); });
       });
     }
 
-    function attachEchostoneEvents() {
-      document.querySelectorAll('.echostone-color-select').forEach(sel => { 
-        sel.addEventListener('change', (e) => { 
-          const idx = e.target.dataset.index;
-          activeEchostones[idx].color = e.target.value;
-          activeEchostones[idx].id = 'none'; 
-          activeEchostones[idx].level = 0;
-          renderEchostoneList();
-          calculateTotal(); 
-        }); 
-      });
-      document.querySelectorAll('.echostone-ability-select').forEach(sel => { 
-        sel.addEventListener('change', (e) => { 
-          const idx = e.target.dataset.index;
-          activeEchostones[idx].id = e.target.value;
-          if(e.target.value === 'none') activeEchostones[idx].level = 0;
-          else if(activeEchostones[idx].level === 0) activeEchostones[idx].level = 20; 
-          renderEchostoneList();
-          calculateTotal(); 
-        }); 
-      });
-      document.querySelectorAll('.echostone-level').forEach(inp => { 
-        inp.addEventListener('input', (e) => { 
-          activeEchostones[e.target.dataset.index].level = Security.clampNumber(e.target.value, 0, 20, 0); 
-          calculateTotal(); 
-        }); 
-      });
-    }
+    document.getElementById('addReforgeBtn').addEventListener('click', () => {
+      userTags.push({ part: '무기', name: '', level: 20 });
+      renderTagInputList();
+    });
 
-    function addReforgeRow() {
-      const validList = ARCANAS[currentArcanaKey].validReforges;
-      const selectedIds = activeReforges.map(r => r.id);
-      
-      const availableOpt = validList.find(opt => !selectedIds.includes(opt.id));
-      if (!availableOpt) {
-        alert('더 이상 추가할 수 있는 유효 세공 옵션이 없습니다.');
+    // ✨ 스펙 카드 하단 한계돌파 네온 태그 렌더링 로직 ✨
+    function renderCardTags() {
+      const area = document.getElementById('cardTagsArea');
+      area.innerHTML = '';
+      if(userTags.length === 0) {
+        area.innerHTML = `<span class="text-[10px] text-slate-600 italic">등록된 장비 옵션이 없습니다.</span>`;
         return;
       }
       
-      activeReforges.push({ id: availableOpt.id, level: 20 });
-      renderReforgeList();
+      userTags.forEach(t => {
+        if(!t.name.trim()) return;
+        const span = document.createElement('span');
+        span.className = "px-2.5 py-1 rounded-[4px] text-[10px] whitespace-nowrap flex items-center gap-1.5 transition-all duration-300 ";
+        
+        // 내장 DB에서 상한 레벨 획득 (모르면 기본 20렙)
+        let maxLvl = REFORGE_MAX_DB[t.name.trim()] || 20; 
+        let level = parseInt(t.level);
+        
+        if (t.part === '에코') {
+          span.className += "tag-echo";
+          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(t.part)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
+        } else if (level < maxLvl) {
+          span.className += "tag-normal";
+          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(t.part)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
+        } else if (level === maxLvl) {
+          span.className += "tag-max";
+          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(t.part)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
+        } else {
+          // 한계돌파 로직: 초과된 레벨(over)에 따라 광원/색상 차등 적용
+          let over = level - maxLvl;
+          let intensity = Math.min(over, 5); // 1~5 단계 스케일링
+          
+          const gradients = [
+            "", 
+            "linear-gradient(135deg, #713f12, #a16207)", // +1 연한 황금빛
+            "linear-gradient(135deg, #9a3412, #c2410c)", // +2 진한 오렌지
+            "linear-gradient(135deg, #9f1239, #be123c)", // +3 붉은 빛
+            "linear-gradient(135deg, #831843, #e11d48)", // +4 마젠타
+            "linear-gradient(135deg, #4c0519, #f43f5e)"  // +5 진홍빛 네온 (끝판왕)
+          ];
+          const shadows = [
+            "",
+            "0 0 6px rgba(234,179,8,0.5)",
+            "0 0 8px rgba(249,115,22,0.7)",
+            "0 0 10px rgba(225,29,72,0.8)",
+            "0 0 12px rgba(244,63,94,0.9)",
+            "0 0 16px rgba(251,113,133,1.0)"
+          ];
+          const textColors = [ "", "#fef08a", "#fed7aa", "#fecdd3", "#ffe4e6", "#fff1f2" ];
+
+          let bg = gradients[intensity];
+          let shadow = shadows[intensity];
+          let color = textColors[intensity];
+
+          span.className += "tag-limit-break font-black";
+          span.style.background = bg;
+          span.style.boxShadow = shadow;
+          span.style.color = color;
+          span.style.borderColor = color + '40';
+          
+          span.innerHTML = `<span class="opacity-80">[${Security.sanitizeString(t.part)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span> <span class="ml-0.5 text-[9px] drop-shadow-md">✨</span>`;
+        }
+        area.appendChild(span);
+      });
     }
 
+    // 전투력은 오직 깡스탯, 크뎀, 보뎀, 피어싱만으로 깔끔하게 산출 (세공 배제)
     function calculateTotal() {
       const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
       const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
-      
       const arcanaDmgRate = Security.clampNumber(document.getElementById('arcanaDamageInput').value, 0, 60, 10) / 100;
       const bonusDmgRate = Security.clampNumber(document.getElementById('bonusDamageInput').value, 0, 100, 0) / 100;
-      
       const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7.5);
       const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
       const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3);
       
-      // 피어싱 관통 환산치 계산 (비례 계수 적용, 포인셰 기믹 삭제)
       const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
 
       let rawCritDmg = 0;
@@ -726,101 +595,41 @@
         rawCritDmg = R_GRADE_DATA[weaponType][document.getElementById('upgradeSelect').value] || 0;
       }
 
-      // 크리티컬 대미지 환산치 계산 (베이스 스탯 비례)
       const critRateCap = 30 + nele;
       const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
       const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
-      
-      document.getElementById('rGradeInfoText').textContent = 
-        `총 추가 크뎀: +${Math.round(totalCritDmgMult * 100)}% (크리 상한 ${critRateCap.toFixed(1)}% 기댓값: +${(expectedCritMult * 100).toFixed(1)}%)`;
-
       const addFromCrit = Math.round(baseStat * expectedCritMult);
 
-      // 보뎀 및 아뎀 환산치 계산
-      const combinedAddMult = bonusDmgRate + arcanaDmgRate;
-      const addFromMult = Math.round(baseStat * combinedAddMult);
+      const addFromMult = Math.round(baseStat * (bonusDmgRate + arcanaDmgRate));
 
-      // 세공 + 에코스톤 병합
-      let finalReforges = {};
-      activeReforges.forEach(r => {
-        if (!finalReforges[r.id] || r.level > finalReforges[r.id]) finalReforges[r.id] = r.level;
-      });
-      activeEchostones.forEach(e => {
-        if (e.id && e.id !== 'none' && e.color !== 'none') {
-          if (!finalReforges[e.id] || e.level > finalReforges[e.id]) finalReforges[e.id] = e.level;
-        }
-      });
-
-      // 세공 환산치 계산
-      let addFromReforge = 0;
-      const defs = ARCANAS[currentArcanaKey].validReforges;
-      Object.keys(finalReforges).forEach(key => {
-        const def = defs.find(d => d.id === key);
-        if (def) {
-          const lvl = finalReforges[key];
-          if (def.flatAdd) addFromReforge += lvl * def.flatAdd;
-          else if (def.weightPerLevel) addFromReforge += Math.round(baseStat * (lvl * def.weightPerLevel));
-        }
-      });
-
-      const totalScore = baseStat + addFromPiercing + addFromCrit + addFromMult + addFromReforge;
-      
-      const statName = ARCANAS[currentArcanaKey].statType;
-      document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${statName} 기준)`;
+      const totalScore = baseStat + addFromPiercing + addFromCrit + addFromMult;
 
       document.getElementById('totalScoreText').textContent = Math.round(totalScore).toLocaleString();
       document.getElementById('breakdownBase').textContent = Math.round(baseStat).toLocaleString();
       document.getElementById('breakdownPiercing').textContent = `+ ${addFromPiercing.toLocaleString()}`;
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
-      document.getElementById('breakdownReforge').textContent = `+ ${addFromReforge.toLocaleString()}`;
-
-      updateEfficiencyReport(baseStat, statName);
-    }
-
-    function updateEfficiencyReport(baseStat, statName) {
-      const rep = document.getElementById('efficiencyReport');
-      rep.innerHTML = `
-        <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
-          <span class="text-slate-300">피어싱 +1 오를 때마다</span>
-          <span class="font-bold text-theme-light">+${Math.round(baseStat * PIERCING_BASE_MULT).toLocaleString()} ${statName} 환산치</span>
-        </div>
-        <div class="flex justify-between items-center p-2 rounded bg-slate-950 border border-slate-800">
-          <span class="text-slate-300">보너스 대미지 +1% 오를 때마다</span>
-          <span class="font-bold text-emerald-300">+${Math.round(baseStat * 0.01).toLocaleString()} ${statName} 환산치</span>
-        </div>
-      `;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+      populateDatalist();
       
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
-
-        const arc = ARCANAS[currentArcanaKey];
-        document.getElementById('baseStatLabel').textContent = `노도핑 ${arc.statType}`;
         
         let iconHtml = '<i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'alchemic_stinger') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'blader') iconHtml = '<i data-lucide="sword" class="w-16 h-16 mb-2 mx-auto"></i>';
         if(currentArcanaKey === 'forbidden_alchemist') iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
 
-        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)">${iconHtml}</div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${arc.name}</span>`;
+        const arcName = e.target.options[e.target.selectedIndex].text;
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)">${iconHtml}</div><span class="text-xs font-semibold text-slate-400">${arcName}</span>`;
         lucide.createIcons();
-
-        updateWeaponTypeOptions();
-
-        activeReforges = [{ id: arc.validReforges[0].id, level: 20 }];
-        activeEchostones = [{ color: 'none', id: 'none', level: 0 }, { color: 'none', id: 'none', level: 0 }, { color: 'none', id: 'none', level: 0 }];
-        
-        renderReforgeList();
-        renderEchostoneList();
       });
 
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
@@ -837,7 +646,6 @@
 
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
-      document.getElementById('addReforgeBtn').addEventListener('click', addReforgeRow);
 
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
@@ -846,13 +654,7 @@
       imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
-        if (!file.type.startsWith('image/')) {
-          alert('보안상의 이유로 이미지 파일(.png, .jpg, .webp 등)만 업로드할 수 있습니다.');
-          e.target.value = '';
-          return;
-        }
-
+        if (!file.type.startsWith('image/')) { alert('이미지 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
         const reader = new FileReader();
         reader.onload = (event) => {
           const img = document.getElementById('previewImage');
@@ -896,49 +698,31 @@
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 이미지 캡처 중...';
         btn.disabled = true;
         lucide.createIcons();
-        
         exportArea.classList.add('exporting-mode');
 
         setTimeout(() => {
-          html2canvas(exportArea, {
-            backgroundColor: '#020617', 
-            scale: 2,
-            useCORS: true
-          }).then(canvas => {
+          html2canvas(exportArea, { backgroundColor: '#020617', scale: 2, useCORS: true })
+          .then(canvas => {
             exportArea.classList.remove('exporting-mode');
-            
             const link = document.createElement('a');
             const nickname = document.getElementById('nicknameInput').value || '밀레시안';
             link.download = `에린_전투력_${nickname}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            
             btn.innerHTML = originalText;
             btn.disabled = false;
             lucide.createIcons();
           }).catch(err => {
             console.error(err);
-            alert("이미지 저장 중 오류가 발생했습니다.");
             exportArea.classList.remove('exporting-mode');
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            lucide.createIcons();
+            btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons();
           });
         }, 100);
       });
 
-      currentArcanaKey = 'elemental_knight';
-      document.getElementById('arcanaSelect').value = 'elemental_knight';
       applyTheme(currentArcanaKey);
-      updateWeaponTypeOptions();
-      const initialArcana = ARCANAS[currentArcanaKey];
-      document.getElementById('baseStatLabel').textContent = `노도핑 ${initialArcana.statType}`;
-      document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${initialArcana.statType} 기준)`;
-      document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-main)"><i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i></div><span id="arcanaBadge" class="text-xs font-semibold text-slate-400">${initialArcana.name}</span>`;
-      
-      activeReforges = [{ id: 'smash_dmg', level: 20 }];
-      renderReforgeList();
-      renderEchostoneList();
+      renderTagInputList();
+      calculateTotal();
     });
   </script>
 </body>
