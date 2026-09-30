@@ -69,7 +69,6 @@
       background-position: right 10px center;
     }
 
-    /* 브라우저 기본 스피너 제거 */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -120,9 +119,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
 
-  <!-- 헤더 영역 -->
+  <!-- 헤더 영역 (우측 뱃지 삭제 완료) -->
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="p-2 bg-theme-bg border border-theme-border rounded-lg text-theme-main transition-colors duration-500">
           <i data-lucide="shield-check" class="w-6 h-6"></i>
@@ -133,14 +132,6 @@
             <span class="text-[10px] text-slate-500 font-medium tracking-tight">Erinn Spec Calculator</span>
           </div>
         </div>
-      </div>
-
-      <div id="dbStatusBadge" class="text-[11px] text-slate-300 flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800 shadow-sm">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-        </span>
-        <span class="font-medium text-slate-400">에린 공인 세공 데이터셋 <span class="text-emerald-400 font-bold ml-0.5">v2.4</span></span>
       </div>
     </div>
   </header>
@@ -203,14 +194,14 @@
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 (개선된 Stepper 컨트롤러 탑재) -->
+      <!-- 2. 베이스 스탯 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 베이스 스탯 입력 (+ - 10 단위 지원) -->
+          <!-- 베이스 스탯 입력 -->
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력 (스탯 세공 포함)</label>
             <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
@@ -225,7 +216,7 @@
             </div>
           </div>
 
-          <!-- 피어싱 레벨 (+ - 1 단위 지원) -->
+          <!-- 피어싱 레벨 -->
           <div>
             <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
             <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
@@ -289,7 +280,7 @@
             </div>
           </div>
           
-          <!-- [모던 Stepper 탑재] 5대 보너스 대미지 및 크리티컬 옵션 -->
+          <!-- 5대 보너스 대미지 및 크리티컬 옵션 (라벨 변경 완료) -->
           <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2.5 border-t border-slate-800 pt-3">
             <!-- 1. 아르카나 댐증 -->
             <div>
@@ -321,9 +312,9 @@
               </div>
             </div>
 
-            <!-- 3. 네일 -->
+            <!-- 3. 크리티컬 상한 (네일) -->
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">네일 (상한 %)</label>
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">크리티컬 상한 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
                 <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="neleInput" data-step="-0.1" data-min="0" data-max="7.5">
                   <i data-lucide="minus" class="w-3 h-3"></i>
@@ -336,9 +327,9 @@
               </div>
             </div>
 
-            <!-- 4. 이보나 -->
+            <!-- 4. 이보나 크댐증 -->
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">이보나 (크뎀 %)</label>
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">이보나 크댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
                 <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="yvonaInput" data-step="-1" data-min="0" data-max="10">
                   <i data-lucide="minus" class="w-3 h-3"></i>
@@ -351,9 +342,9 @@
               </div>
             </div>
 
-            <!-- 5. 토템/농장 -->
+            <!-- 5. 토템/농장 크댐증 -->
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">토템/농장 (%)</label>
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">토템/농장 크댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
                 <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="totemCritInput" data-step="-1" data-min="0" data-max="30">
                   <i data-lucide="minus" class="w-3 h-3"></i>
@@ -556,9 +547,6 @@
   </div>
 
   <script>
-    // -------------------------------------------------------------
-    // 1. Supabase 클라이언트 초기화
-    // -------------------------------------------------------------
     const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
@@ -602,9 +590,6 @@
     let currentArcanaKey = 'elemental_knight';
     let userTags = [];
 
-    // -------------------------------------------------------------
-    // 2. TCALC001 전체 데이터 1회 로드
-    // -------------------------------------------------------------
     async function initSupabaseDataOnce() {
       if (!supabaseClient) return;
 
@@ -692,9 +677,6 @@
       document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
     }
 
-    // -------------------------------------------------------------
-    // 3. 세공 목록 UI 렌더링
-    // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
@@ -728,7 +710,6 @@
         row.innerHTML = `
           <div class="flex flex-nowrap items-center gap-2 w-full relative">
             
-            <!-- 1. 장비 타입 드롭다운 -->
             <div class="w-36 shrink-0 relative">
               <button type="button" 
                 class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
@@ -755,7 +736,6 @@
               </div>
             </div>
             
-            <!-- 2. 세공 옵션 드롭다운 -->
             <div class="flex-1 min-w-[120px] relative">
               <button type="button" 
                 class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
@@ -789,7 +769,6 @@
               </div>
             </div>
             
-            <!-- 3. 세공 레벨 Stepper 컨트롤러 -->
             <div class="shrink-0 flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
               <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
                 <i data-lucide="minus" class="w-3 h-3"></i>
@@ -829,7 +808,6 @@
         document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
       };
 
-      // 장비 타입 드롭다운
       document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -886,7 +864,6 @@
         });
       });
 
-      // 세공 옵션 드롭다운
       document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -948,7 +925,6 @@
         });
       });
 
-      // Stepper 버튼(-, +)
       document.querySelectorAll('.btn-step-down').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = btn.dataset.index;
@@ -1024,9 +1000,6 @@
       renderTagInputList();
     });
 
-    // -------------------------------------------------------------
-    // 4. 스펙 카드 태그 렌더러
-    // -------------------------------------------------------------
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
@@ -1086,9 +1059,6 @@
       });
     }
 
-    // -------------------------------------------------------------
-    // 5. 종합 전투력 환산 로직 (피어싱 input 연결)
-    // -------------------------------------------------------------
     function calculateTotal() {
       const parseInput = (val, defaultVal) => {
         if (val === '' || val === null || val === undefined) return defaultVal;
@@ -1130,9 +1100,6 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // -------------------------------------------------------------
-    // 6. 캐릭터 이미지 줌 & 구도 제어 유틸
-    // -------------------------------------------------------------
     function updateImageTransform() {
       const zoom = document.getElementById('zoomSlider').value;
       const posY = document.getElementById('posYSlider').value;
@@ -1149,9 +1116,6 @@
       img.style.objectPosition = `center ${posY}%`;
     }
 
-    // -------------------------------------------------------------
-    // 7. 정책 모달 데이터
-    // -------------------------------------------------------------
     const POLICY_DATA = {
       terms: {
         title: "이용약관 (Terms of Service)",
@@ -1183,7 +1147,6 @@
 
       await initSupabaseDataOnce();
 
-      // [통합 Stepper 버튼 핸들러] 베이스스탯, 피어싱, 5대 보너스 스탯
       document.querySelectorAll('.stat-step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const targetId = btn.dataset.target;
@@ -1197,7 +1160,6 @@
           let currentVal = parseFloat(input.value) || 0;
           let nextVal = currentVal + step;
 
-          // 소수점 1자리(0.1, 0.5) 연산 오차 방지
           nextVal = Math.round(nextVal * 10) / 10;
           nextVal = Math.min(Math.max(nextVal, min), max);
 
@@ -1206,7 +1168,6 @@
         });
       });
 
-      // 아르카나 변경
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -1225,7 +1186,6 @@
         lucide.createIcons();
       });
 
-      // 무기 타입 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -1233,7 +1193,6 @@
         calculateTotal();
       });
 
-      // 숫자 입력 필드 직접 타이핑 시 보정 및 계산
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
@@ -1253,7 +1212,6 @@
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
 
-      // 이미지 등록
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
@@ -1292,7 +1250,6 @@
         updateImageTransform();
       });
 
-      // 스펙 카드 이미지 저장
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1331,7 +1288,6 @@
         }, 100);
       });
 
-      // 정책 모달 핸들러
       const modal = document.getElementById('policyModal');
       document.querySelectorAll('.modal-open-btn').forEach(btn => {
         btn.addEventListener('click', () => {
