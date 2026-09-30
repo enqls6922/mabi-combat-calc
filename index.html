@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 애드센스 및 보안 허용 CSP 정책 -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
@@ -15,7 +14,6 @@
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
-  <!-- Google AdSense 공식 스크립트 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -69,6 +67,16 @@
       background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
       background-position: right 10px center;
+    }
+
+    /* 브라우저 기본 못생긴 스피너(화살표) 완전 제거 */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
     }
 
     ::-webkit-scrollbar { width: 6px; }
@@ -127,7 +135,6 @@
         </div>
       </div>
 
-      <!-- 정돈된 공식 데이터셋 배지 -->
       <div id="dbStatusBadge" class="text-[11px] text-slate-300 flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800 shadow-sm">
         <span class="relative flex h-2 w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -138,7 +145,7 @@
     </div>
   </header>
 
-  <!-- [애드센스 상단 가로 반응형 배너] -->
+  <!-- 상단 광고 배너 -->
   <div class="max-w-7xl mx-auto w-full px-4 pt-4">
     <div class="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl py-2 px-3 text-center overflow-hidden min-h-[90px] flex flex-col items-center justify-center">
       <span class="text-[9px] text-slate-600 block mb-1">ADVERTISEMENT</span>
@@ -303,7 +310,7 @@
         </div>
       </div>
 
-      <!-- 3. 장비 세공 및 에코스톤 등록 -->
+      <!-- 3. 장비 세공 및 에코스톤 등록 (세련된 Stepper UI 적용) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -425,7 +432,7 @@
         </button>
       </div>
 
-      <!-- [애드센스 우측 하단 직사각형/반응형 배너] -->
+      <!-- 우측 하단 배너 -->
       <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] flex flex-col items-center justify-center">
         <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
         <ins class="adsbygoogle"
@@ -491,7 +498,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // 1. Supabase 클라이언트 초기화 (보안 파라미터 REST 방식)
+    // 1. Supabase 클라이언트 초기화
     // -------------------------------------------------------------
     const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
@@ -500,7 +507,6 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // XSS 방어 인젝션 방어 유틸
     const Security = {
       sanitizeString(str) {
         if (!str) return '';
@@ -628,7 +634,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링
+    // 3. UI 렌더링 (모던 Stepper 레벨 조절기 적용)
     // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
@@ -724,11 +730,24 @@
               </div>
             </div>
             
-            <!-- 3. 세공 레벨 입력칸 -->
-            <div class="w-16 shrink-0 flex items-center gap-1">
-              <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
-              <span class="text-slate-400">Lv</span>
+            <!-- 3. [개선] 깔끔하고 넓어진 세공 레벨 Stepper 컨트롤러 -->
+            <div class="shrink-0 flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
+              <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="minus" class="w-3 h-3"></i>
+              </button>
+              <input type="number" 
+                min="${item.min}" 
+                max="${allowedMaxLevel}" 
+                value="${item.level}" 
+                class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
+                data-index="${index}">
+              <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
+              <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+              </button>
             </div>
+
+            <!-- 삭제 버튼 -->
             <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
@@ -752,7 +771,7 @@
         document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
       };
 
-      // 1. [장비 타입] 드롭다운 토글 및 검색
+      // 1. [장비 타입] 드롭다운
       document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -809,7 +828,7 @@
         });
       });
 
-      // 2. [세공 내용] 드롭다운 토글 및 검색
+      // 2. [세공 내용] 드롭다운
       document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -871,7 +890,35 @@
         });
       });
 
-      // 3. 레벨 입력 제어
+      // 3. [개선] Stepper 버튼(-, +) 및 직접 입력 제어
+      document.querySelectorAll('.btn-step-down').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.dataset.index;
+          const tag = userTags[idx];
+          const minLvl = tag.min || 1;
+          if (tag.level > minLvl) {
+            tag.level -= 1;
+            const input = document.querySelector(`.tag-level[data-index="${idx}"]`);
+            if (input) input.value = tag.level;
+            renderCardTags();
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-step-up').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.dataset.index;
+          const tag = userTags[idx];
+          const maxLvl = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
+          if (tag.level < maxLvl) {
+            tag.level += 1;
+            const input = document.querySelector(`.tag-level[data-index="${idx}"]`);
+            if (input) input.value = tag.level;
+            renderCardTags();
+          }
+        });
+      });
+
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
@@ -921,7 +968,7 @@
     });
 
     // -------------------------------------------------------------
-    // 4. 스펙 카드 한계돌파 차등 네온 태그 렌더러
+    // 4. 스펙 카드 태그 렌더러
     // -------------------------------------------------------------
     function renderCardTags() {
       const area = document.getElementById('cardTagsArea');
@@ -1043,7 +1090,7 @@
     }
 
     // -------------------------------------------------------------
-    // 6. 애드센스 정책 모달 데이터 (에린 스펙 계산기 명칭 동기화)
+    // 6. 애드센스 정책 모달 데이터
     // -------------------------------------------------------------
     const POLICY_DATA = {
       terms: {
@@ -1104,7 +1151,7 @@
         calculateTotal();
       });
 
-      // 숫자 입력칸 블러 시 0 자동 보정
+      // 숫자 입력칸 블러 시 0 보정
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
@@ -1124,7 +1171,7 @@
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
 
-      // 이미지 등록 & 프리뷰 & 조작 패널 오픈
+      // 이미지 등록 & 프리뷰 & 조작 패널
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
@@ -1202,7 +1249,7 @@
         }, 100);
       });
 
-      // 7. 정책 모달 이벤트 연결
+      // 정책 모달 이벤트
       const modal = document.getElementById('policyModal');
       document.querySelectorAll('.modal-open-btn').forEach(btn => {
         btn.addEventListener('click', () => {
