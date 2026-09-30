@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:;">
-  <title>에린 전투력 환산 계산기 (v4.0)</title>
+  <title>에린 전투력 환산 계산기 (v4.1)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -76,7 +76,7 @@
     .tag-base {
       padding: 0.25rem 0.625rem;
       border-radius: 0.25rem;
-      font-size: 0.625rem; /* 10px */
+      font-size: 0.625rem;
       white-space: nowrap;
       display: flex;
       align-items: center;
@@ -96,6 +96,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
+  <!-- 자동완성 데이터리스트 (폼 외부에 안전하게 배치) -->
+  <datalist id="commonReforges"></datalist>
+
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
@@ -103,7 +106,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v4.0</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v4.1</span></h1>
         </div>
       </div>
     </div>
@@ -231,48 +234,46 @@
             <div>
               <label class="block text-xs text-slate-400 mb-1">아르카나 댐증 (%)</label>
               <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="calc-input w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
               <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="calc-input w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">네일 (크리상한 %)</label>
               <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="calc-input w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
               <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="calc-input w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
             <div>
               <label class="block text-xs text-slate-400 mb-1">토템/농장 크뎀 (%)</label>
               <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+                class="calc-input w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 3. 자유 입력 세공 리스트 (점수 반영 X, 스펙 자랑용 한돌 태그) -->
+      <!-- 3. 부위별 세공 리스트 입력 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">부위를 선택하면 해당 부위의 <b>상한선/한계돌파 제한</b>이 자동으로 설정됩니다. (자동완성 지원)</p>
+            <p class="text-[11px] text-slate-400 mt-1">부위를 선택하면 <b>상한선/한계돌파 제한</b>이 자동 적용됩니다. 빈칸 더블클릭 시 목록이 뜹니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
           </button>
         </div>
         <div id="reforgeListContainer" class="space-y-3"></div>
-        <!-- 자동완성 데이터리스트 -->
-        <datalist id="commonReforges"></datalist>
       </div>
 
       <!-- 4. 캐릭터 외형 등록 -->
@@ -335,9 +336,9 @@
           </div>
         </div>
 
-        <!-- 한돌 프리미엄 태그 영역 -->
+        <!-- 세공 태그 렌더링 영역 -->
         <div class="border-t border-slate-800/80 pt-3">
-          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-2">Equipment Options</span>
+          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold block mb-2">Equipment Limit Break</span>
           <div id="cardTagsArea" class="flex flex-wrap gap-1.5">
             <!-- JS 동적 렌더링 -->
           </div>
@@ -366,7 +367,8 @@
       },
       clampNumber(val, min, max, defaultVal = 0) {
         const num = parseFloat(val);
-        if (isNaN(num)) return defaultVal;
+        // 빈칸이거나 NaN이면 defaultVal(0) 반환
+        if (isNaN(num) || String(val).trim() === '') return defaultVal;
         return Math.min(Math.max(num, min), max);
       }
     };
@@ -389,7 +391,7 @@
     };
     const PIERCING_BASE_MULT = 0.03;
 
-    // [마비노기 세공 옵션 마스터 리스트 (자동완성용)]
+    // [마비노기 세공 옵션 마스터 리스트]
     const MASTER_OPTIONS = [
       "스매시 대미지", "윈드밀 대미지", "다운 어택 대미지", "파이널 히트 최소 대미지", "파이널 히트 최대 대미지", "파이널 히트 쿨타임 감소", "파이널 히트 지속 시간", "자이언트 풀 스윙 대미지",
       "파이어볼 최대 대미지", "파이어볼 최소 대미지", "썬더 최대 대미지", "라이트닝 마스터리 대미지", "파이어 마스터리 대미지", "아이스 마스터리 대미지", "헤일스톰 최대 대미지", "투아림 익스플로전 대미지",
@@ -457,7 +459,6 @@
         max = 5; limit = 5; 
       }
       else if (name === "보호" || name === "마법 보호" || name.includes("방패 보호")) {
-        // 윈드 브레이커 보호 등 예외 제외한 기본 보호류
         if(name !== "윈드 브레이커 보호") { max = 10; limit = 10; }
       }
       
@@ -475,10 +476,10 @@
           const limits = getLimits(item.part, item.name);
 
           const row = document.createElement('div');
-          row.className = "flex flex-wrap md:flex-nowrap items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs";
+          row.className = "flex flex-nowrap items-center gap-2 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
           
           row.innerHTML = `
-            <select class="tag-part w-full md:w-28 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
+            <select class="tag-part w-24 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
               <option value="양손무기" ${item.part === '양손무기' ? 'selected' : ''}>양손무기</option>
               <option value="한손무기" ${item.part === '한손무기' ? 'selected' : ''}>한손무기</option>
               <option value="모자" ${item.part === '모자' ? 'selected' : ''}>모자/투구</option>
@@ -488,17 +489,21 @@
               <option value="악세서리" ${item.part === '악세서리' ? 'selected' : ''}>악세서리</option>
               <option value="에코스톤" ${item.part === '에코스톤' ? 'selected' : ''}>에코스톤</option>
             </select>
-            <div class="flex-1 flex flex-col sm:flex-row gap-2 w-full">
-              <input type="text" list="commonReforges" placeholder="옵션명 직접 입력 (예: 스매시 대미지)" value="${Security.sanitizeString(item.name)}" class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none" data-index="${index}">
+            <div class="flex-1 min-w-[100px]">
+              <input type="text" list="commonReforges" placeholder="옵션명 직접 입력" value="${Security.sanitizeString(item.name)}" class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none" data-index="${index}">
             </div>
-            <div class="w-full md:w-24 shrink-0 flex flex-col items-center justify-center">
-              <div class="flex items-center gap-1 w-full">
-                <input type="number" min="1" max="30" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
-                <span class="text-slate-400">Lv</span>
+            
+            <!-- 높낮이 어긋남 해결을 위해 flex-col과 items-center로 묶고 휴지통을 가로 정렬함 -->
+            <div class="flex items-center gap-2 shrink-0">
+              <div class="flex flex-col items-center justify-center w-24">
+                <div class="flex items-center gap-1 w-full">
+                  <input type="number" min="1" max="30" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
+                  <span class="text-slate-400">Lv</span>
+                </div>
+                <span class="text-[9px] text-slate-500 font-bold mt-1 tracking-tighter">Max:${limits.max} / 한돌:${limits.limit}</span>
               </div>
-              <span class="text-[9px] text-slate-500 font-bold mt-1 tracking-tighter">Max:${limits.max} / 한돌:${limits.limit}</span>
+              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
-            <button class="remove-tag-btn shrink-0 text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           `;
           container.appendChild(row);
         });
@@ -533,11 +538,18 @@
         });
       });
       document.querySelectorAll('.tag-level').forEach(inp => {
+        // 키보드로 입력 시 한돌 강제 제한 적용 + 빈칸 방지
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
           const lim = getLimits(userTags[idx].part, userTags[idx].name);
-          // 입력한 숫자가 한돌 리미트를 넘지 않게 강제
-          userTags[idx].level = Security.clampNumber(e.target.value, 1, lim.limit, lim.max); 
+          
+          let val = parseInt(e.target.value);
+          if(isNaN(val)) val = 1;
+          
+          // 한돌 상한(limit)을 넘지 못하게 강제
+          userTags[idx].level = Math.min(Math.max(val, 1), lim.limit);
+          e.target.value = userTags[idx].level; // UI 값 즉시 수정
+
           renderCardTags(); 
         });
       });
@@ -620,14 +632,20 @@
     }
 
     function calculateTotal() {
-      const baseStat = Security.clampNumber(document.getElementById('baseStatInput').value, 0, 8000, 1500);
-      const piercing = Security.clampNumber(document.getElementById('piercingSelect').value, 0, 11, 0);
+      // 숫자입력칸 빈칸 방지: 입력값이 없거나 숫자가 아니면 무조건 0 처리
+      const parseInput = (val, defaultVal) => {
+        let num = parseFloat(val);
+        return isNaN(num) ? defaultVal : num;
+      };
+
+      const baseStat = parseInput(document.getElementById('baseStatInput').value, 0);
+      const piercing = parseInput(document.getElementById('piercingSelect').value, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
-      const arcanaDmgRate = Security.clampNumber(document.getElementById('arcanaDamageInput').value, 0, 60, 10) / 100;
-      const bonusDmgRate = Security.clampNumber(document.getElementById('bonusDamageInput').value, 0, 100, 0) / 100;
-      const nele = Security.clampNumber(document.getElementById('neleInput').value, 0, 7.5, 7.5);
-      const yvona = Security.clampNumber(document.getElementById('yvonaInput').value, 0, 10, 10);
-      const totemCrit = Security.clampNumber(document.getElementById('totemCritInput').value, 0, 30, 3);
+      const arcanaDmgRate = parseInput(document.getElementById('arcanaDamageInput').value, 0) / 100;
+      const bonusDmgRate = parseInput(document.getElementById('bonusDamageInput').value, 0) / 100;
+      const nele = parseInput(document.getElementById('neleInput').value, 0);
+      const yvona = parseInput(document.getElementById('yvonaInput').value, 0);
+      const totemCrit = parseInput(document.getElementById('totemCritInput').value, 0);
       
       const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
 
@@ -657,7 +675,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-      populateDatalist();
+      populateDatalist(); // 자동완성 세팅
       
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
@@ -684,8 +702,19 @@
         calculateTotal();
       });
 
-      ['baseStatInput', 'piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect', 'arcanaDamageInput', 'bonusDamageInput', 'neleInput', 'yvonaInput', 'totemCritInput'].forEach(id => {
-        document.getElementById(id).addEventListener('input', calculateTotal);
+      // 빈칸 즉시 0 처리 이벤트
+      document.querySelectorAll('.calc-input, #baseStatInput').forEach(inp => {
+        inp.addEventListener('blur', (e) => {
+          if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+            e.target.value = 0;
+          }
+          calculateTotal();
+        });
+        inp.addEventListener('input', calculateTotal);
+        inp.addEventListener('change', calculateTotal);
+      });
+      // 피어싱, 개조창 등 Select 변경 감지
+      ['piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect'].forEach(id => {
         document.getElementById(id).addEventListener('change', calculateTotal);
       });
 
@@ -710,31 +739,7 @@
         reader.readAsDataURL(file);
       });
 
-      document.getElementById('aiTransformBtn').addEventListener('click', () => {
-        const modal = document.getElementById('adModal');
-        const progress = document.getElementById('adProgress');
-        const countText = document.getElementById('adCountdownText');
-        modal.classList.remove('hidden');
-        progress.style.width = '0%';
-
-        let sec = 5;
-        const timer = setInterval(() => {
-          sec--;
-          countText.textContent = `남은 시간: ${sec}초`;
-          progress.style.width = `${((5 - sec) / 5) * 100}%`;
-          if (sec <= 0) {
-            clearInterval(timer);
-            modal.classList.add('hidden');
-            document.getElementById('animeOverlayBadge').classList.remove('hidden');
-            const preview = document.getElementById('previewImage');
-            if (!preview.classList.contains('hidden')) {
-              preview.style.filter = 'contrast(120%) saturate(130%) brightness(110%)';
-            }
-            alert('🎉 광고 시청 완료! AI 변환 일러스트가 적용되었습니다.');
-          }
-        }, 1000);
-      });
-
+      // 스펙 카드 이미지 저장 기능 구현
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
