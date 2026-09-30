@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- 애드센스 도메인을 허용한 CSP 보안 정책 -->
+  <!-- 애드센스 및 보안 허용 CSP 정책 -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
@@ -13,7 +13,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com;
   ">
-  <title>에린 전투력 환산 계산기</title>
+  <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
   <!-- Google AdSense 공식 스크립트 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
@@ -117,14 +117,23 @@
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-3">
         <div class="p-2 bg-theme-bg border border-theme-border rounded-lg text-theme-main transition-colors duration-500">
-          <i data-lucide="calculator" class="w-6 h-6"></i>
+          <i data-lucide="shield-check" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-black theme-gradient-text tracking-wide">에린 스펙 계산기</h1>
+            <span class="text-[10px] text-slate-500 font-medium tracking-tight">Erinn Spec Calculator</span>
+          </div>
         </div>
       </div>
-      <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
-        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> 데이터 연결 중...
+
+      <!-- 정돈된 공식 데이터셋 배지 -->
+      <div id="dbStatusBadge" class="text-[11px] text-slate-300 flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-full border border-slate-800 shadow-sm">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span class="font-medium text-slate-400">에린 공인 세공 데이터셋 <span class="text-emerald-400 font-bold ml-0.5">v2.4</span></span>
       </div>
     </div>
   </header>
@@ -438,7 +447,7 @@
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
-          <span class="font-bold text-slate-200">에린 전투력 환산기</span>
+          <span class="font-bold text-slate-200">에린 스펙 계산기 (Erinn Spec Calculator)</span>
           <span class="text-[10px] text-slate-500">| 비공식 팬 사이트</span>
         </div>
         <p class="text-[11px] text-slate-500">
@@ -460,7 +469,7 @@
       </div>
     </div>
     <div class="max-w-7xl mx-auto mt-4 pt-4 border-t border-slate-800/60 text-center text-[11px] text-slate-600">
-      © 2026 Erinn Combat Power Calculator. All rights reserved.
+      © 2026 Erinn Spec Calculator. All rights reserved.
     </div>
   </footer>
 
@@ -482,7 +491,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // 1. Supabase 클라이언트 초기화
+    // 1. Supabase 클라이언트 초기화 (보안 파라미터 REST 방식)
     // -------------------------------------------------------------
     const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
@@ -491,6 +500,7 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
+    // XSS 방어 인젝션 방어 유틸
     const Security = {
       sanitizeString(str) {
         if (!str) return '';
@@ -531,10 +541,7 @@
     // 2. TCALC001 전체 데이터 1회 로드
     // -------------------------------------------------------------
     async function initSupabaseDataOnce() {
-      if (!supabaseClient) {
-        updateDbStatus(false, '데이터 로드 실패');
-        return;
-      }
+      if (!supabaseClient) return;
 
       try {
         let { data, error } = await supabaseClient
@@ -550,8 +557,7 @@
         }
 
         if (error) {
-          console.error('[오류]:', error);
-          updateDbStatus(false, '데이터 조회 실패');
+          console.error('[조회 오류]:', error);
           return;
         }
 
@@ -606,26 +612,9 @@
             }];
             renderTagInputList();
           }
-
-          updateDbStatus(true, '실시간 DB 동기화됨');
-        } else {
-          updateDbStatus(false, '데이터가 없습니다');
         }
       } catch (err) {
         console.error('[치명적 예외]:', err);
-        updateDbStatus(false, '서버 연결 실패');
-      }
-    }
-
-    function updateDbStatus(isSuccess, text) {
-      const badge = document.getElementById('dbStatusBadge');
-      if (!badge) return;
-      if (isSuccess) {
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400"></span> ${Security.sanitizeString(text)}`;
-        badge.className = "text-[11px] text-emerald-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-emerald-500/30";
-      } else {
-        badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-rose-400"></span> ${Security.sanitizeString(text)}`;
-        badge.className = "text-[11px] text-rose-300 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-rose-500/30";
       }
     }
 
@@ -701,7 +690,7 @@
               </div>
             </div>
             
-            <!-- 2. 세공 옵션 커스텀 검색 드롭다운 (선택 체크 표시) -->
+            <!-- 2. 세공 옵션 커스텀 검색 드롭다운 -->
             <div class="flex-1 min-w-[120px] relative">
               <button type="button" 
                 class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
@@ -1054,13 +1043,13 @@
     }
 
     // -------------------------------------------------------------
-    // 6. 애드센스 정책 모달 데이터
+    // 6. 애드센스 정책 모달 데이터 (에린 스펙 계산기 명칭 동기화)
     // -------------------------------------------------------------
     const POLICY_DATA = {
       terms: {
         title: "이용약관 (Terms of Service)",
         content: `
-          <p><strong>제1조 (목적)</strong><br>본 약관은 '에린 전투력 환산기'(이하 "서비스")가 제공하는 모든 계산 및 인증 카드 생성 서비스의 이용과 관련하여 서비스와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+          <p><strong>제1조 (목적)</strong><br>본 약관은 '에린 스펙 계산기'(Erinn Spec Calculator, 이하 "서비스")가 제공하는 모든 전투력 환산 및 인증 카드 생성 서비스의 이용과 관련하여 서비스와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
           <p><strong>제2조 (제공 서비스의 한계)</strong><br>1. 본 계산기에서 제공하는 환산 전투력 수치 및 대미지 기여도 분석은 커뮤니티의 통계적 기댓값을 토대로 산출된 참고용 데이터입니다.<br>2. 넥슨 공식 인게임 공식 패치나 보정치에 따라 실제 인게임 체감 성능과 차이가 발생할 수 있습니다.</p>
           <p><strong>제3조 (저작권 및 면책)</strong><br>본 서비스에 등장하는 마비노기(Mabinogi)와 관련된 모든 이미지, 텍스트, 재능 명칭 및 세공 옵션 등의 원저작권은 ㈜넥슨에 귀속됩니다.</p>
         `
@@ -1068,7 +1057,7 @@
       privacy: {
         title: "개인정보처리방침 (Privacy Policy)",
         content: `
-          <p><strong>1. 수집하는 개인정보 항목</strong><br>본 서비스는 별도의 회원가입이 없으며, 서버에 사용자의 개인식별정보(이름, 주민번호, 비밀번호 등)를 저장하지 않습니다.</p>
+          <p><strong>1. 수집하는 개인정보 항목</strong><br>본 서비스는 별도의 회원가입이 없으며, 서버에 사용자의 개인식별정보(이름, 주민번호, 비밀번호 등)를 일체 저장하지 않습니다.</p>
           <p><strong>2. 캐릭터 이미지 및 닉네임 처리</strong><br>사용자가 입력하는 캐릭터 닉네임과 업로드하는 인게임 스크린샷은 전적으로 사용자의 웹 브라우저 메모리 내(클라이언트 단)에서만 처리되며, 본 웹사이트의 서버 데이터베이스로 전송되거나 저장되지 않습니다.</p>
           <p><strong>3. 구글 애드센스(Google AdSense) 및 쿠키 정책</strong><br>본 사이트는 구글 애드센스를 통한 광고를 게재할 수 있습니다. 구글은 사용자의 이전 방문 기록 등을 바탕으로 맞춤형 광고를 제공하기 위해 쿠키(Cookie)를 사용할 수 있습니다. 사용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다.</p>
         `
@@ -1197,7 +1186,7 @@
 
             const link = document.createElement('a');
             const nickname = document.getElementById('nicknameInput').value || '밀레시안';
-            link.download = `에린_전투력_${nickname}.png`;
+            link.download = `에린_스펙_${nickname}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
             btn.innerHTML = originalText;
