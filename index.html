@@ -69,7 +69,7 @@
       background-position: right 10px center;
     }
 
-    /* 브라우저 기본 못생긴 스피너(화살표) 완전 제거 */
+    /* 브라우저 기본 스피너 제거 */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
       -webkit-appearance: none; 
@@ -203,36 +203,45 @@
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 -->
+      <!-- 2. 베이스 스탯 (개선된 Stepper 컨트롤러 탑재) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 text-theme-main"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 베이스 스탯 입력 (+ - 10 단위 지원) -->
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력 (스탯 세공 포함)</label>
-            <input type="number" id="baseStatInput" value="1500" min="0" max="8000"
-              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-4 py-2 text-sm font-semibold text-theme-light focus:border-theme-main focus:outline-none transition-colors duration-300">
-          </div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
-            <select id="piercingSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
-              <option value="0">0 레벨</option>
-              <option value="1">1 레벨</option>
-              <option value="2">2 레벨</option>
-              <option value="3">3 레벨</option>
-              <option value="4" selected>4 레벨</option>
-              <option value="5">5 레벨</option>
-              <option value="6">6 레벨</option>
-              <option value="7">7 레벨</option>
-              <option value="8">8 레벨</option>
-              <option value="9">9 레벨</option>
-              <option value="10">10 레벨</option>
-              <option value="11">11 레벨</option>
-            </select>
+            <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="baseStatInput" data-step="-10" data-min="0" data-max="8000">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" id="baseStatInput" value="1500" min="0" max="8000" step="1"
+                class="w-full bg-transparent text-center font-bold text-theme-light focus:outline-none text-sm">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="baseStatInput" data-step="10" data-min="0" data-max="8000">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
           </div>
 
+          <!-- 피어싱 레벨 (+ - 1 단위 지원) -->
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
+            <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="piercingInput" data-step="-1" data-min="0" data-max="11">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" id="piercingInput" value="4" min="0" max="11" step="1"
+                class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-sm">
+              <span class="text-xs text-slate-500 pr-1 select-none font-semibold">Lv</span>
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="piercingInput" data-step="1" data-min="0" data-max="11">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 무기 장착 타입 및 특별개조 -->
           <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
@@ -280,37 +289,87 @@
             </div>
           </div>
           
-          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2 border-t border-slate-800 pt-3">
+          <!-- [모던 Stepper 탑재] 5대 보너스 대미지 및 크리티컬 옵션 -->
+          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2.5 border-t border-slate-800 pt-3">
+            <!-- 1. 아르카나 댐증 -->
             <div>
-              <label class="block text-xs text-slate-400 mb-1">아르카나 댐증 (%)</label>
-              <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">아르카나 댐증 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="arcanaDamageInput" data-step="-1" data-min="0" data-max="60">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="arcanaDamageInput" data-step="1" data-min="0" data-max="60">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
             </div>
+
+            <!-- 2. 보너스 대미지 -->
             <div>
-              <label class="block text-xs text-slate-400 mb-1">보너스 대미지 (%)</label>
-              <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">보너스 대미지 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="bonusDamageInput" data-step="-0.5" data-min="0" data-max="60">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="bonusDamageInput" data-step="0.5" data-min="0" data-max="60">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
             </div>
+
+            <!-- 3. 네일 -->
             <div>
-              <label class="block text-xs text-slate-400 mb-1">네일 (크리상한 %)</label>
-              <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">네일 (상한 %)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="neleInput" data-step="-0.1" data-min="0" data-max="7.5">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="neleInput" data-step="0.1" data-min="0" data-max="7.5">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
             </div>
+
+            <!-- 4. 이보나 -->
             <div>
-              <label class="block text-xs text-slate-400 mb-1">이보나 (크뎀 %)</label>
-              <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">이보나 (크뎀 %)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="yvonaInput" data-step="-1" data-min="0" data-max="10">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="yvonaInput" data-step="1" data-min="0" data-max="10">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
             </div>
+
+            <!-- 5. 토템/농장 -->
             <div>
-              <label class="block text-xs text-slate-400 mb-1">토템/농장 크뎀 (%)</label>
-              <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
-                class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+              <label class="block text-[11px] text-slate-400 mb-1 truncate">토템/농장 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="totemCritInput" data-step="-1" data-min="0" data-max="30">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="totemCritInput" data-step="1" data-min="0" data-max="30">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 3. 장비 세공 및 에코스톤 등록 (세련된 Stepper UI 적용) -->
+      <!-- 3. 장비 세공 및 에코스톤 등록 -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
@@ -634,7 +693,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링 (모던 Stepper 레벨 조절기 적용)
+    // 3. 세공 목록 UI 렌더링
     // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
@@ -669,7 +728,7 @@
         row.innerHTML = `
           <div class="flex flex-nowrap items-center gap-2 w-full relative">
             
-            <!-- 1. 장비 타입 커스텀 검색 드롭다운 -->
+            <!-- 1. 장비 타입 드롭다운 -->
             <div class="w-36 shrink-0 relative">
               <button type="button" 
                 class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
@@ -696,7 +755,7 @@
               </div>
             </div>
             
-            <!-- 2. 세공 옵션 커스텀 검색 드롭다운 -->
+            <!-- 2. 세공 옵션 드롭다운 -->
             <div class="flex-1 min-w-[120px] relative">
               <button type="button" 
                 class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
@@ -730,7 +789,7 @@
               </div>
             </div>
             
-            <!-- 3. [개선] 깔끔하고 넓어진 세공 레벨 Stepper 컨트롤러 -->
+            <!-- 3. 세공 레벨 Stepper 컨트롤러 -->
             <div class="shrink-0 flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
               <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
                 <i data-lucide="minus" class="w-3 h-3"></i>
@@ -747,7 +806,6 @@
               </button>
             </div>
 
-            <!-- 삭제 버튼 -->
             <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
@@ -771,7 +829,7 @@
         document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
       };
 
-      // 1. [장비 타입] 드롭다운
+      // 장비 타입 드롭다운
       document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -828,7 +886,7 @@
         });
       });
 
-      // 2. [세공 내용] 드롭다운
+      // 세공 옵션 드롭다운
       document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -890,7 +948,7 @@
         });
       });
 
-      // 3. [개선] Stepper 버튼(-, +) 및 직접 입력 제어
+      // Stepper 버튼(-, +)
       document.querySelectorAll('.btn-step-down').forEach(btn => {
         btn.addEventListener('click', () => {
           const idx = btn.dataset.index;
@@ -936,7 +994,6 @@
         });
       });
 
-      // 4. 삭제 버튼
       document.querySelectorAll('.remove-tag-btn').forEach(btn => {
         btn.addEventListener('click', (e) => { 
           userTags.splice(e.currentTarget.dataset.index, 1); 
@@ -1029,6 +1086,9 @@
       });
     }
 
+    // -------------------------------------------------------------
+    // 5. 종합 전투력 환산 로직 (피어싱 input 연결)
+    // -------------------------------------------------------------
     function calculateTotal() {
       const parseInput = (val, defaultVal) => {
         if (val === '' || val === null || val === undefined) return defaultVal;
@@ -1037,7 +1097,7 @@
       };
 
       const baseStat = parseInput(document.getElementById('baseStatInput').value, 0);
-      const piercing = parseInput(document.getElementById('piercingSelect').value, 0);
+      const piercing = parseInput(document.getElementById('piercingInput').value, 0);
       const weaponType = document.getElementById('weaponTypeSelect').value;
       const arcanaDmgRate = parseInput(document.getElementById('arcanaDamageInput').value, 0) / 100;
       const bonusDmgRate = parseInput(document.getElementById('bonusDamageInput').value, 0) / 100;
@@ -1071,7 +1131,7 @@
     }
 
     // -------------------------------------------------------------
-    // 5. 캐릭터 이미지 줌 & 구도 제어 유틸
+    // 6. 캐릭터 이미지 줌 & 구도 제어 유틸
     // -------------------------------------------------------------
     function updateImageTransform() {
       const zoom = document.getElementById('zoomSlider').value;
@@ -1090,7 +1150,7 @@
     }
 
     // -------------------------------------------------------------
-    // 6. 애드센스 정책 모달 데이터
+    // 7. 정책 모달 데이터
     // -------------------------------------------------------------
     const POLICY_DATA = {
       terms: {
@@ -1121,10 +1181,32 @@
       lucide.createIcons();
       applyTheme(currentArcanaKey); 
 
-      // 1. TCALC001 전체 데이터 1회 로드
       await initSupabaseDataOnce();
 
-      // 2. 아르카나 선택 변경
+      // [통합 Stepper 버튼 핸들러] 베이스스탯, 피어싱, 5대 보너스 스탯
+      document.querySelectorAll('.stat-step-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const input = document.getElementById(targetId);
+          if (!input) return;
+
+          const step = parseFloat(btn.dataset.step);
+          const min = parseFloat(btn.dataset.min);
+          const max = parseFloat(btn.dataset.max);
+
+          let currentVal = parseFloat(input.value) || 0;
+          let nextVal = currentVal + step;
+
+          // 소수점 1자리(0.1, 0.5) 연산 오차 방지
+          nextVal = Math.round(nextVal * 10) / 10;
+          nextVal = Math.min(Math.max(nextVal, min), max);
+
+          input.value = nextVal;
+          calculateTotal();
+        });
+      });
+
+      // 아르카나 변경
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -1143,7 +1225,7 @@
         lucide.createIcons();
       });
 
-      // 무기 타입 선택 변경
+      // 무기 타입 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -1151,7 +1233,7 @@
         calculateTotal();
       });
 
-      // 숫자 입력칸 블러 시 0 보정
+      // 숫자 입력 필드 직접 타이핑 시 보정 및 계산
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
@@ -1164,14 +1246,14 @@
         inp.addEventListener('change', calculateTotal);
       });
 
-      ['piercingSelect', 'upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect'].forEach(id => {
+      ['upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect'].forEach(id => {
         document.getElementById(id).addEventListener('change', calculateTotal);
       });
 
       document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
       document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
 
-      // 이미지 등록 & 프리뷰 & 조작 패널
+      // 이미지 등록
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
@@ -1210,7 +1292,7 @@
         updateImageTransform();
       });
 
-      // 스펙 카드 저장
+      // 스펙 카드 이미지 저장
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1249,7 +1331,7 @@
         }, 100);
       });
 
-      // 정책 모달 이벤트
+      // 정책 모달 핸들러
       const modal = document.getElementById('policyModal');
       document.querySelectorAll('.modal-open-btn').forEach(btn => {
         btn.addEventListener('click', () => {
