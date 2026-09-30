@@ -11,7 +11,7 @@
     font-src https://fonts.gstatic.com; 
     img-src 'self' data: blob:;
   ">
-  <title>에린 전투력 환산 계산기 (v5.5 TCALC001 Schema)</title>
+  <title>에린 전투력 환산 계산기 (v5.6 Searchable)</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -110,7 +110,7 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.5</span></h1>
+          <h1 class="text-lg font-bold theme-gradient-text tracking-wide">에린 환산 스탯 계산기 <span class="text-[10px] text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 rounded ml-1">v5.6</span></h1>
         </div>
       </div>
       <div id="dbStatusBadge" class="text-[11px] text-slate-400 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
@@ -267,14 +267,14 @@
         </div>
       </div>
 
-      <!-- 3. Supabase 연동 세공 리스트 등록 -->
+      <!-- 3. Supabase 연동 세공 리스트 등록 (검색형 콤보박스 적용) -->
       <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-theme-main"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">Supabase DB(TCALC001)에서 로드한 실제 세공 데이터 목록입니다.</p>
+            <p class="text-[11px] text-slate-400 mt-1">세공 내용 입력창을 클릭하거나 타이핑하여 빠르게 옵션을 검색·선택할 수 있습니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
@@ -412,8 +412,7 @@
     let userTags = [];
 
     // -------------------------------------------------------------
-    // 2. [TCALC001 실제 스키마 컬럼 1:1 매핑]
-    // EQ_TYPE, RF_NM, RF_MIN_LV, RF_MAX_LV, RF_LIMIT_YN, RF_LIMIT_MIN_LV, RF_LIMIT_MAX_LV
+    // 2. TCALC001 전체 데이터 1회 전건 로드 (단일 SELECT 쿼리)
     // -------------------------------------------------------------
     async function initSupabaseDataOnce() {
       if (!supabaseClient) {
@@ -446,7 +445,6 @@
           memoryReforgeMap = {};
 
           data.forEach(row => {
-            // 제공된 실제 스키마 컬럼명 매핑 (대소문자 무관하게 처리)
             const eqType = String(row.EQ_TYPE || row.eq_type || '').trim();
             const rfNm = String(row.RF_NM || row.rf_nm || '').trim();
 
@@ -456,7 +454,6 @@
             const maxLvl = parseInt(row.RF_MAX_LV || row.rf_max_lv || 20);
             const limitYn = String(row.RF_LIMIT_YN || row.rf_limit_yn || 'N').trim().toUpperCase();
             
-            // 한계돌파 가능 여부(Y)에 따른 한돌 레벨 설정
             let limitMinLvl = maxLvl + 1;
             let limitMaxLvl = maxLvl;
 
@@ -528,7 +525,7 @@
     }
 
     // -------------------------------------------------------------
-    // 3. UI 렌더링
+    // 3. UI 렌더링 (검색형 콤보박스: Input + Datalist 적용)
     // -------------------------------------------------------------
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
@@ -555,27 +552,36 @@
         item.limit_yn = currentOpt.limit_yn;
         item.limit_max = currentOpt.limit_max_level;
 
-        // 허용되는 최대 입력 레벨 (한돌 가능 시 limit_max_level, 불가 시 max_level)
         const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
+        const datalistId = `datalist_reforge_${index}`;
 
         const row = document.createElement('div');
         row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
         
         row.innerHTML = `
+          <!-- 해당 항목 전용 자동완성 Datalist -->
+          <datalist id="${datalistId}">
+            ${options.map(o => `<option value="${Security.sanitizeString(o.name)}"></option>`).join('')}
+          </datalist>
+
           <div class="flex flex-nowrap items-center gap-2 w-full">
             <!-- 1. 장비 타입 (EQ_TYPE) 드롭다운 -->
             <select class="tag-part w-32 shrink-0 bg-slate-900 border border-slate-700 rounded px-2 py-2 text-slate-300 focus:outline-none cursor-pointer" data-index="${index}">
               ${memoryPartList.map(p => `<option value="${p}" ${p === item.part ? 'selected' : ''}>${p}</option>`).join('')}
             </select>
             
-            <!-- 2. 세공 내용 (RF_NM) 드롭다운 -->
-            <div class="flex-1 min-w-[120px]">
-              <select class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none cursor-pointer" data-index="${index}">
-                ${options.map(o => `<option value="${Security.sanitizeString(o.name)}" ${o.name === item.name ? 'selected' : ''}>${Security.sanitizeString(o.name)}</option>`).join('')}
-              </select>
+            <!-- 2. 세공 내용 검색형 콤보박스 (타이핑 검색 및 클릭 드롭다운 지원) -->
+            <div class="flex-1 min-w-[120px] relative">
+              <input type="text" 
+                list="${datalistId}" 
+                value="${Security.sanitizeString(item.name)}" 
+                placeholder="세공명 검색 또는 선택"
+                class="tag-name w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-200 focus:border-theme-main focus:outline-none"
+                data-index="${index}"
+                autocomplete="off">
             </div>
             
-            <!-- 3. 세공 레벨 입력칸 (한돌 최대 레벨 이상 입력 불가) -->
+            <!-- 3. 세공 레벨 입력칸 -->
             <div class="w-16 shrink-0 flex items-center gap-1">
               <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" class="tag-level w-full bg-slate-900 border border-slate-700 rounded px-2 py-1.5 text-theme-light font-semibold text-center focus:outline-none" data-index="${index}">
               <span class="text-slate-400">Lv</span>
@@ -621,30 +627,49 @@
         });
       });
 
-      // 2. 세공 옵션(RF_NM) 변경
-      document.querySelectorAll('.tag-name').forEach(sel => {
-        sel.addEventListener('change', (e) => { 
+      // 2. 검색형 세공 콤보박스 클릭 및 입력 이벤트
+      document.querySelectorAll('.tag-name').forEach(inp => {
+        // 클릭 시 바로 목록 열기 (showPicker 지원 브라우저)
+        inp.addEventListener('focus', function() {
+          if (typeof this.showPicker === 'function') {
+            try { this.showPicker(); } catch(err) {}
+          }
+        });
+
+        // 사용자가 검색하여 옵션을 고르거나 입력을 마쳤을 때
+        const handleOptionChange = (e) => {
           const idx = e.target.dataset.index;
-          const selectedName = e.target.value;
+          const selectedName = e.target.value.trim();
           userTags[idx].name = selectedName;
           
           const options = memoryReforgeMap[userTags[idx].part] || [];
-          const opt = options.find(o => o.name === selectedName) || { min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
-          
-          userTags[idx].min = opt.min_level;
-          userTags[idx].max = opt.max_level;
-          userTags[idx].limit_yn = opt.limit_yn;
-          userTags[idx].limit_max = opt.limit_max_level;
-          
-          const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
-          if (userTags[idx].level > allowedMax) {
-            userTags[idx].level = allowedMax;
+          const opt = options.find(o => o.name === selectedName);
+
+          if (opt) {
+            userTags[idx].min = opt.min_level;
+            userTags[idx].max = opt.max_level;
+            userTags[idx].limit_yn = opt.limit_yn;
+            userTags[idx].limit_max = opt.limit_max_level;
+            
+            const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
+            if (userTags[idx].level > allowedMax) {
+              userTags[idx].level = allowedMax;
+            }
           }
-          renderTagInputList(); 
+          renderCardTags();
+        };
+
+        inp.addEventListener('change', (e) => {
+          handleOptionChange(e);
+          renderTagInputList(); // 하단 Max/한돌 텍스트 갱신을 위해 재렌더링
+        });
+
+        inp.addEventListener('input', (e) => {
+          handleOptionChange(e);
         });
       });
 
-      // 3. 레벨 입력 (한돌 여부에 따른 절대 한도 제어)
+      // 3. 레벨 입력 제어 (한돌 상한선 제한)
       document.querySelectorAll('.tag-level').forEach(inp => {
         inp.addEventListener('input', (e) => { 
           const idx = e.target.dataset.index;
@@ -655,7 +680,6 @@
           let val = parseInt(e.target.value);
           if (isNaN(val)) val = allowedMin;
 
-          // 상한 및 한돌 초과 불가 강제 clamp
           tag.level = Math.min(Math.max(val, allowedMin), allowedMax);
           e.target.value = tag.level;
 
@@ -723,7 +747,6 @@
           span.className += "tag-max font-bold";
           span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
         } else {
-          // 한계돌파 구간 (maxLvl 초과 ~ limitMaxLvl): 초과 비율에 따른 5단계 차등 네온
           let diff = Math.max(limitMaxLvl - maxLvl, 1);
           let ratio = (level - maxLvl) / diff;
           if (ratio > 1) ratio = 1;
@@ -798,9 +821,10 @@
       lucide.createIcons();
       applyTheme(currentArcanaKey); 
 
-      // TCALC001 전체 데이터 1회 로드
+      // 1. TCALC001 전체 데이터 1회 로드
       await initSupabaseDataOnce();
 
+      // 2. 아르카나 선택 변경
       document.getElementById('arcanaSelect').addEventListener('change', (e) => {
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
@@ -819,6 +843,7 @@
         lucide.createIcons();
       });
 
+      // 무기 타입 선택 변경
       document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
         const isDual = e.target.value === 'dual_wield';
         document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
@@ -826,6 +851,7 @@
         calculateTotal();
       });
 
+      // 숫자 입력칸 블러 시 0 자동 보정
       document.querySelectorAll('input[type="number"]').forEach(inp => {
         inp.addEventListener('blur', (e) => {
           if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
