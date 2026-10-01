@@ -653,7 +653,7 @@
               <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
               <div class="arcana-badge-pill">
                 <span class="arcana-badge-dot"></span>
-                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
               </div>
             </div>
             
@@ -1478,7 +1478,6 @@
         const cWidth = avatarContainer.clientWidth || 300;
         const cHeight = avatarContainer.clientHeight || 400;
 
-        // 드래그 거리를 퍼센테이지(0%~100%) 변화량으로 변환
         const deltaPercentX = -((e.clientX - startX) / cWidth) * 100;
         const deltaPercentY = -((e.clientY - startY) / cHeight) * 100;
 
@@ -1529,41 +1528,28 @@
       });
     }
 
+    // [Edge Function을 직접 호출하여 IP 기준 정확한 잔여 횟수를 동기화]
     async function checkDailyAiUsageLimit() {
-      const today = new Date().toISOString().slice(0, 10);
-      const usageKey = `ai_usage_${today}`;
-      let localCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
-
       if (supabaseClient) {
         try {
-          const startOfDay = new Date();
-          startOfDay.setHours(0, 0, 0, 0);
-
-          const clientFingerprint = localStorage.getItem('client_fp') || crypto.randomUUID();
-          localStorage.setItem('client_fp', clientFingerprint);
-
-          const { data, count, error } = await supabaseClient
-            .from('ai_generations')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_identifier', clientFingerprint)
-            .gte('created_at', startOfDay.toISOString());
-
-          if (!error && typeof count === 'number') {
-            localCount = Math.max(localCount, count);
-            localStorage.setItem(usageKey, localCount.toString());
+          const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+            body: { action: 'check' }
+          });
+          if (!error && data && typeof data.remainCount === 'number') {
+            return data.remainCount;
           }
         } catch (e) {
-          console.warn('[DB 일일 사용량 확인 우회]:', e);
+          console.warn('[IP 잔여 횟수 확인 중 오류]:', e);
         }
       }
-      return localCount;
+      return 3;
     }
 
     async function updateRemainUsageUI() {
-      const count = await checkDailyAiUsageLimit();
-      const remain = Math.max(3 - count, 0);
+      const remain = await checkDailyAiUsageLimit();
       const el = document.getElementById('aiRemainCountText');
       if (el) el.textContent = remain;
+      return remain;
     }
 
     async function handleAiIllustrationGeneration() {
@@ -1580,8 +1566,8 @@
         return;
       }
 
-      let usageCount = await checkDailyAiUsageLimit();
-      if (usageCount >= 3) {
+      let remain = await checkDailyAiUsageLimit();
+      if (remain <= 0) {
         alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
         return;
       }
@@ -1610,7 +1596,12 @@
           }
         });
 
-        if (error) throw new Error(error.message || 'AI 변환 서버 응답 오류');
+        if (error) {
+          if (error.message && error.message.includes("한도")) {
+            throw new Error("오늘 무료 AI 일러스트 생성 한도(3회)를 초과했습니다.");
+          }
+          throw new Error(error.message || 'AI 변환 서버 응답 오류');
+        }
 
         const finalUrl = data?.outputUrl || data?.imageUrl || data?.url || data?.output;
 
@@ -1623,14 +1614,10 @@
           const badge = document.getElementById('animeOverlayBadge');
           if (badge) badge.classList.remove('hidden');
 
-          const today = new Date().toISOString().slice(0, 10);
-          const usageKey = `ai_usage_${today}`;
-          usageCount += 1;
-          localStorage.setItem(usageKey, usageCount.toString());
-          await updateRemainUsageUI();
+          const newRemain = await updateRemainUsageUI();
 
           setTimeout(() => {
-            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${Math.max(3 - usageCount, 0)}회)`);
+            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${newRemain}회)`);
           }, 100);
         } else {
           throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
@@ -1638,7 +1625,8 @@
       } catch (err) {
         console.error('[AI 생성 에러]:', err);
         adModal.classList.add('hidden');
-        alert('AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+        alert(err.message || 'AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+        await updateRemainUsageUI();
       } finally {
         aiBtn.disabled = false;
         adProgressBar.style.width = '0%';
