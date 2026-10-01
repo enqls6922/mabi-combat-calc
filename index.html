@@ -361,7 +361,6 @@
 
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-      <!-- 1. 좌측 상단 로고 및 서비스명 클릭 시 화면 새로고침 -->
       <div id="brandHeaderLogo" class="flex items-center space-x-3 cursor-pointer group select-none" title="새로고침">
         <div class="p-1.5 bg-theme-bg border border-theme-border rounded-lg transition-all duration-500 shrink-0 flex items-center justify-center group-hover:scale-105">
           <img src="icon/아이콘.svg" alt="Erinn Icon" class="w-7 h-7 object-contain filter drop-shadow-[0_0_2px_var(--theme-main)]">
@@ -374,7 +373,6 @@
         </div>
       </div>
       
-      <!-- 테마 토글 버튼 (라이트 / 다크) -->
       <button id="themeToggleBtn" type="button" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition flex items-center justify-center shadow-sm" title="화면 모드 변경">
         <i id="themeToggleIcon" data-lucide="sun" class="w-4 h-4"></i>
       </button>
@@ -644,7 +642,7 @@
         </div>
 
         <!-- 카드 캐릭터 이미지 영역 -->
-        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
+        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none">
             <img id="bgBlurImage" src="" draggable="false" class="no-native-drag absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-cover hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform;">
             
@@ -1431,7 +1429,6 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [하드웨어 가속 렌더링 및 모바일/PC 통합 트랜스폼 계산]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1457,7 +1454,6 @@
       img.style.transform = `translate3d(${currentImagePosX}px, ${currentImagePosY}px, 0px) scale(${scale})`;
     }
 
-    // [PC 및 모바일 터치 패닝/핀치줌 전면 개편]
     function initImageControls() {
       const avatarContainer = document.getElementById('avatarContainer');
       const img = document.getElementById('previewImage');
@@ -1514,9 +1510,9 @@
         }
       });
 
-      // 모바일 터치 이벤트: passive: false로 스크롤 간섭 원천 차단
+      // 모바일 터치 이벤트: 사진이 보일 때만 touch-action 제어 및 스크롤 차단
       avatarContainer.addEventListener('touchstart', (e) => {
-        if (img.classList.contains('hidden')) return;
+        if (img.classList.contains('hidden')) return; // 사진 없으면 브라우저 기본 스크롤 유지
 
         if (e.touches.length === 1) {
           isDragging = true;
@@ -1531,17 +1527,18 @@
           initialPinchDistance = Math.hypot(dx, dy);
           initialZoomAtPinch = currentImageZoom;
         }
-      }, { passive: false });
+      }, { passive: true });
 
       avatarContainer.addEventListener('touchmove', (e) => {
-        if (img.classList.contains('hidden')) return;
-        e.preventDefault(); // 모바일 웹 브라우저 전체 스크롤 차단
+        if (img.classList.contains('hidden')) return; // 사진 없으면 브라우저 기본 스크롤 허용
 
         if (e.touches.length === 1 && isDragging) {
+          if (e.cancelable) e.preventDefault(); // 사진 조작 시에만 스크롤 방지
           currentImagePosX = initialPosX + (e.touches[0].clientX - startX);
           currentImagePosY = initialPosY + (e.touches[0].clientY - startY);
           updateImageTransform();
         } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+          if (e.cancelable) e.preventDefault();
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           const distance = Math.hypot(dx, dy);
