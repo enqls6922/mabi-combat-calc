@@ -141,17 +141,27 @@
 
     input[type=range] { accent-color: var(--theme-main); }
 
-    /* [라이트 모드 전용 세부 오버라이드] */
+    /* ========================================================
+       [라이트 모드: 눈부심 방지 소프트 톤다운 및 완벽 색상 오버라이드]
+       ======================================================== */
     html.light-theme {
       color-scheme: light;
     }
-    html.light-theme .section-card {
-      background-color: #ffffff !important;
+    html.light-theme body {
+      background-color: #f1f5f9 !important; /* 덜 눈부신 차분한 소프트 쿨그레이 */
+      color: #1e293b !important;
+    }
+    html.light-theme header {
+      background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+    }
+    html.light-theme .section-card {
+      background-color: #f8fafc !important; /* 순백색이 아닌 부드러운 패널색 */
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05) !important;
     }
     html.light-theme .inner-box {
-      background-color: #f8fafc !important;
+      background-color: #edf2f7 !important; /* 차분한 내부 컨테이너 */
       border-color: #e2e8f0 !important;
     }
     html.light-theme label,
@@ -167,12 +177,20 @@
     html.light-theme .text-slate-200 {
       color: #1e293b !important;
     }
+
+    /* 인풋 및 셀렉트 박스 */
     html.light-theme input[type="text"],
     html.light-theme select {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
       color: #0f172a !important;
     }
+    html.light-theme input#baseStatInput,
+    html.light-theme .tag-level {
+      color: var(--theme-dark) !important;
+    }
+
+    /* 드롭다운 메뉴 및 검색 */
     html.light-theme .part-dropdown-trigger,
     html.light-theme .reforge-dropdown-trigger {
       background-color: #ffffff !important;
@@ -183,7 +201,7 @@
     html.light-theme .reforge-dropdown-menu {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12) !important;
     }
     html.light-theme .part-dropdown-search,
     html.light-theme .reforge-dropdown-search {
@@ -197,8 +215,15 @@
     }
     html.light-theme .part-dropdown-item:hover,
     html.light-theme .reforge-dropdown-item:hover {
-      background-color: #f1f5f9 !important;
+      background-color: #e2e8f0 !important;
       color: #0f172a !important;
+    }
+
+    /* 스텝 조절 버튼 (+ / -) 및 세공 리스트의 검은 박스 오버라이드 */
+    html.light-theme .bg-slate-900,
+    html.light-theme .bg-slate-950 {
+      background-color: #edf2f7 !important;
+      border-color: #cbd5e1 !important;
     }
     html.light-theme .stat-step-btn,
     html.light-theme .btn-step-down,
@@ -211,10 +236,16 @@
       background-color: #e2e8f0 !important;
       color: #0f172a !important;
     }
-    html.light-theme input#baseStatInput,
-    html.light-theme .tag-level {
+
+    /* 장비 추가 버튼 */
+    html.light-theme #addReforgeBtn {
+      background-color: #ffffff !important;
+      border-color: var(--theme-main) !important;
       color: var(--theme-dark) !important;
+      font-weight: 600 !important;
     }
+
+    /* 드롭존 영역 */
     html.light-theme #dropZone {
       background-color: #f8fafc !important;
       border-color: #cbd5e1 !important;
@@ -222,8 +253,10 @@
     html.light-theme #dropZone:hover {
       border-color: var(--theme-main) !important;
     }
+
+    /* 테마 모드 버튼 */
     html.light-theme #themeToggleBtn {
-      background-color: #f1f5f9 !important;
+      background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
       color: #334155 !important;
     }
@@ -231,6 +264,8 @@
       background-color: #e2e8f0 !important;
       color: #0f172a !important;
     }
+
+    /* 하단 푸터 */
     html.light-theme footer {
       background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
@@ -823,33 +858,16 @@
 
     function applyThemeMode(mode) {
       const root = document.documentElement;
-      const body = document.body;
       const icon = document.getElementById('themeToggleIcon');
 
       if (mode === 'light') {
         root.classList.remove('dark-theme');
         root.classList.add('light-theme');
-        body.classList.remove('bg-slate-950', 'text-slate-100');
-        body.classList.add('bg-slate-100', 'text-slate-900');
-
-        document.querySelectorAll('header').forEach(el => {
-          el.classList.remove('bg-slate-900', 'border-slate-800');
-          el.classList.add('bg-white', 'border-slate-200');
-        });
-
         icon.setAttribute('data-lucide', 'moon');
         localStorage.setItem('site_theme_mode', 'light');
       } else {
         root.classList.remove('light-theme');
         root.classList.add('dark-theme');
-        body.classList.remove('bg-slate-100', 'text-slate-900');
-        body.classList.add('bg-slate-950', 'text-slate-100');
-
-        document.querySelectorAll('header').forEach(el => {
-          el.classList.remove('bg-white', 'border-slate-200');
-          el.classList.add('bg-slate-900', 'border-slate-800');
-        });
-
         icon.setAttribute('data-lucide', 'sun');
         localStorage.setItem('site_theme_mode', 'dark');
       }
