@@ -847,8 +847,8 @@
     let draggedTagIndex = null;
 
     let currentImageZoom = 100;
-    let currentImagePosX = 0;
-    let currentImagePosY = 0;
+    let imagePosPercentX = 50;
+    let imagePosPercentY = 50;
 
     async function initSupabaseDataOnce() {
       if (!supabaseClient) return;
@@ -1426,32 +1426,14 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [object-cover에 의해 잘려나간 실제 여백까지 고려하여 부드럽고 안전하게 패닝할 수 있도록 보정]
+    // [object-position과 scale을 결합하여 배경 노출 없이 안전하고 자유롭게 패닝하는 함수]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
-      const container = document.getElementById('avatarContainer');
-      if (!img || !container) return;
+      if (!img) return;
 
       const scale = currentImageZoom / 100;
-      const cWidth = container.clientWidth;
-      const cHeight = container.clientHeight;
-
-      const natW = img.naturalWidth || cWidth;
-      const natH = img.naturalHeight || cHeight;
-
-      // object-cover 적용 시 렌더링되는 실제 이미지 가로/세로 비율 계산
-      const coverRatio = Math.max(cWidth / natW, cHeight / natH);
-      const renderedW = natW * coverRatio;
-      const renderedH = natH * coverRatio;
-
-      // 줌(scale) 및 object-cover로 인해 컨테이너 밖으로 넘어간 총 여분 크기만큼만 이동 허용
-      const maxTranslateX = Math.max(0, (renderedW * scale - cWidth) / 2);
-      const maxTranslateY = Math.max(0, (renderedH * scale - cHeight) / 2);
-
-      currentImagePosX = Math.max(-maxTranslateX, Math.min(maxTranslateX, currentImagePosX));
-      currentImagePosY = Math.max(-maxTranslateY, Math.min(maxTranslateY, currentImagePosY));
-
-      img.style.transform = `translate(${currentImagePosX}px, ${currentImagePosY}px) scale(${scale})`;
+      img.style.objectPosition = `${imagePosPercentX}% ${imagePosPercentY}%`;
+      img.style.transform = `scale(${scale})`;
     }
 
     function initImageMouseControls() {
@@ -1461,8 +1443,8 @@
       let isDragging = false;
       let startX = 0;
       let startY = 0;
-      let initialPosX = 0;
-      let initialPosY = 0;
+      let initialPercentX = 50;
+      let initialPercentY = 50;
 
       avatarContainer.addEventListener('wheel', (e) => {
         if (img.classList.contains('hidden')) return;
@@ -1483,8 +1465,8 @@
         isDragging = true;
         startX = e.clientX;
         startY = e.clientY;
-        initialPosX = currentImagePosX;
-        initialPosY = currentImagePosY;
+        initialPercentX = imagePosPercentX;
+        initialPercentY = imagePosPercentY;
         img.classList.remove('cursor-grab');
         img.classList.add('cursor-grabbing');
       });
@@ -1492,11 +1474,17 @@
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
+        
+        const cWidth = avatarContainer.clientWidth || 300;
+        const cHeight = avatarContainer.clientHeight || 400;
 
-        currentImagePosX = initialPosX + deltaX;
-        currentImagePosY = initialPosY + deltaY;
+        // 드래그 거리를 퍼센테이지(0%~100%) 변화량으로 변환
+        const deltaPercentX = -((e.clientX - startX) / cWidth) * 100;
+        const deltaPercentY = -((e.clientY - startY) / cHeight) * 100;
+
+        imagePosPercentX = Math.max(0, Math.min(100, initialPercentX + deltaPercentX));
+        imagePosPercentY = Math.max(0, Math.min(100, initialPercentY + deltaPercentY));
+
         updateImageTransform();
       });
 
@@ -1516,18 +1504,23 @@
           isDragging = true;
           touchStartX = e.touches[0].clientX;
           touchStartY = e.touches[0].clientY;
-          initialPosX = currentImagePosX;
-          initialPosY = currentImagePosY;
+          initialPercentX = imagePosPercentX;
+          initialPercentY = imagePosPercentY;
         }
       }, { passive: true });
 
       window.addEventListener('touchmove', (e) => {
         if (!isDragging || e.touches.length !== 1) return;
-        const deltaX = e.touches[0].clientX - touchStartX;
-        const deltaY = e.touches[0].clientY - touchStartY;
+        
+        const cWidth = avatarContainer.clientWidth || 300;
+        const cHeight = avatarContainer.clientHeight || 400;
 
-        currentImagePosX = initialPosX + deltaX;
-        currentImagePosY = initialPosY + deltaY;
+        const deltaPercentX = -((e.touches[0].clientX - touchStartX) / cWidth) * 100;
+        const deltaPercentY = -((e.touches[0].clientY - touchStartY) / cHeight) * 100;
+
+        imagePosPercentX = Math.max(0, Math.min(100, initialPercentX + deltaPercentX));
+        imagePosPercentY = Math.max(0, Math.min(100, initialPercentY + deltaPercentY));
+
         updateImageTransform();
       }, { passive: true });
 
@@ -1779,13 +1772,8 @@
           document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
           
           currentImageZoom = 100;
-          currentImagePosX = 0;
-          currentImagePosY = 0;
-
-          // 이미지가 로드된 후 정확한 naturalWidth/naturalHeight를 반영하여 트랜스폼 계산
-          img.onload = () => {
-            updateImageTransform();
-          };
+          imagePosPercentX = 50;
+          imagePosPercentY = 50;
           updateImageTransform();
         };
         reader.readAsDataURL(file);
