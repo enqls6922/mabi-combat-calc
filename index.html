@@ -142,13 +142,13 @@
     input[type=range] { accent-color: var(--theme-main); }
 
     /* ========================================================
-       [라이트 모드: 눈부심 방지 소프트 톤다운 및 완벽 색상 오버라이드]
+       [라이트 모드 전용 세부 오버라이드 및 눈부심 방지 테마]
        ======================================================== */
     html.light-theme {
       color-scheme: light;
     }
     html.light-theme body {
-      background-color: #f1f5f9 !important; /* 덜 눈부신 차분한 소프트 쿨그레이 */
+      background-color: #f1f5f9 !important;
       color: #1e293b !important;
     }
     html.light-theme header {
@@ -156,12 +156,12 @@
       border-color: #e2e8f0 !important;
     }
     html.light-theme .section-card {
-      background-color: #f8fafc !important; /* 순백색이 아닌 부드러운 패널색 */
+      background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
       box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05) !important;
     }
     html.light-theme .inner-box {
-      background-color: #edf2f7 !important; /* 차분한 내부 컨테이너 */
+      background-color: #edf2f7 !important;
       border-color: #e2e8f0 !important;
     }
     html.light-theme label,
@@ -178,19 +178,25 @@
       color: #1e293b !important;
     }
 
-    /* 인풋 및 셀렉트 박스 */
+    /* 일반 인풋 및 셀렉트 */
     html.light-theme input[type="text"],
     html.light-theme select {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
       color: #0f172a !important;
     }
-    html.light-theme input#baseStatInput,
-    html.light-theme .tag-level {
+
+    /* [롤백 반영] 아르카나 재능 콤보박스는 고유 테마 컬러 유지 */
+    html.light-theme select#arcanaSelect {
+      color: var(--theme-main) !important;
+      font-weight: 800 !important;
+    }
+
+    html.light-theme input#baseStatInput {
       color: var(--theme-dark) !important;
     }
 
-    /* 드롭다운 메뉴 및 검색 */
+    /* 드롭다운 메뉴 및 검색창 */
     html.light-theme .part-dropdown-trigger,
     html.light-theme .reforge-dropdown-trigger {
       background-color: #ffffff !important;
@@ -219,12 +225,7 @@
       color: #0f172a !important;
     }
 
-    /* 스텝 조절 버튼 (+ / -) 및 세공 리스트의 검은 박스 오버라이드 */
-    html.light-theme .bg-slate-900,
-    html.light-theme .bg-slate-950 {
-      background-color: #edf2f7 !important;
-      border-color: #cbd5e1 !important;
-    }
+    /* 상/하단 스텝 조절 버튼 (+ / -) 및 세공 레벨 조절 박스 */
     html.light-theme .stat-step-btn,
     html.light-theme .btn-step-down,
     html.light-theme .btn-step-up {
@@ -237,12 +238,24 @@
       color: #0f172a !important;
     }
 
-    /* 장비 추가 버튼 */
+    /* [세공 레벨 높낮이 조절창 라이트 모드 전환] */
+    html.light-theme #reforgeListContainer .bg-slate-900 {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme .tag-level {
+      color: var(--theme-dark) !important;
+    }
+
+    /* [장비 추가 버튼 텍스트 시인성 확보] */
     html.light-theme #addReforgeBtn {
       background-color: #ffffff !important;
       border-color: var(--theme-main) !important;
-      color: var(--theme-dark) !important;
-      font-weight: 600 !important;
+      color: var(--theme-main) !important;
+      font-weight: 700 !important;
+    }
+    html.light-theme #addReforgeBtn i {
+      color: var(--theme-main) !important;
     }
 
     /* 드롭존 영역 */
@@ -252,6 +265,48 @@
     }
     html.light-theme #dropZone:hover {
       border-color: var(--theme-main) !important;
+    }
+
+    /* [우측 스펙 카드 라이트 모드 전환] */
+    html.light-theme #cardExportArea {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+    html.light-theme #cardExportArea div[style*="border-bottom: 1px solid #1e293b"],
+    html.light-theme #cardExportArea div[style*="border-top: 1px solid #1e293b"] {
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #1e293b"] {
+      background-color: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #1e293b"] span {
+      color: #334155 !important;
+    }
+    html.light-theme #cardServerBadge {
+      color: #0f172a !important;
+    }
+    html.light-theme #avatarContainer {
+      background-color: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #030712"] {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme #breakdownBase {
+      color: #0f172a !important;
+    }
+
+    /* [스펙 카드 이미지 저장 버튼 라이트 모드 전환] */
+    html.light-theme #saveCardBtn {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    html.light-theme #saveCardBtn:hover {
+      background-color: #cbd5e1 !important;
     }
 
     /* 테마 모드 버튼 */
@@ -538,7 +593,7 @@
 
     </section>
 
-    <!-- 우측: 결과 스펙 카드 영역 (카드는 다크 테마 감성 유지) -->
+    <!-- 우측: 결과 스펙 카드 영역 -->
     <section class="lg:col-span-5 space-y-5 sm:space-y-6 w-full">
       
       <div class="bg-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
@@ -844,7 +899,6 @@
       }
     }
 
-    // [개선된 다크/라이트 모드 토글 함수]
     function initThemeMode() {
       const savedTheme = localStorage.getItem('site_theme_mode') || 'dark';
       applyThemeMode(savedTheme);
@@ -1326,7 +1380,6 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [개선된 줌 & 패닝 변환 함수: 중심 기준 스케일 및 픽셀 패닝 연산]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1345,7 +1398,6 @@
       img.style.transform = `translate(${currentImagePosX}px, ${currentImagePosY}px) scale(${scale})`;
     }
 
-    // [상하좌우 자유 패닝 및 휠 줌 인터랙션 컨트롤러]
     function initImageMouseControls() {
       const avatarContainer = document.getElementById('avatarContainer');
       const img = document.getElementById('previewImage');
@@ -1356,7 +1408,6 @@
       let initialPosX = 0;
       let initialPosY = 0;
 
-      // 1. 휠(Wheel) 조작: 줌인 / 줌아웃 (100% ~ 300%)
       avatarContainer.addEventListener('wheel', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault();
@@ -1370,7 +1421,6 @@
         updateImageTransform();
       }, { passive: false });
 
-      // 2. 마우스 드래그 조작 (상하좌우)
       avatarContainer.addEventListener('mousedown', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault(); 
@@ -1402,7 +1452,6 @@
         }
       });
 
-      // 3. 모바일 터치 드래그 지원
       let touchStartX = 0;
       let touchStartY = 0;
       avatarContainer.addEventListener('touchstart', (e) => {
