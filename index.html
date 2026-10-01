@@ -18,12 +18,12 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- html-to-image: 브라우저 CSS 렌더링을 1:1로 캡처 -->
   <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -58,7 +58,7 @@
       overflow-x: hidden;
       width: 100%;
       font-family: 'Noto Sans KR', sans-serif;
-      transition: all 0.4s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     
     .theme-gradient-text {
@@ -98,18 +98,13 @@
     #cardExportArea { position: relative; }
     .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
 
-    /* 이미지 드래그 고스트 현상 방지 */
     .no-native-drag {
       -webkit-user-drag: none;
-      -khtml-user-drag: none;
-      -moz-user-drag: none;
-      -o-user-drag: none;
       user-drag: none;
       user-select: none;
       -webkit-user-select: none;
     }
 
-    /* 태그 수직 중앙 정렬 보정 */
     .tag-base {
       display: inline-flex !important;
       align-items: center !important;
@@ -147,9 +142,9 @@
     input[type=range] { accent-color: var(--theme-main); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden transition-colors duration-300">
 
-  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full">
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="p-2 bg-theme-bg border border-theme-border rounded-lg section-icon transition-all duration-500 shrink-0">
@@ -162,6 +157,11 @@
           </div>
         </div>
       </div>
+      
+      <!-- 테마 토글 버튼 (라이트 / 다크) -->
+      <button id="themeToggleBtn" type="button" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition flex items-center justify-center shadow-sm" title="화면 모드 변경">
+        <i id="themeToggleIcon" data-lucide="sun" class="w-4 h-4"></i>
+      </button>
     </div>
   </header>
 
@@ -187,7 +187,7 @@
   <main class="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 flex-1">
     
     <section class="lg:col-span-7 space-y-5 sm:space-y-6 w-full">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg section-card">
         <h2 class="text-sm font-semibold theme-gradient-text mb-3 sm:mb-4 flex items-center gap-2">
           <i data-lucide="swords" class="w-4 h-4 section-icon"></i> 1. 캐릭터 & 아르카나 정보
         </h2>
@@ -223,7 +223,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4 section-card">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 section-icon"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
@@ -258,7 +258,7 @@
             </div>
           </div>
 
-          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
+          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800 inner-box">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
               <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
@@ -379,7 +379,7 @@
         </div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4 section-card">
         <div class="flex items-center justify-between gap-2">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
@@ -394,15 +394,15 @@
         <div id="reforgeListContainer" class="space-y-3 w-full"></div>
       </div>
 
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-3 section-card">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="image" class="w-4 h-4 section-icon"></i> 4. 캐릭터 외형 등록 (선택)
         </h2>
-        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-5 sm:p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-5 sm:p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40 inner-box">
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
           <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
           <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
-          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [휠: 줌인/아웃] 및 [드래그: 상하 위치]를 직접 조절할 수 있습니다.</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠: 줌인/아웃] 및 [드래그: 상하좌우 이동]으로 맞출 수 있습니다.</p>
         </div>
       </div>
 
@@ -411,11 +411,9 @@
     <!-- 우측: 결과 스펙 카드 영역 -->
     <section class="lg:col-span-5 space-y-5 sm:space-y-6 w-full">
       
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
-        <!-- 배경 블러 장식 (캡처 시 숨김) -->
+      <div class="bg-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
         <div id="cardGlowDecorator" class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
-        <!-- [상단 헤더: 수직 중앙 정렬 완벽 고정] -->
         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; height: 38px; margin-bottom: 16px; width: 100%;">
           <div style="display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 10px; border-radius: 9999px; background-color: #1e293b; border: 1px solid #334155; line-height: 1;">
             <span style="font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; line-height: 1; display: inline-block;">
@@ -429,10 +427,10 @@
           </div>
         </div>
 
-        <!-- 카드 캐릭터 이미지 영역: 마우스 휠 및 드래그 조작 지원 -->
+        <!-- 카드 캐릭터 이미지 영역: 상하좌우 패닝 및 휠 줌 -->
         <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
             <img id="bgBlurImage" src="" draggable="false" class="no-native-drag absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
-            <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-cover hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none">
+            <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-cover hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center;">
             
             <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500 pointer-events-none">
               <i data-lucide="swords" class="w-16 h-16 section-icon mb-2 mx-auto"></i>
@@ -444,7 +442,6 @@
             </div>
         </div>
 
-        <!-- 스코어 박스 -->
         <div style="text-align: center; background-color: #030712; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 10px; margin-bottom: 16px;">
           <span id="cardFinalLabel" style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; line-height: 1;">종합 전투력 환산 스코어</span>
           <div style="font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: var(--theme-main);" id="totalScoreText">
@@ -454,7 +451,7 @@
 
         <div style="border-top: 1px solid #1e293b; padding-top: 14px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
-            <span>노도핑 순수 깡스탯</span>
+            <span>노도핑 전투 베이스 스펙</span>
             <span id="breakdownBase" style="color: #e2e8f0; font-weight: 600;">0</span>
           </div>
           <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
@@ -467,7 +464,6 @@
           </div>
         </div>
 
-        <!-- 세공 뱃지 영역: 줄바꿈 시에도 수직 중앙 정렬 유지 -->
         <div style="border-top: 1px solid #1e293b; padding-top: 14px;">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
             <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Equipment Options</span>
@@ -479,7 +475,6 @@
         </div>
       </div>
 
-      <!-- AI 버튼 및 저장 버튼 -->
       <div class="space-y-2">
         <button id="aiTransformBtn" class="w-full text-white font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
           <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> 
@@ -490,7 +485,6 @@
         </button>
       </div>
 
-      <!-- 우측 하단 배너 -->
       <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] flex flex-col items-center justify-center">
         <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
         <ins class="adsbygoogle"
@@ -530,7 +524,7 @@
     </div>
   </div>
 
-  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400 w-full">
+  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400 w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
@@ -620,9 +614,10 @@
     let userTags = [];
     let draggedTagIndex = null;
 
-    // 이미지 위치 및 줌 상태 변수 (내부 제어용)
+    // [이미지 패닝 & 줌 상태 변수]
     let currentImageZoom = 100;
-    let currentImagePosY = 50;
+    let currentImagePosX = 0; // px
+    let currentImagePosY = 0; // px
 
     async function initSupabaseDataOnce() {
       if (!supabaseClient) return;
@@ -719,6 +714,62 @@
       }
     }
 
+    // [다크/라이트 모드 토글 함수]
+    function initThemeMode() {
+      const savedTheme = localStorage.getItem('site_theme_mode') || 'dark';
+      applyThemeMode(savedTheme);
+
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        const isDark = document.documentElement.classList.contains('dark-theme');
+        const nextMode = isDark ? 'light' : 'dark';
+        applyThemeMode(nextMode);
+      });
+    }
+
+    function applyThemeMode(mode) {
+      const root = document.documentElement;
+      const body = document.body;
+      const icon = document.getElementById('themeToggleIcon');
+
+      if (mode === 'light') {
+        root.classList.remove('dark-theme');
+        root.classList.add('light-theme');
+        body.classList.remove('bg-slate-950', 'text-slate-100');
+        body.classList.add('bg-slate-100', 'text-slate-900');
+
+        // 카드 및 패널 배경 반전 스타일
+        document.querySelectorAll('header, footer, .section-card').forEach(el => {
+          el.classList.remove('bg-slate-900', 'border-slate-800');
+          el.classList.add('bg-white', 'border-slate-200');
+        });
+        document.querySelectorAll('.inner-box').forEach(el => {
+          el.classList.remove('bg-slate-950', 'bg-slate-950/40', 'border-slate-800');
+          el.classList.add('bg-slate-50', 'border-slate-200');
+        });
+
+        icon.setAttribute('data-lucide', 'moon');
+        localStorage.setItem('site_theme_mode', 'light');
+      } else {
+        root.classList.remove('light-theme');
+        root.classList.add('dark-theme');
+        body.classList.remove('bg-slate-100', 'text-slate-900');
+        body.classList.add('bg-slate-950', 'text-slate-100');
+
+        document.querySelectorAll('header, footer, .section-card').forEach(el => {
+          el.classList.remove('bg-white', 'border-slate-200');
+          el.classList.add('bg-slate-900', 'border-slate-800');
+        });
+        document.querySelectorAll('.inner-box').forEach(el => {
+          el.classList.remove('bg-slate-50', 'border-slate-200');
+          el.classList.add('bg-slate-950', 'border-slate-800');
+        });
+
+        icon.setAttribute('data-lucide', 'sun');
+        localStorage.setItem('site_theme_mode', 'dark');
+      }
+      lucide.createIcons();
+    }
+
     function renderTagInputList() {
       const container = document.getElementById('reforgeListContainer');
       container.innerHTML = '';
@@ -743,7 +794,7 @@
         const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
 
         const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-800 text-xs w-full";
+        row.className = "flex flex-col gap-2 bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-800 text-xs w-full inner-box";
         
         row.innerHTML = `
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full relative">
@@ -1171,44 +1222,61 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [이미지 위치 및 줌 업데이트 (순수 즉각 렌더링)]
+    // [개선된 줌 & 패닝 변환 함수: 중심 기준 스케일 및 픽셀 패닝 연산]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
-      if (!img) return;
-      img.style.transform = `scale(${currentImageZoom / 100})`;
-      img.style.objectPosition = `center ${currentImagePosY}%`;
+      const container = document.getElementById('avatarContainer');
+      if (!img || !container) return;
+
+      const scale = currentImageZoom / 100;
+      const cWidth = container.clientWidth;
+      const cHeight = container.clientHeight;
+
+      // 줌 배율에 따른 바깥 허용 이동 범위 계산
+      const maxTranslateX = (cWidth * (scale - 1)) / 2;
+      const maxTranslateY = (cHeight * (scale - 1)) / 2;
+
+      // 이동 한계치를 초과하지 않도록 보정
+      currentImagePosX = Math.max(-maxTranslateX, Math.min(maxTranslateX, currentImagePosX));
+      currentImagePosY = Math.max(-maxTranslateY, Math.min(maxTranslateY, currentImagePosY));
+
+      img.style.transform = `translate(${currentImagePosX}px, ${currentImagePosY}px) scale(${scale})`;
     }
 
-    // [마우스 휠 줌 & 드래그 인터랙션 초기화 (네이티브 드래그 고스트 방지)]
+    // [상하좌우 자유 패닝 및 휠 줌 인터랙션 컨트롤러]
     function initImageMouseControls() {
       const avatarContainer = document.getElementById('avatarContainer');
       const img = document.getElementById('previewImage');
 
       let isDragging = false;
+      let startX = 0;
       let startY = 0;
-      let startPosY = 50;
+      let initialPosX = 0;
+      let initialPosY = 0;
 
-      // 1. 휠(Wheel) 조작: 줌인 / 줌아웃
+      // 1. 휠(Wheel) 조작: 줌인 / 줌아웃 (100% ~ 300%)
       avatarContainer.addEventListener('wheel', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault();
 
-        const step = 6;
+        const step = 8;
         if (e.deltaY < 0) {
-          currentImageZoom = Math.min(currentImageZoom + step, 250);
+          currentImageZoom = Math.min(currentImageZoom + step, 300);
         } else {
           currentImageZoom = Math.max(currentImageZoom - step, 100);
         }
         updateImageTransform();
       }, { passive: false });
 
-      // 2. 마우스 드래그 조작: 네이티브 브라우저 고스트 이미지 팝업 방지
+      // 2. 마우스 드래그 조작 (상하좌우)
       avatarContainer.addEventListener('mousedown', (e) => {
         if (img.classList.contains('hidden')) return;
-        e.preventDefault(); // 브라우저 자체의 파란색 선택/이미지 드래그 아웃 차단
+        e.preventDefault(); 
         isDragging = true;
+        startX = e.clientX;
         startY = e.clientY;
-        startPosY = currentImagePosY;
+        initialPosX = currentImagePosX;
+        initialPosY = currentImagePosY;
         img.classList.remove('cursor-grab');
         img.classList.add('cursor-grabbing');
       });
@@ -1216,10 +1284,11 @@
       window.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
+        const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
-        const sensitivity = 0.35;
-        let newPosY = startPosY - Math.round(deltaY * sensitivity);
-        currentImagePosY = Math.max(0, Math.min(100, newPosY));
+
+        currentImagePosX = initialPosX + deltaX;
+        currentImagePosY = initialPosY + deltaY;
         updateImageTransform();
       });
 
@@ -1232,22 +1301,26 @@
       });
 
       // 3. 모바일 터치 드래그 지원
+      let touchStartX = 0;
       let touchStartY = 0;
       avatarContainer.addEventListener('touchstart', (e) => {
         if (img.classList.contains('hidden')) return;
         if (e.touches.length === 1) {
           isDragging = true;
+          touchStartX = e.touches[0].clientX;
           touchStartY = e.touches[0].clientY;
-          startPosY = currentImagePosY;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
         }
       }, { passive: true });
 
       window.addEventListener('touchmove', (e) => {
         if (!isDragging || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - touchStartX;
         const deltaY = e.touches[0].clientY - touchStartY;
-        const sensitivity = 0.35;
-        let newPosY = startPosY - Math.round(deltaY * sensitivity);
-        currentImagePosY = Math.max(0, Math.min(100, newPosY));
+
+        currentImagePosX = initialPosX + deltaX;
+        currentImagePosY = initialPosY + deltaY;
         updateImageTransform();
       }, { passive: true });
 
@@ -1367,9 +1440,10 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       applyTheme(currentArcanaKey); 
+      initThemeMode();
       lucide.createIcons();
       updateRemainUsageUI();
-      initImageMouseControls(); // 이미지 휠/드래그 컨트롤 활성화
+      initImageMouseControls(); 
 
       await initSupabaseDataOnce();
 
@@ -1465,7 +1539,8 @@
           document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
           
           currentImageZoom = 100;
-          currentImagePosY = 50;
+          currentImagePosX = 0;
+          currentImagePosY = 0;
           updateImageTransform();
         };
         reader.readAsDataURL(file);
@@ -1473,7 +1548,7 @@
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
 
-      // [스펙 카드 다운로드: 외부 이미지 Base64 사전 변환 + 배경블러 필터링 + html-to-image 캡처]
+      // [스펙 카드 다운로드]
       document.getElementById('saveCardBtn').addEventListener('click', async () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1487,7 +1562,9 @@
 
         if (glowDecorator) glowDecorator.style.display = 'none';
 
-        // 1. 외부 도메인 URL인 경우 CORS 프록시를 통해 Base64 데이터로 사전 치환하여 보안 차단 방지
+        const originalBoxShadow = exportArea.style.boxShadow;
+        exportArea.style.boxShadow = 'none';
+
         if (previewImg.src && previewImg.src.startsWith('http')) {
           try {
             const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(previewImg.src);
@@ -1505,10 +1582,9 @@
         }
 
         try {
-          // 2. html-to-image로 화면 그대로 캡처 (bgBlurImage는 제외하여 추가 에러 방지)
           const dataUrl = await htmlToImage.toPng(exportArea, {
             pixelRatio: 2,
-            backgroundColor: '#020617',
+            backgroundColor: null, 
             cacheBust: true,
             fontEmbedCSS: '', 
             filter: (node) => {
@@ -1518,6 +1594,7 @@
           });
 
           if (glowDecorator) glowDecorator.style.display = '';
+          exportArea.style.boxShadow = originalBoxShadow;
 
           const link = document.createElement('a');
           const nickname = document.getElementById('nicknameInput').value || '밀레시안';
@@ -1528,6 +1605,7 @@
           console.error('[이미지 다운로드 에러]:', err);
           alert("이미지 저장 중 오류가 발생했습니다.");
           if (glowDecorator) glowDecorator.style.display = '';
+          exportArea.style.boxShadow = originalBoxShadow;
         } finally {
           btn.innerHTML = originalText;
           btn.disabled = false;
