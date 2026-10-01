@@ -6,11 +6,11 @@
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://*.adtrafficquality.google; 
-    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com; 
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com https://images.weserv.nl; 
     frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
     font-src 'self' data: https://fonts.gstatic.com; 
-    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai;
+    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai https://images.weserv.nl;
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
@@ -18,7 +18,7 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- html-to-image: 화면의 CSS(줌, Y위치, 수직 정렬)를 그대로 저장 -->
+  <!-- html-to-image: 브라우저 CSS 렌더링을 1:1로 캡처 -->
   <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -404,7 +404,7 @@
         <!-- 배경 블러 장식 (캡처 시 숨김) -->
         <div id="cardGlowDecorator" class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
-        <!-- [상단 헤더: 수직 중앙 정렬 고정] -->
+        <!-- [상단 헤더: 수직 중앙 정렬 완벽 고정] -->
         <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; height: 38px; margin-bottom: 16px; width: 100%;">
           <div style="display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 10px; border-radius: 9999px; background-color: #1e293b; border: 1px solid #334155; line-height: 1;">
             <span style="font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; line-height: 1; display: inline-block;">
@@ -418,7 +418,7 @@
           </div>
         </div>
 
-        <!-- 카드 캐릭터 이미지 영역: CORS 충돌 방지를 위해 crossorigin 속성 제거 -->
+        <!-- 카드 캐릭터 이미지 영역 -->
         <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="bgBlurImage" src="" class="absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" class="relative z-10 w-full h-full object-cover hidden transition-transform duration-75">
@@ -776,7 +776,8 @@
                   ${memoryPartList.map(p => `
                     <div class="part-dropdown-item px-2 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${p === item.part ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
                          data-part="${Security.sanitizeString(p)}">
-                      <span>${Security.sanitizeString(p)}</span>${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
+                      <span>${Security.sanitizeString(p)}</span>
+                      ${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
                     </div>
                   `).join('')}
                 </div>
@@ -1422,12 +1423,13 @@
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
 
-      // [스펙 카드 다운로드: bgBlurImage 필터링 및 웹폰트 변환 예외 처리 완료]
+      // [스펙 카드 다운로드: 외부 이미지 Base64 사전 변환 + 배경블러 필터링 + html-to-image 캡처]
       document.getElementById('saveCardBtn').addEventListener('click', async () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
         const controlPanel = document.getElementById('imageControlPanel');
         const glowDecorator = document.getElementById('cardGlowDecorator');
+        const previewImg = document.getElementById('previewImage');
         const originalText = btn.innerHTML;
         
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 카드 이미지 생성 중...';
@@ -1438,7 +1440,26 @@
         if (panelWasVisible) controlPanel.classList.add('hidden');
         if (glowDecorator) glowDecorator.style.display = 'none';
 
+        // 1. 외부 도메인 URL인 경우 CORS 프록시를 통해 Base64 데이터로 사전 치환하여 보안 차단 방지
+        let originalPreviewSrc = previewImg.src;
+        if (previewImg.src && previewImg.src.startsWith('http')) {
+          try {
+            const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(previewImg.src);
+            const res = await fetch(proxyUrl);
+            const blob = await res.blob();
+            const base64Data = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+            previewImg.src = base64Data;
+          } catch (corsErr) {
+            console.warn('[CORS 변환 우회 실패, 원본 시도]:', corsErr);
+          }
+        }
+
         try {
+          // 2. html-to-image로 화면 그대로 캡처 (bgBlurImage는 제외하여 추가 에러 방지)
           const dataUrl = await htmlToImage.toPng(exportArea, {
             pixelRatio: 2,
             backgroundColor: '#020617',
