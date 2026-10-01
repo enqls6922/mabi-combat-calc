@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
@@ -41,11 +41,11 @@
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
     
     :root {
       --theme-main: #f97316; 
-      --theme-dark: #c2410c; /* 아이콘 전용 짙은 컬러 */
+      --theme-dark: #c2410c;
       --theme-light: #fed7aa;
       --theme-bg: rgba(249, 115, 22, 0.15);
       --theme-border: rgba(249, 115, 22, 0.35);
@@ -53,7 +53,12 @@
       --theme-to: #ea580c;
     }
 
-    body { font-family: 'Noto Sans KR', sans-serif; transition: all 0.4s ease; }
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: all 0.4s ease;
+    }
     
     .theme-gradient-text {
       background: linear-gradient(135deg, var(--theme-from) 0%, var(--theme-to) 100%);
@@ -62,7 +67,6 @@
       transition: all 0.4s ease;
     }
     
-    /* 섹션 헤더 아이콘 전용 짙은 스타일 */
     .section-icon {
       color: var(--theme-dark);
       filter: drop-shadow(0 0 1px var(--theme-dark));
@@ -93,37 +97,30 @@
     #cardExportArea { position: relative; }
     .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
 
-    .exporting-mode { width: 400px !important; border-radius: 0 !important; }
-    .exporting-mode .theme-gradient-text {
-      background: none !important;
-      -webkit-text-fill-color: var(--theme-main) !important;
-      color: var(--theme-main) !important;
-    }
-    .exporting-mode .blur-3xl { display: none !important; }
-
+    /* 태그 수직 중앙 정렬 강제 */
     .tag-base {
-      padding: 0.25rem 0.625rem;
-      border-radius: 0.25rem;
-      font-size: 0.625rem;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      transition: all 0.2s ease;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 24px !important;
+      line-height: 1 !important;
+      padding: 0 8px !important;
+      border-radius: 4px !important;
+      font-size: 10px !important;
+      white-space: nowrap !important;
+      gap: 4px !important;
       cursor: grab;
       user-select: none;
+      box-sizing: border-box !important;
     }
-    .tag-base:active {
-      cursor: grabbing;
+    .tag-base * {
+      line-height: 1 !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
     }
-    .tag-base.dragging {
-      opacity: 0.4;
-      transform: scale(0.95);
-    }
-    .tag-base.drag-over {
-      border: 1px dashed var(--theme-main) !important;
-      transform: scale(1.05);
-    }
+    .tag-base:active { cursor: grabbing; }
+    .tag-base.dragging { opacity: 0.4; transform: scale(0.95); }
+    .tag-base.drag-over { border: 1px dashed var(--theme-main) !important; transform: scale(1.05); }
 
     .tag-normal { background-color: #1e293b; border: 1px solid #334155; color: #cbd5e1; }
     .tag-echo { background: linear-gradient(135deg, #064e3b, #065f46); border: 1px solid #34d399; color: #d1fae5; }
@@ -135,33 +132,29 @@
     }
     .tag-limit-break { font-weight: 900; }
 
-    input[type=range] {
-      accent-color: var(--theme-main);
-    }
+    input[type=range] { accent-color: var(--theme-main); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-  <!-- 헤더 영역 -->
-  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md">
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg section-icon transition-all duration-500">
+        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg section-icon transition-all duration-500 shrink-0">
           <i data-lucide="shield-check" class="w-6 h-6"></i>
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-lg font-black theme-gradient-text tracking-wide">에린 스펙 계산기</h1>
-            <span class="text-[10px] text-slate-500 font-medium tracking-tight">Erinn Spec Calculator</span>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <h1 class="text-base sm:text-lg font-black theme-gradient-text tracking-wide whitespace-nowrap">에린 스펙 계산기</h1>
+            <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium tracking-tight">Erinn Spec Calculator</span>
           </div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- 상단 광고 배너 -->
-  <div class="max-w-7xl mx-auto w-full px-4 pt-4">
-    <div class="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl py-2 px-3 text-center overflow-hidden min-h-[90px] flex flex-col items-center justify-center">
+  <div class="max-w-7xl mx-auto w-full px-3 sm:px-4 pt-3 sm:pt-4">
+    <div class="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl py-2 px-2 text-center overflow-hidden min-h-[90px] flex flex-col items-center justify-center">
       <span class="text-[9px] text-slate-600 block mb-1">ADVERTISEMENT</span>
       <ins class="adsbygoogle"
            style="display:block; text-align:center;"
@@ -175,17 +168,14 @@
     </div>
   </div>
 
-  <!-- 메인 컨텐츠 영역 -->
-  <main class="max-w-7xl mx-auto w-full p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+  <main class="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 flex-1">
     
-    <section class="lg:col-span-7 space-y-6">
-      
-      <!-- 1. 캐릭터 정보 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
-        <h2 class="text-sm font-semibold theme-gradient-text mb-4 flex items-center gap-2">
+    <section class="lg:col-span-7 space-y-5 sm:space-y-6 w-full">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg">
+        <h2 class="text-sm font-semibold theme-gradient-text mb-3 sm:mb-4 flex items-center gap-2">
           <i data-lucide="swords" class="w-4 h-4 section-icon"></i> 1. 캐릭터 & 아르카나 정보
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <label class="block text-xs text-slate-400 mb-1">캐릭터 닉네임</label>
             <input type="text" id="nicknameInput" maxlength="12" placeholder="밀레시안" value="밀레시안"
@@ -217,46 +207,42 @@
         </div>
       </div>
 
-      <!-- 2. 베이스 스탯 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="activity" class="w-4 h-4 section-icon"></i> 2. 노도핑 전투 베이스 스펙
         </h2>
         
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- 베이스 스탯 입력 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력 (스탯 세공 포함)</label>
             <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
-              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="baseStatInput" data-step="-10" data-min="0" data-max="8000">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="baseStatInput" data-step="-10" data-min="0" data-max="8000">
                 <i data-lucide="minus" class="w-3.5 h-3.5"></i>
               </button>
               <input type="number" id="baseStatInput" value="1500" min="0" max="8000" step="1"
-                class="w-full bg-transparent text-center font-bold text-theme-light focus:outline-none text-sm">
-              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="baseStatInput" data-step="10" data-min="0" data-max="8000">
+                class="w-full bg-transparent text-center font-bold text-theme-light focus:outline-none text-sm min-w-0">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="baseStatInput" data-step="10" data-min="0" data-max="8000">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
 
-          <!-- 피어싱 레벨 -->
           <div>
             <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
             <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors">
-              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="piercingInput" data-step="-1" data-min="0" data-max="11">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="piercingInput" data-step="-1" data-min="0" data-max="11">
                 <i data-lucide="minus" class="w-3.5 h-3.5"></i>
               </button>
               <input type="number" id="piercingInput" value="4" min="0" max="11" step="1"
-                class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-sm">
-              <span class="text-xs text-slate-500 pr-1 select-none font-semibold">Lv</span>
-              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition" data-target="piercingInput" data-step="1" data-min="0" data-max="11">
+                class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-sm min-w-0">
+              <span class="text-xs text-slate-500 pr-1 select-none font-semibold shrink-0">Lv</span>
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="piercingInput" data-step="1" data-min="0" data-max="11">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
 
-          <!-- 무기 장착 타입 및 특별개조 -->
-          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
+          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800">
             <div>
               <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
               <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
@@ -303,74 +289,73 @@
             </div>
           </div>
           
-          <!-- 5대 보너스 대미지 및 크리티컬 옵션 -->
-          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2.5 border-t border-slate-800 pt-3">
+          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-2.5 border-t border-slate-800 pt-3">
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">아르카나 댐증 (%)</label>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">아르카나 댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="arcanaDamageInput" data-step="-1" data-min="0" data-max="60">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="-1" data-min="0" data-max="60">
                   <i data-lucide="minus" class="w-3 h-3"></i>
                 </button>
                 <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
-                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="arcanaDamageInput" data-step="1" data-min="0" data-max="60">
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="1" data-min="0" data-max="60">
                   <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>
               </div>
             </div>
 
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">보너스 대미지 (%)</label>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">보너스 대미지 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="bonusDamageInput" data-step="-0.5" data-min="0" data-max="60">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="bonusDamageInput" data-step="-0.5" data-min="0" data-max="60">
                   <i data-lucide="minus" class="w-3 h-3"></i>
                 </button>
                 <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
-                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="bonusDamageInput" data-step="0.5" data-min="0" data-max="60">
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="bonusDamageInput" data-step="0.5" data-min="0" data-max="60">
                   <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>
               </div>
             </div>
 
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">크리티컬 상한 (%)</label>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">크리티컬 상한 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="neleInput" data-step="-0.1" data-min="0" data-max="7.5">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="neleInput" data-step="-0.1" data-min="0" data-max="7.5">
                   <i data-lucide="minus" class="w-3 h-3"></i>
                 </button>
                 <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
-                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="neleInput" data-step="0.1" data-min="0" data-max="7.5">
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="neleInput" data-step="0.1" data-min="0" data-max="7.5">
                   <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>
               </div>
             </div>
 
             <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">이보나 크댐증 (%)</label>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">이보나 크댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="yvonaInput" data-step="-1" data-min="0" data-max="10">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="yvonaInput" data-step="-1" data-min="0" data-max="10">
                   <i data-lucide="minus" class="w-3 h-3"></i>
                 </button>
                 <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
-                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="yvonaInput" data-step="1" data-min="0" data-max="10">
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="yvonaInput" data-step="1" data-min="0" data-max="10">
                   <i data-lucide="plus" class="w-3 h-3"></i>
                 </button>
               </div>
             </div>
 
-            <div>
-              <label class="block text-[11px] text-slate-400 mb-1 truncate">토템/농장 크댐증 (%)</label>
+            <div class="col-span-2 md:col-span-1">
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">토템/농장 크댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="totemCritInput" data-step="-1" data-min="0" data-max="30">
-                  <i data-lucide="minus" class="w-3 h-3"></i>
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="totemCritInput" data-step="-1" data-min="0" data-max="30">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                 </button>
                 <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
-                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs">
-                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition" data-target="totemCritInput" data-step="1" data-min="0" data-max="30">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="totemCritInput" data-step="1" data-min="0" data-max="30">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
@@ -378,66 +363,72 @@
         </div>
       </div>
 
-      <!-- 3. 장비 세공 및 에코스톤 등록 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-4">
-        <div class="flex items-center justify-between">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4">
+        <div class="flex items-center justify-between gap-2">
           <div>
             <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 section-icon"></i> 3. 장비 세공 및 에코스톤 등록
             </h2>
-            <p class="text-[11px] text-slate-400 mt-1">장비 타입과 세공 내용 모두 클릭하여 검색 및 선택할 수 있습니다.</p>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">장비 타입과 세공 내용 모두 클릭하여 검색 및 선택할 수 있습니다.</p>
           </div>
           <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
             <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
           </button>
         </div>
-        <div id="reforgeListContainer" class="space-y-3"></div>
+        <div id="reforgeListContainer" class="space-y-3 w-full"></div>
       </div>
 
-      <!-- 4. 캐릭터 외형 등록 -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg space-y-3">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-3">
         <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
           <i data-lucide="image" class="w-4 h-4 section-icon"></i> 4. 캐릭터 외형 등록 (선택)
         </h2>
-        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-5 sm:p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40">
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
           <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
           <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
-          <p class="text-[11px] text-slate-500 mt-1">등록 후 카드 우측 하단에서 [줌 & 구도 위치]를 조절할 수 있습니다.</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 우측 하단에서 [줌 & 구도 위치]를 조절할 수 있습니다.</p>
         </div>
       </div>
 
     </section>
 
-    <!-- 우측: 결과 스펙 카드 및 우측 배너 -->
-    <section class="lg:col-span-5 space-y-6">
+    <!-- 우측: 결과 스펙 카드 영역 -->
+    <section class="lg:col-span-5 space-y-5 sm:space-y-6 w-full">
       
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-6 shadow-2xl relative overflow-hidden transition-all duration-500" id="cardExportArea">
-        <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
+      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
+        <!-- 배경 블러 장식 (캡처 시 숨김) -->
+        <div id="cardGlowDecorator" class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
-        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-          <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-600 text-slate-300">
-            에린 표준 깡체급 환산 기준
-          </span>
-          <span id="cardServerBadge" class="text-xs text-slate-400 font-medium">류트 | 밀레시안</span>
+        <!-- [상단 헤더: 수직 중앙 정렬 완벽 고정] -->
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; height: 38px; margin-bottom: 16px; width: 100%;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 10px; border-radius: 9999px; background-color: #1e293b; border: 1px solid #334155; line-height: 1;">
+            <span style="font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; line-height: 1; display: inline-block;">
+              에린 스펙 계산 기준
+            </span>
+          </div>
+          <div style="display: inline-flex; align-items: center; justify-content: flex-end; height: 26px; line-height: 1;">
+            <span id="cardServerBadge" style="font-size: 12px; font-weight: 700; color: #e2e8f0; white-space: nowrap; line-height: 1; display: inline-block;">
+              류트 | 밀레시안
+            </span>
+          </div>
         </div>
 
         <!-- 카드 캐릭터 이미지 영역 -->
-        <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-3 flex flex-col items-center justify-center">
+        <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="bgBlurImage" src="" class="absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" class="relative z-10 w-full h-full object-cover hidden transition-transform duration-75">
             
             <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500">
-              <i data-lucide="swords" class="w-16 h-16 text-slate-600 mb-2 mx-auto"></i>
+              <i data-lucide="swords" class="w-16 h-16 section-icon mb-2 mx-auto"></i>
               <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">엘레멘탈 나이트</span>
             </div>
             
-            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-theme-main text-white text-[10px] px-2 py-0.5 rounded font-bold backdrop-blur z-20">
+            <div id="animeOverlayBadge" style="position: absolute; top: 10px; right: 10px; background-color: var(--theme-main); color: #ffffff; font-size: 10px; font-weight: 700; height: 22px; padding: 0 8px; border-radius: 6px; z-index: 20; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; line-height: 1;" class="hidden">
               ✨ AI Illustration
             </div>
         </div>
 
-        <!-- [구도 & 줌 조작 패널] -->
+        <!-- 구도 & 줌 조작 패널 -->
         <div id="imageControlPanel" class="hidden bg-slate-950/80 border border-slate-800 rounded-xl p-3 mb-4 space-y-2">
           <div class="flex items-center justify-between text-[11px] text-slate-400 font-medium">
             <span class="flex items-center gap-1.5"><i data-lucide="crop" class="w-3.5 h-3.5 section-icon"></i> 캐릭터 구도 미세조절</span>
@@ -463,45 +454,48 @@
           </div>
         </div>
 
-        <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
-          <span id="cardFinalLabel" class="text-xs text-slate-400 block mb-1">종합 전투력 환산 스코어</span>
-          <div class="text-4xl font-black theme-gradient-text tracking-tight" id="totalScoreText">
+        <!-- 스코어 박스 -->
+        <div style="text-align: center; background-color: #030712; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 10px; margin-bottom: 16px;">
+          <span id="cardFinalLabel" style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; line-height: 1;">종합 전투력 환산 스코어</span>
+          <div style="font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: var(--theme-main);" id="totalScoreText">
             3,250
           </div>
         </div>
 
-        <div class="space-y-2 text-xs border-t border-slate-800 pt-3 mb-4">
-          <div class="flex justify-between text-slate-400">
+        <div style="border-top: 1px solid #1e293b; padding-top: 14px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
             <span>노도핑 순수 깡스탯</span>
-            <span id="breakdownBase" class="text-slate-200 font-semibold">0</span>
+            <span id="breakdownBase" style="color: #e2e8f0; font-weight: 600;">0</span>
           </div>
-          <div class="flex justify-between text-slate-400">
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
             <span>피어싱 관통 환산치</span>
-            <span id="breakdownPiercing" class="text-theme-light font-semibold">+ 0</span>
+            <span id="breakdownPiercing" style="color: var(--theme-light); font-weight: 600;">+ 0</span>
           </div>
-          <div class="flex justify-between text-slate-400">
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
             <span>크뎀/보뎀/아뎀 환산치</span>
-            <span id="breakdownMult" class="text-sky-400 font-semibold">+ 0</span>
+            <span id="breakdownMult" style="color: #38bdf8; font-weight: 600;">+ 0</span>
           </div>
         </div>
 
-        <!-- [드래그 앤 드롭 지원] 세공 뱃지 영역 -->
-        <div class="border-t border-slate-800/80 pt-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Equipment Options</span>
-            <span class="text-[9px] text-slate-600 flex items-center gap-1">
-              <i data-lucide="move" class="w-2.5 h-2.5"></i> 드래그하여 순서 변경
+        <!-- 세공 뱃지 영역: 줄바꿈 시에도 수직 중앙 정렬 유지 -->
+        <div style="border-top: 1px solid #1e293b; padding-top: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Equipment Options</span>
+            <span style="font-size: 9px; color: #475569; display: flex; align-items: center; gap: 4px; line-height: 1;">
+              <i data-lucide="move" class="w-2.5 h-2.5"></i> 순서 변경 가능
             </span>
           </div>
-          <div id="cardTagsArea" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
+          <div id="cardTagsArea" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; align-items: center;"></div>
         </div>
       </div>
 
+      <!-- AI 버튼 및 저장 버튼 -->
       <div class="space-y-2">
-        <button id="aiTransformBtn" class="w-full text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
-          <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> AI 일러스트 카드 만들기 (광고 5초)
+        <button id="aiTransformBtn" class="w-full text-white font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
+          <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> 
+          <span>AI 일러스트 카드 생성 (광고 5초 / 오늘 <span id="aiRemainCountText">3</span>회 가능)</span>
         </button>
-        <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl text-xs font-medium flex items-center justify-center gap-2 transition">
+        <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
           <i data-lucide="download" class="w-4 h-4"></i> 스펙 카드 이미지 저장
         </button>
       </div>
@@ -523,8 +517,26 @@
     </section>
   </main>
 
-  <!-- 하단 푸터 (Footer) -->
-  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400">
+  <div id="adSimulationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+      <div class="w-12 h-12 bg-theme-bg border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4 text-theme-main">
+        <i data-lucide="sparkles" class="w-6 h-6 animate-pulse"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
+      <p id="adModalStatusText" class="text-xs text-slate-400 mb-6">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
+      
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4">
+        <div class="text-3xl font-black text-theme-main mb-1" id="adCountdownText">5</div>
+        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">광고 시청 대기 중...</span>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full mt-3 overflow-hidden">
+          <div id="adProgressBar" class="h-full bg-theme-main transition-all duration-1000 ease-linear" style="width: 0%"></div>
+        </div>
+      </div>
+      <p class="text-[10px] text-slate-500">※ 창을 닫지 마시고 잠시만 기다려 주세요.</p>
+    </div>
+  </div>
+
+  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400 w-full">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
@@ -554,7 +566,6 @@
     </div>
   </footer>
 
-  <!-- 정책 모달 레이어 -->
   <div id="policyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 p-4">
@@ -593,7 +604,6 @@
       }
     };
 
-    // 각 아르카나 테마별 색상: main, dark(아이콘 전용 짙은색), light, from, to
     const THEMES = {
       elemental_knight:    { main: '#f97316', dark: '#c2410c', light: '#fed7aa', from: '#fb923c', to: '#ea580c', stat: '최대 공격력' },
       dark_mage:           { main: '#a855f7', dark: '#6b21a8', light: '#e9d5ff', from: '#c084fc', to: '#7e22ce', stat: '마법 공격력' },
@@ -620,10 +630,7 @@
       if (!supabaseClient) return;
 
       try {
-        let { data, error } = await supabaseClient
-          .from('TCALC001')
-          .select('*');
-
+        let { data, error } = await supabaseClient.from('TCALC001').select('*');
         if ((!data || data.length === 0) && !error) {
           const retry = await supabaseClient.from('tcalc001').select('*');
           if (retry.data && retry.data.length > 0) {
@@ -707,6 +714,11 @@
 
       document.getElementById('baseStatLabel').textContent = `노도핑 ${t.stat} (스탯세공 포함 직접 기입)`;
       document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
+      
+      const defaultPlaceholderIcon = document.querySelector('#defaultAvatarPlaceholder i');
+      if (defaultPlaceholderIcon) {
+        defaultPlaceholderIcon.style.color = t.dark;
+      }
     }
 
     function renderTagInputList() {
@@ -722,11 +734,7 @@
       userTags.forEach((item, index) => {
         const options = memoryReforgeMap[item.part] || [];
         let currentOpt = options.find(o => o.name === item.name) || options[0] || { 
-          name: item.name, 
-          min_level: 1, 
-          max_level: 20, 
-          limit_yn: 'N', 
-          limit_max_level: 20 
+          name: item.name, min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
         };
         
         item.min = currentOpt.min_level;
@@ -737,12 +745,11 @@
         const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
 
         const row = document.createElement('div');
-        row.className = "flex flex-col gap-1.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 text-xs w-full";
+        row.className = "flex flex-col gap-2 bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-800 text-xs w-full";
         
         row.innerHTML = `
-          <div class="flex flex-nowrap items-center gap-2 w-full relative">
-            
-            <div class="w-36 shrink-0 relative">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full relative">
+            <div class="w-full sm:w-36 shrink-0 relative">
               <button type="button" 
                 class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
                 data-index="${index}">
@@ -750,10 +757,9 @@
                 <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
               </button>
 
-              <div class="part-dropdown-menu hidden absolute top-full left-0 w-48 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+              <div class="part-dropdown-menu hidden absolute top-full left-0 w-full sm:w-48 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
                 <div class="relative mb-2">
-                  <input type="text" 
-                    placeholder="부위 검색..." 
+                  <input type="text" placeholder="부위 검색..." 
                     class="part-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
                     data-index="${index}">
                 </div>
@@ -761,14 +767,15 @@
                   ${memoryPartList.map(p => `
                     <div class="part-dropdown-item px-2 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${p === item.part ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
                          data-part="${Security.sanitizeString(p)}">
-                      <span>${Security.sanitizeString(p)}</span>${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
+                      <span>${Security.sanitizeString(p)}</span>
+                      ${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
                     </div>
                   `).join('')}
                 </div>
               </div>
             </div>
             
-            <div class="flex-1 min-w-[120px] relative">
+            <div class="flex-1 min-w-0 relative">
               <button type="button" 
                 class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
                 data-index="${index}">
@@ -778,8 +785,7 @@
 
               <div class="reforge-dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
                 <div class="relative mb-2">
-                  <input type="text" 
-                    placeholder="세공명 검색..." 
+                  <input type="text" placeholder="세공명 검색..." 
                     class="reforge-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
                     data-index="${index}">
                 </div>
@@ -800,31 +806,49 @@
                 </div>
               </div>
             </div>
-            
-            <div class="shrink-0 flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
-              <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                <i data-lucide="minus" class="w-3 h-3"></i>
+
+            <div class="hidden sm:flex items-center gap-2 shrink-0">
+              <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
+                <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" 
+                  class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
+                  data-index="${index}">
+                <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
+                <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                  <i data-lucide="plus" class="w-3 h-3"></i>
+                </button>
+              </div>
+
+              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
-              <input type="number" 
-                min="${item.min}" 
-                max="${allowedMaxLevel}" 
-                value="${item.level}" 
+            </div>
+          </div>
+
+          <div class="flex sm:hidden items-center justify-between border-t border-slate-800/80 pt-2 mt-0.5">
+            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
+              <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" 
                 class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
                 data-index="${index}">
               <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
-              <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                <i data-lucide="plus" class="w-3 h-3"></i>
+              <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
               </button>
             </div>
 
-            <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition shrink-0" data-index="${index}">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
-          </div>
-          <div class="flex justify-end pr-10">
-            <span class="text-[10px] text-slate-500 font-medium tracking-tighter">
-              상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : '(한돌 불가)'}
-            </span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500 font-medium">
+                상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : ''}
+              </span>
+              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-1.5 rounded transition" data-index="${index}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
         `;
         container.appendChild(row);
@@ -846,9 +870,7 @@
           const idx = btn.dataset.index;
           const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
           const isHidden = menu.classList.contains('hidden');
-          
           closeAllDropdowns();
-
           if (isHidden) {
             menu.classList.remove('hidden');
             const searchInput = menu.querySelector('.part-dropdown-search');
@@ -902,9 +924,7 @@
           const idx = btn.dataset.index;
           const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
           const isHidden = menu.classList.contains('hidden');
-          
           closeAllDropdowns();
-
           if (isHidden) {
             menu.classList.remove('hidden');
             const searchInput = menu.querySelector('.reforge-dropdown-search');
@@ -945,11 +965,8 @@
             userTags[idx].max = opt.max_level;
             userTags[idx].limit_yn = opt.limit_yn;
             userTags[idx].limit_max = opt.limit_max_level;
-
             const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
-            if (userTags[idx].level > allowedMax) {
-              userTags[idx].level = allowedMax;
-            }
+            if (userTags[idx].level > allowedMax) userTags[idx].level = allowedMax;
           }
 
           closeAllDropdowns();
@@ -964,8 +981,7 @@
           const minLvl = tag.min || 1;
           if (tag.level > minLvl) {
             tag.level -= 1;
-            const input = document.querySelector(`.tag-level[data-index="${idx}"]`);
-            if (input) input.value = tag.level;
+            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
             renderCardTags();
           }
         });
@@ -978,8 +994,7 @@
           const maxLvl = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
           if (tag.level < maxLvl) {
             tag.level += 1;
-            const input = document.querySelector(`.tag-level[data-index="${idx}"]`);
-            if (input) input.value = tag.level;
+            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
             renderCardTags();
           }
         });
@@ -991,13 +1006,10 @@
           const tag = userTags[idx];
           const allowedMax = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
           const allowedMin = tag.min || 1;
-
           let val = parseInt(e.target.value);
           if (isNaN(val)) val = allowedMin;
-
           tag.level = Math.min(Math.max(val, allowedMin), allowedMax);
-          e.target.value = tag.level;
-
+          document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(i => i.value = tag.level);
           renderCardTags(); 
         });
       });
@@ -1021,12 +1033,8 @@
         name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
       };
       userTags.push({ 
-        part: defaultPart, 
-        name: defaultOpt.name, 
-        level: defaultOpt.max_level, 
-        min: defaultOpt.min_level,
-        max: defaultOpt.max_level, 
-        limit_yn: defaultOpt.limit_yn,
+        part: defaultPart, name: defaultOpt.name, level: defaultOpt.max_level, 
+        min: defaultOpt.min_level, max: defaultOpt.max_level, limit_yn: defaultOpt.limit_yn,
         limit_max: defaultOpt.limit_max_level 
       });
       renderTagInputList();
@@ -1036,7 +1044,7 @@
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
       if (userTags.length === 0) {
-        area.innerHTML = `<span class="text-[10px] text-slate-600 italic">등록된 장비 옵션이 없습니다.</span>`;
+        area.innerHTML = `<span class="text-[10px] text-slate-500 italic">등록된 장비 옵션이 없습니다.</span>`;
         return;
       }
       
@@ -1056,13 +1064,13 @@
 
         if (t.part.includes('에코')) {
           span.className += "tag-echo";
-          span.innerHTML = `<span class="opacity-70">[에코]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70 leading-none">[에코]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black leading-none">${level}</span>`;
         } else if (level < maxLvl) {
           span.className += "tag-normal";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black leading-none">${level}</span>`;
         } else if (level === maxLvl) {
           span.className += "tag-max font-bold";
-          span.innerHTML = `<span class="opacity-70">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span>`;
+          span.innerHTML = `<span class="opacity-70 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black text-[11px] leading-none">${level}</span>`;
         } else {
           let diff = Math.max(limitMaxLvl - maxLvl, 1);
           let ratio = (level - maxLvl) / diff;
@@ -1087,7 +1095,7 @@
           span.style.color = styleConfig.text;
           span.style.borderColor = styleConfig.text + '40';
           
-          span.innerHTML = `<span class="opacity-80">[${Security.sanitizeString(shortPart)}]</span> ${Security.sanitizeString(t.name)} <span class="font-black ml-0.5 text-[11px]">${level}</span> <span class="ml-0.5 text-[9px] drop-shadow-md">✨</span>`;
+          span.innerHTML = `<span class="opacity-80 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black text-[11px] leading-none">${level}</span> <span class="text-[9px] leading-none">✨</span>`;
         }
 
         span.addEventListener('dragstart', (e) => {
@@ -1107,15 +1115,12 @@
           span.classList.add('drag-over');
         });
 
-        span.addEventListener('dragleave', () => {
-          span.classList.remove('drag-over');
-        });
+        span.addEventListener('dragleave', () => span.classList.remove('drag-over'));
 
         span.addEventListener('drop', (e) => {
           e.preventDefault();
           span.classList.remove('drag-over');
           const targetIndex = parseInt(span.dataset.index);
-
           if (draggedTagIndex !== null && draggedTagIndex !== targetIndex) {
             const movedItem = userTags.splice(draggedTagIndex, 1)[0];
             userTags.splice(targetIndex, 0, movedItem);
@@ -1184,6 +1189,88 @@
       img.style.objectPosition = `center ${posY}%`;
     }
 
+    function updateRemainUsageUI() {
+      const today = new Date().toISOString().slice(0, 10);
+      const usageKey = `ai_usage_${today}`;
+      const count = parseInt(localStorage.getItem(usageKey) || '0', 10);
+      const remain = Math.max(3 - count, 0);
+      const el = document.getElementById('aiRemainCountText');
+      if (el) el.textContent = remain;
+    }
+
+    async function handleAiIllustrationGeneration() {
+      const previewImg = document.getElementById('previewImage');
+      const bgImg = document.getElementById('bgBlurImage');
+      const aiBtn = document.getElementById('aiTransformBtn');
+      const adModal = document.getElementById('adSimulationModal');
+      const adCountdownText = document.getElementById('adCountdownText');
+      const adProgressBar = document.getElementById('adProgressBar');
+      const adStatusText = document.getElementById('adModalStatusText');
+
+      if (!previewImg.src || previewImg.src === '' || previewImg.classList.contains('hidden')) {
+        alert('먼저 4번 항목에서 캐릭터 스크린샷을 업로드해 주세요!');
+        return;
+      }
+
+      const today = new Date().toISOString().slice(0, 10);
+      const usageKey = `ai_usage_${today}`;
+      let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+      if (usageCount >= 3) {
+        alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
+        return;
+      }
+
+      adModal.classList.remove('hidden');
+      aiBtn.disabled = true;
+
+      try {
+        for (let i = 5; i > 0; i--) {
+          adCountdownText.textContent = i;
+          adProgressBar.style.width = `${((6 - i) / 5) * 100}%`;
+          await new Promise(res => setTimeout(res, 1000));
+        }
+
+        adCountdownText.textContent = "AI";
+        adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
+
+        const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+          body: { imageBase64: previewImg.src }
+        });
+
+        if (error) throw new Error(error.message || 'AI 변환 서버 응답 오류');
+
+        if (data && data.outputUrl) {
+          adModal.classList.add('hidden');
+
+          previewImg.src = data.outputUrl;
+          bgImg.src = data.outputUrl;
+          
+          const badge = document.getElementById('animeOverlayBadge');
+          if (badge) badge.classList.remove('hidden');
+
+          usageCount += 1;
+          localStorage.setItem(usageKey, usageCount.toString());
+          updateRemainUsageUI();
+
+          setTimeout(() => {
+            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${3 - usageCount}회)`);
+          }, 100);
+        } else {
+          throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
+        }
+      } catch (err) {
+        console.error('[AI 생성 에러]:', err);
+        adModal.classList.add('hidden');
+        alert('AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+      } finally {
+        aiBtn.disabled = false;
+        adProgressBar.style.width = '0%';
+        adCountdownText.textContent = '5';
+        adStatusText.textContent = '스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.';
+      }
+    }
+
     const POLICY_DATA = {
       terms: {
         title: "이용약관 (Terms of Service)",
@@ -1210,8 +1297,9 @@
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
-      lucide.createIcons();
       applyTheme(currentArcanaKey); 
+      lucide.createIcons();
+      updateRemainUsageUI();
 
       await initSupabaseDataOnce();
 
@@ -1240,17 +1328,17 @@
         currentArcanaKey = e.target.value;
         applyTheme(currentArcanaKey); 
         
-        let iconHtml = '<i data-lucide="swords" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'blader') iconHtml = '<i data-lucide="sword" class="w-16 h-16 mb-2 mx-auto"></i>';
-        if(currentArcanaKey === 'forbidden_alchemist') iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 mb-2 mx-auto"></i>';
+        let iconHtml = '<i data-lucide="swords" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'dark_mage') iconHtml = '<i data-lucide="wand-2" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'alchemic_stinger' || currentArcanaKey === 'variable_gunner') iconHtml = '<i data-lucide="crosshair" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'fury_fighter') iconHtml = '<i data-lucide="flame" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'melodic_puppeteer') iconHtml = '<i data-lucide="music" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'sacred_guard') iconHtml = '<i data-lucide="shield" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'blader') iconHtml = '<i data-lucide="sword" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
+        if(currentArcanaKey === 'forbidden_alchemist') iconHtml = '<i data-lucide="flask-conical" class="w-16 h-16 section-icon mb-2 mx-auto"></i>';
 
         const arcName = e.target.options[e.target.selectedIndex].text;
-        document.getElementById('defaultAvatarPlaceholder').innerHTML = `<div style="color: var(--theme-dark)">${iconHtml}</div><span class="text-xs font-semibold text-slate-400">${arcName}</span>`;
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `${iconHtml}<span class="text-xs font-semibold text-slate-400">${arcName}</span>`;
         lucide.createIcons();
       });
 
@@ -1277,8 +1365,12 @@
         document.getElementById(id).addEventListener('change', calculateTotal);
       });
 
-      document.getElementById('nicknameInput').addEventListener('input', (e) => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; });
-      document.getElementById('serverSelect').addEventListener('change', () => { document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; });
+      document.getElementById('nicknameInput').addEventListener('input', (e) => { 
+        document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; 
+      });
+      document.getElementById('serverSelect').addEventListener('change', () => { 
+        document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; 
+      });
 
       const dropZone = document.getElementById('dropZone');
       const imageInput = document.getElementById('imageInput');
@@ -1318,42 +1410,50 @@
         updateImageTransform();
       });
 
-      document.getElementById('saveCardBtn').addEventListener('click', () => {
+      document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
+
+      // [스펙 카드 다운로드 시 텍스트 수직 쏠림 방지]
+      document.getElementById('saveCardBtn').addEventListener('click', async () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
         const controlPanel = document.getElementById('imageControlPanel');
+        const glowDecorator = document.getElementById('cardGlowDecorator');
         const originalText = btn.innerHTML;
         
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 이미지 캡처 중...';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 카드 이미지 생성 중...';
         btn.disabled = true;
         lucide.createIcons();
-        exportArea.classList.add('exporting-mode');
 
         const panelWasVisible = !controlPanel.classList.contains('hidden');
         if (panelWasVisible) controlPanel.classList.add('hidden');
+        if (glowDecorator) glowDecorator.style.display = 'none';
 
-        setTimeout(() => {
-          html2canvas(exportArea, { backgroundColor: '#020617', scale: 2, useCORS: true })
-          .then(canvas => {
-            exportArea.classList.remove('exporting-mode');
-            if (panelWasVisible) controlPanel.classList.remove('hidden');
-
-            const link = document.createElement('a');
-            const nickname = document.getElementById('nicknameInput').value || '밀레시안';
-            link.download = `에린_스펙_${nickname}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            lucide.createIcons();
-          }).catch(err => {
-            console.error(err);
-            alert("이미지 저장 중 오류가 발생했습니다.");
-            exportArea.classList.remove('exporting-mode');
-            if (panelWasVisible) controlPanel.classList.remove('hidden');
-            btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons();
+        try {
+          const canvas = await html2canvas(exportArea, {
+            backgroundColor: '#020617',
+            scale: 2,
+            useCORS: true,
+            logging: false
           });
-        }, 100);
+
+          if (panelWasVisible) controlPanel.classList.remove('hidden');
+          if (glowDecorator) glowDecorator.style.display = '';
+
+          const link = document.createElement('a');
+          const nickname = document.getElementById('nicknameInput').value || '밀레시안';
+          link.download = `에린_스펙_${nickname}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        } catch (err) {
+          console.error(err);
+          alert("이미지 저장 중 오류가 발생했습니다.");
+          if (panelWasVisible) controlPanel.classList.remove('hidden');
+          if (glowDecorator) glowDecorator.style.display = '';
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          lucide.createIcons();
+        }
       });
 
       const modal = document.getElementById('policyModal');
