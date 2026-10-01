@@ -14,7 +14,7 @@
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
-  <!-- 파비콘 및 즐겨찾기(북마크) 아이콘 등록 (icon 폴더 경로 반영) -->
+  <!-- 파비콘 및 즐겨찾기(북마크) 아이콘 등록 -->
   <link rel="icon" type="image/svg+xml" href="icon/아이콘.svg">
   <link rel="apple-touch-icon" href="icon/아이콘.svg">
 
@@ -144,6 +144,27 @@
     .tag-limit-break { font-weight: 900; }
 
     input[type=range] { accent-color: var(--theme-main); }
+
+    /* [아르카나 문장 뱃지 스타일] */
+    .arcana-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--theme-border);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px -1px var(--theme-bg);
+      transition: all 0.4s ease;
+    }
+    .arcana-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 9999px;
+      background-color: var(--theme-main);
+      box-shadow: 0 0 8px var(--theme-main);
+    }
 
     /* ========================================================
        [라이트 모드 전용 세부 오버라이드 및 눈부심 방지 테마]
@@ -295,6 +316,11 @@
       background-color: #e2e8f0 !important;
       border-color: #cbd5e1 !important;
     }
+    html.light-theme .arcana-badge-pill {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border-color: var(--theme-border) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    }
     html.light-theme #cardExportArea div[style*="background-color: #030712"] {
       background-color: #ffffff !important;
       border-color: #e2e8f0 !important;
@@ -336,7 +362,7 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <!-- 좌측 상단 메인 브랜드 아이콘 (icon/아이콘.svg 경로 반영) -->
+        <!-- 좌측 상단 메인 브랜드 아이콘 -->
         <div class="p-1.5 bg-theme-bg border border-theme-border rounded-lg transition-all duration-500 shrink-0 flex items-center justify-center">
           <img src="icon/아이콘.svg" alt="Erinn Icon" class="w-7 h-7 object-contain filter drop-shadow-[0_0_2px_var(--theme-main)]">
         </div>
@@ -622,10 +648,13 @@
             <img id="bgBlurImage" src="" draggable="false" class="no-native-drag absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-cover hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center;">
             
-            <!-- 아르카나별 고유 문장이 기본 이미지로 노출되는 영역 (icon/ 폴더 경로 반영) -->
+            <!-- 아르카나별 고유 문장 및 꾸며진 뱃지 라벨 -->
             <div id="defaultAvatarPlaceholder" class="text-center transition-all duration-500 pointer-events-none p-4 flex flex-col items-center justify-center w-full h-full">
-              <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-2">
-              <span id="arcanaBadge" class="text-xs font-bold text-slate-300">엘레멘탈 나이트</span>
+              <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3"[cite: 31, 32]>
+              <div class="arcana-badge-pill">
+                <span class="arcana-badge-dot"></span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
+              </div>
             </div>
             
             <div id="animeOverlayBadge" style="position: absolute; top: 10px; right: 10px; background-color: var(--theme-main); color: #ffffff; font-size: 10px; font-weight: 700; height: 22px; padding: 0 8px; border-radius: 6px; z-index: 20; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; line-height: 1;" class="hidden pointer-events-none">
@@ -642,7 +671,7 @@
 
         <div style="border-top: 1px solid #1e293b; padding-top: 14px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
           <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
-            <span>노도핑 순수 깡스탯</span>
+            <span>전투 베이스 스펙</span>
             <span id="breakdownBase" style="color: #e2e8f0; font-weight: 600;">0</span>
           </div>
           <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
@@ -726,7 +755,7 @@
           본 계산기는 유저 편의를 위해 제작된 팬 프로젝트이며, ㈜넥슨 및 마비노기와 공식적인 제휴 관계가 아닙니다.
         </p>
         <p class="text-[10px] text-slate-600">
-          Mabinogi is a registered trademark of NEXON Korea Corporation.
+          Mabinogi is a registered trademark of NEXON Corporation.
         </p>
       </div>
 
@@ -795,7 +824,6 @@
       fury_fighter:        { main: '#dc2626', dark: '#991b1b', light: '#fee2e2', from: '#ef4444', to: '#b91c1c', stat: '최대 공격력' }
     };
 
-    // [icon/ 폴더 경로를 반영한 아르카나별 문장 매핑]
     const ARCANA_CRESTS = {
       elemental_knight:    'icon/엘나.webp',
       dark_mage:           'icon/닼메.webp',
@@ -1498,10 +1526,38 @@
       });
     }
 
-    function updateRemainUsageUI() {
+    async function checkDailyAiUsageLimit() {
       const today = new Date().toISOString().slice(0, 10);
       const usageKey = `ai_usage_${today}`;
-      const count = parseInt(localStorage.getItem(usageKey) || '0', 10);
+      let localCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
+
+      if (supabaseClient) {
+        try {
+          const startOfDay = new Date();
+          startOfDay.setHours(0, 0, 0, 0);
+
+          const clientFingerprint = localStorage.getItem('client_fp') || crypto.randomUUID();
+          localStorage.setItem('client_fp', clientFingerprint);
+
+          const { data, count, error } = await supabaseClient
+            .from('ai_generations')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_identifier', clientFingerprint)
+            .gte('created_at', startOfDay.toISOString());
+
+          if (!error && typeof count === 'number') {
+            localCount = Math.max(localCount, count);
+            localStorage.setItem(usageKey, localCount.toString());
+          }
+        } catch (e) {
+          console.warn('[DB 일일 사용량 확인 우회]:', e);
+        }
+      }
+      return localCount;
+    }
+
+    async function updateRemainUsageUI() {
+      const count = await checkDailyAiUsageLimit();
       const remain = Math.max(3 - count, 0);
       const el = document.getElementById('aiRemainCountText');
       if (el) el.textContent = remain;
@@ -1521,10 +1577,7 @@
         return;
       }
 
-      const today = new Date().toISOString().slice(0, 10);
-      const usageKey = `ai_usage_${today}`;
-      let usageCount = parseInt(localStorage.getItem(usageKey) || '0', 10);
-
+      let usageCount = await checkDailyAiUsageLimit();
       if (usageCount >= 3) {
         alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
         return;
@@ -1543,8 +1596,15 @@
         adCountdownText.textContent = "AI";
         adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
 
+        const clientFingerprint = localStorage.getItem('client_fp') || crypto.randomUUID();
+        localStorage.setItem('client_fp', clientFingerprint);
+
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
-          body: { imageBase64: previewImg.src }
+          body: { 
+            imageBase64: previewImg.src,
+            userIdentifier: clientFingerprint,
+            arcanaKey: currentArcanaKey
+          }
         });
 
         if (error) throw new Error(error.message || 'AI 변환 서버 응답 오류');
@@ -1560,12 +1620,14 @@
           const badge = document.getElementById('animeOverlayBadge');
           if (badge) badge.classList.remove('hidden');
 
+          const today = new Date().toISOString().slice(0, 10);
+          const usageKey = `ai_usage_${today}`;
           usageCount += 1;
           localStorage.setItem(usageKey, usageCount.toString());
-          updateRemainUsageUI();
+          await updateRemainUsageUI();
 
           setTimeout(() => {
-            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${3 - usageCount}회)`);
+            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${Math.max(3 - usageCount, 0)}회)`);
           }, 100);
         } else {
           throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
@@ -1611,7 +1673,7 @@
       applyTheme(currentArcanaKey); 
       initThemeMode();
       lucide.createIcons();
-      updateRemainUsageUI();
+      await updateRemainUsageUI();
       initImageMouseControls(); 
 
       await initSupabaseDataOnce();
@@ -1645,8 +1707,11 @@
         const crestFile = ARCANA_CRESTS[currentArcanaKey] || 'icon/엘나.webp';
         
         document.getElementById('defaultAvatarPlaceholder').innerHTML = `
-          <img id="arcanaCrestImg" src="${crestFile}" alt="${arcName}" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-2">
-          <span id="arcanaBadge" class="text-xs font-bold text-slate-300">${arcName}</span>
+          <img id="arcanaCrestImg" src="${crestFile}" alt="${arcName}" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
+          <div class="arcana-badge-pill">
+            <span class="arcana-badge-dot"></span>
+            <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
+          </div>
         `;
         lucide.createIcons();
       });
