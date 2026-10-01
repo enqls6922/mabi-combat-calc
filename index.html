@@ -524,12 +524,12 @@
               <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">아르카나 댐증 (%)</label>
               <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
                 <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="-1" data-min="0" data-max="60">
-                  <i data-lucide="minus" class="w-3 h-3"></i>
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                 </button>
                 <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
                   class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
                 <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="1" data-min="0" data-max="60">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
             </div>
@@ -616,7 +616,7 @@
           <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
           <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
           <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
-          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/터치 핀치: 줌] 및 [드래그/터치 이동: 상하좌우 조절]이 가능합니다.</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/드래그, 모바일: 2손가락 줌/이동]으로 위치를 맞출 수 있습니다.</p>
         </div>
       </div>
 
@@ -642,7 +642,7 @@
         </div>
 
         <!-- 카드 캐릭터 이미지 영역 -->
-        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none">
+        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: pan-y;">
             <img id="bgBlurImage" src="" draggable="false" class="no-native-drag absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-cover hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform;">
             
@@ -1066,14 +1066,14 @@
             <div class="hidden sm:flex items-center gap-2 shrink-0">
               <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
                 <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                  <i data-lucide="minus" class="w-3 h-3"></i>
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
                 </button>
                 <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" 
                   class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
                   data-index="${index}">
                 <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
                 <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
-                  <i data-lucide="plus" class="w-3 h-3"></i>
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 </button>
               </div>
 
@@ -1466,6 +1466,8 @@
 
       let initialPinchDistance = 0;
       let initialZoomAtPinch = 100;
+      let pinchCenterStartX = 0;
+      let pinchCenterStartY = 0;
 
       // PC 마우스 휠
       avatarContainer.addEventListener('wheel', (e) => {
@@ -1510,55 +1512,51 @@
         }
       });
 
-      // 모바일 터치 이벤트: 사진이 보일 때만 touch-action 제어 및 스크롤 차단
+      // 모바일 터치 이벤트: 1손가락 터치는 브라우저 기본 세로 스크롤을 100% 보장
+      // 2손가락 터치(핀치 줌 및 두 손가락 드래그)일 때만 이미지 조작으로 인식하여 스크롤 방지
       avatarContainer.addEventListener('touchstart', (e) => {
-        if (img.classList.contains('hidden')) return; // 사진 없으면 브라우저 기본 스크롤 유지
+        if (img.classList.contains('hidden')) return;
 
-        if (e.touches.length === 1) {
-          isDragging = true;
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-          initialPosX = currentImagePosX;
-          initialPosY = currentImagePosY;
-        } else if (e.touches.length === 2) {
+        if (e.touches.length === 2) {
           isDragging = false;
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           initialPinchDistance = Math.hypot(dx, dy);
           initialZoomAtPinch = currentImageZoom;
+
+          pinchCenterStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          pinchCenterStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
         }
       }, { passive: true });
 
       avatarContainer.addEventListener('touchmove', (e) => {
-        if (img.classList.contains('hidden')) return; // 사진 없으면 브라우저 기본 스크롤 허용
+        if (img.classList.contains('hidden')) return;
 
-        if (e.touches.length === 1 && isDragging) {
-          if (e.cancelable) e.preventDefault(); // 사진 조작 시에만 스크롤 방지
-          currentImagePosX = initialPosX + (e.touches[0].clientX - startX);
-          currentImagePosY = initialPosY + (e.touches[0].clientY - startY);
-          updateImageTransform();
-        } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+        // 2손가락일 때만 줌 및 위치 이동 처리 (브라우저 기본 스크롤 차단)
+        if (e.touches.length === 2 && initialPinchDistance > 0) {
           if (e.cancelable) e.preventDefault();
+
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           const distance = Math.hypot(dx, dy);
 
           const factor = distance / initialPinchDistance;
           currentImageZoom = Math.max(100, Math.min(300, initialZoomAtPinch * factor));
+
+          const currentCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const currentCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+          currentImagePosX = initialPosX + (currentCenterX - pinchCenterStartX);
+          currentImagePosY = initialPosY + (currentCenterY - pinchCenterStartY);
+
           updateImageTransform();
         }
       }, { passive: false });
 
       avatarContainer.addEventListener('touchend', (e) => {
-        if (e.touches.length === 0) {
-          isDragging = false;
-          initialPinchDistance = 0;
-        } else if (e.touches.length === 1) {
-          isDragging = true;
-          startX = e.touches[0].clientX;
-          startY = e.touches[0].clientY;
-          initialPosX = currentImagePosX;
-          initialPosY = currentImagePosY;
+        if (e.touches.length < 2) {
           initialPinchDistance = 0;
         }
       });
@@ -1592,6 +1590,44 @@
         el.textContent = remain >= 999 ? '∞ (관리자)' : remain;
       }
       return remain;
+    }
+
+    // 모바일 고화질 스크린샷 1024px 안전 리사이징 압축
+    async function compressImageForUpload(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1024;
+            let w = img.width;
+            let h = img.height;
+
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(compressedBase64);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     async function handleAiIllustrationGeneration() {
@@ -1629,7 +1665,7 @@
         adCountdownText.textContent = "AI";
         adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
 
-        const clientFingerprint = localStorage.getItem('client_fp') || crypto.randomUUID();
+        const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
         localStorage.setItem('client_fp', clientFingerprint);
 
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
@@ -1791,19 +1827,18 @@
       const imageInput = document.getElementById('imageInput');
       dropZone.addEventListener('click', () => imageInput.click());
       
-      imageInput.addEventListener('change', (e) => {
+      imageInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
         if (!file.type.startsWith('image/')) { alert('이미지 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
         
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imgUrl = event.target.result;
+        try {
+          const compressedUrl = await compressImageForUpload(file);
           const img = document.getElementById('previewImage');
           const bgImg = document.getElementById('bgBlurImage');
           
-          img.src = imgUrl;
-          bgImg.src = imgUrl;
+          img.src = compressedUrl;
+          bgImg.src = compressedUrl;
 
           img.classList.remove('hidden');
           bgImg.classList.remove('hidden');
@@ -1817,8 +1852,10 @@
             updateImageTransform();
           };
           updateImageTransform();
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+          console.error('[이미지 압축 처리 실패]:', err);
+          alert('이미지를 처리하는 중 오류가 발생했습니다.');
+        }
       });
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
