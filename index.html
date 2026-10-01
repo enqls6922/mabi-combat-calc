@@ -97,13 +97,14 @@
     #cardExportArea { position: relative; }
     .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
 
-    /* 캡처 시 스타일 안정화 */
+    /* 캡처 시 레이아웃 및 폰트 왜곡 방지 고정 스타일 */
     .exporting-mode { 
-      width: 420px !important; 
-      max-width: 420px !important;
-      min-width: 420px !important;
+      width: 440px !important; 
+      max-width: 440px !important;
+      min-width: 440px !important;
       border-radius: 1rem !important; 
       box-sizing: border-box !important;
+      padding: 1.5rem !important;
     }
     .exporting-mode .theme-gradient-text {
       background: none !important;
@@ -419,21 +420,21 @@
     <!-- 우측: 결과 스펙 카드 및 우측 배너 -->
     <section class="lg:col-span-5 space-y-5 sm:space-y-6 w-full">
       
-      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-4 sm:p-6 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
+      <div class="bg-gradient-to-b from-slate-900 via-slate-900 to-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
         <div class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
 
-        <!-- [헤더 영역 고정: 줄바꿈 및 글자 잘림 방지] -->
-        <div class="flex items-center justify-between gap-2 border-b border-slate-800 pb-3 mb-4 w-full">
+        <!-- [상단 헤더 문구 수정 및 짤림 완벽 방지] -->
+        <div class="flex items-center justify-between gap-3 border-b border-slate-800 pb-3.5 mb-4 w-full">
           <span class="text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 shrink-0 whitespace-nowrap">
-            에린 표준 깡체급 환산 기준
+            에린 스펙 계산 기준
           </span>
-          <span id="cardServerBadge" class="text-xs text-slate-300 font-semibold truncate text-right shrink-0 whitespace-nowrap">
+          <span id="cardServerBadge" class="text-xs text-slate-200 font-semibold truncate shrink-0 whitespace-nowrap">
             류트 | 밀레시안
           </span>
         </div>
 
         <!-- 카드 캐릭터 이미지 영역 -->
-        <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-3 flex flex-col items-center justify-center">
+        <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
             <img id="bgBlurImage" src="" class="absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
             <img id="previewImage" src="" alt="Avatar" class="relative z-10 w-full h-full object-cover hidden transition-transform duration-75">
             
@@ -442,7 +443,7 @@
               <span id="arcanaBadge" class="text-xs font-semibold text-slate-400">엘레멘탈 나이트</span>
             </div>
             
-            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-theme-main text-white text-[10px] px-2.5 py-0.5 rounded font-bold backdrop-blur z-20 shadow-lg whitespace-nowrap">
+            <div id="animeOverlayBadge" class="hidden absolute top-2 right-2 bg-theme-main text-white text-[10px] px-2.5 py-1 rounded font-bold backdrop-blur z-20 shadow-lg whitespace-nowrap">
               ✨ AI Illustration
             </div>
         </div>
@@ -473,14 +474,14 @@
           </div>
         </div>
 
-        <div class="text-center bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 mb-4">
-          <span id="cardFinalLabel" class="text-xs text-slate-400 block mb-1">종합 전투력 환산 스코어</span>
+        <div class="text-center bg-slate-950/80 border border-slate-800/80 rounded-xl p-4 mb-4 shadow-inner">
+          <span id="cardFinalLabel" class="text-xs text-slate-300 block mb-1">종합 전투력 환산 스코어</span>
           <div class="text-3xl sm:text-4xl font-black theme-gradient-text tracking-tight" id="totalScoreText">
             3,250
           </div>
         </div>
 
-        <div class="space-y-2 text-xs border-t border-slate-800 pt-3 mb-4">
+        <div class="space-y-2 text-xs border-t border-slate-800 pt-3.5 mb-4">
           <div class="flex justify-between text-slate-400">
             <span>노도핑 순수 깡스탯</span>
             <span id="breakdownBase" class="text-slate-200 font-semibold">0</span>
@@ -496,14 +497,14 @@
         </div>
 
         <!-- 세공 뱃지 영역 -->
-        <div class="border-t border-slate-800/80 pt-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Equipment Options</span>
-            <span class="text-[9px] text-slate-600 flex items-center gap-1">
+        <div class="border-t border-slate-800/80 pt-3.5">
+          <div class="flex items-center justify-between mb-2.5">
+            <span class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Equipment Options</span>
+            <span class="text-[9px] text-slate-500 flex items-center gap-1">
               <i data-lucide="move" class="w-2.5 h-2.5"></i> 드래그하여 순서 변경
             </span>
           </div>
-          <div id="cardTagsArea" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
+          <div id="cardTagsArea" class="flex flex-wrap gap-1.5 min-h-[32px]"></div>
         </div>
       </div>
 
@@ -829,7 +830,7 @@
                            data-name="${Security.sanitizeString(o.name)}">
                         <span class="truncate pr-2">${Security.sanitizeString(o.name)}</span>
                         <div class="flex items-center gap-1.5 shrink-0">
-                          <span class="text-[10px] text-slate-500">${o.max_level}Lv ${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
+                          <span class="text-[10px] text-slate-500">${o.max_level}Lv${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
                           ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>' : ''}
                         </div>
                       </div>
@@ -1102,7 +1103,7 @@
       const area = document.getElementById('cardTagsArea');
       area.innerHTML = '';
       if (userTags.length === 0) {
-        area.innerHTML = `<span class="text-[10px] text-slate-600 italic">등록된 장비 옵션이 없습니다.</span>`;
+        area.innerHTML = `<span class="text-[10px] text-slate-500 italic">등록된 장비 옵션이 없습니다.</span>`;
         return;
       }
       
@@ -1259,9 +1260,6 @@
       if (el) el.textContent = remain;
     }
 
-    // -------------------------------------------------------------
-    // [FLUX.1 일러스트 변환 핸들러]
-    // -------------------------------------------------------------
     async function handleAiIllustrationGeneration() {
       const previewImg = document.getElementById('previewImage');
       const bgImg = document.getElementById('bgBlurImage');
@@ -1285,7 +1283,6 @@
         return;
       }
 
-      // 모의 광고 모달 열기
       adModal.classList.remove('hidden');
       aiBtn.disabled = true;
 
@@ -1310,7 +1307,6 @@
         }
 
         if (data && data.outputUrl) {
-          // 모달 즉시 닫기
           adModal.classList.add('hidden');
 
           previewImg.src = data.outputUrl;
@@ -1482,7 +1478,7 @@
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
 
-      // [스펙 카드 다운로드 렌더링 최적화]
+      // [스펙 카드 캡처 화질 및 폰트 왜곡 방지 최적화]
       document.getElementById('saveCardBtn').addEventListener('click', () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1493,13 +1489,11 @@
         btn.disabled = true;
         lucide.createIcons();
         
-        // 캡처 전용 모드 적용
         exportArea.classList.add('exporting-mode');
 
         const panelWasVisible = !controlPanel.classList.contains('hidden');
         if (panelWasVisible) controlPanel.classList.add('hidden');
 
-        // 레이아웃 및 폰트 렌더링 버퍼 확보 후 html2canvas 실행
         setTimeout(() => {
           html2canvas(exportArea, { 
             backgroundColor: '#020617', 
@@ -1507,7 +1501,7 @@
             useCORS: true,
             scrollX: 0,
             scrollY: 0,
-            windowWidth: 1280 // 폰트 밀림 방지 기준 너비
+            windowWidth: document.documentElement.offsetWidth
           })
           .then(canvas => {
             exportArea.classList.remove('exporting-mode');
