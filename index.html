@@ -650,7 +650,7 @@
             
             <!-- 아르카나별 고유 문장 및 꾸며진 뱃지 라벨 -->
             <div id="defaultAvatarPlaceholder" class="text-center transition-all duration-500 pointer-events-none p-4 flex flex-col items-center justify-center w-full h-full">
-              <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3"[cite: 31, 32]>
+              <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
               <div class="arcana-badge-pill">
                 <span class="arcana-badge-dot"></span>
                 <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
@@ -1426,6 +1426,7 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
+    // [줌아웃(100%) 상태에서도 상하좌우 자유롭게 이동 가능하도록 보정된 변환 함수]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1435,8 +1436,12 @@
       const cWidth = container.clientWidth;
       const cHeight = container.clientHeight;
 
-      const maxTranslateX = (cWidth * (scale - 1)) / 2;
-      const maxTranslateY = (cHeight * (scale - 1)) / 2;
+      // 줌아웃(100%) 상태에서도 캐릭터 전신/상체/얼굴을 자유롭게 맞출 수 있도록 여유 마진 부여
+      const baseFreedomX = cWidth * 0.75;
+      const baseFreedomY = cHeight * 0.9;
+
+      const maxTranslateX = ((cWidth * (scale - 1)) / 2) + (baseFreedomX * scale);
+      const maxTranslateY = ((cHeight * (scale - 1)) / 2) + (baseFreedomY * scale);
 
       currentImagePosX = Math.max(-maxTranslateX, Math.min(maxTranslateX, currentImagePosX));
       currentImagePosY = Math.max(-maxTranslateY, Math.min(maxTranslateY, currentImagePosY));
