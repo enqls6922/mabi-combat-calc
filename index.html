@@ -14,6 +14,10 @@
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
+  <!-- 파비콘 및 즐겨찾기(북마크) 아이콘 등록 -->
+  <link rel="icon" type="image/svg+xml" href="아이콘.svg">
+  <link rel="apple-touch-icon" href="아이콘.svg">
+
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -332,8 +336,9 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="p-2 bg-theme-bg border border-theme-border rounded-lg section-icon transition-all duration-500 shrink-0">
-          <i data-lucide="shield-check" class="w-6 h-6"></i>
+        <!-- 좌측 상단 메인 브랜드 아이콘 (업로드된 SVG 아이콘 반영) -->
+        <div class="p-1.5 bg-theme-bg border border-theme-border rounded-lg transition-all duration-500 shrink-0 flex items-center justify-center">
+          <img src="아이콘.svg" alt="Erinn Icon" class="w-7 h-7 object-contain filter drop-shadow-[0_0_2px_var(--theme-main)]">
         </div>
         <div>
           <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
@@ -721,7 +726,7 @@
           본 계산기는 유저 편의를 위해 제작된 팬 프로젝트이며, ㈜넥슨 및 마비노기와 공식적인 제휴 관계가 아닙니다.
         </p>
         <p class="text-[10px] text-slate-600">
-          Mabinogi is a registered trademark of NEXON Korea Corporation.
+          Mabinogi is a registered trademark of NEXON Corporation.
         </p>
       </div>
 
