@@ -1426,7 +1426,7 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [이미지가 컨테이너 밖으로 벗어나지 않도록 clamp하는 변환 함수]
+    // [object-cover에 의해 잘려나간 실제 여백까지 고려하여 부드럽고 안전하게 패닝할 수 있도록 보정]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1436,8 +1436,17 @@
       const cWidth = container.clientWidth;
       const cHeight = container.clientHeight;
 
-      const maxTranslateX = (cWidth * (scale - 1)) / 2;
-      const maxTranslateY = (cHeight * (scale - 1)) / 2;
+      const natW = img.naturalWidth || cWidth;
+      const natH = img.naturalHeight || cHeight;
+
+      // object-cover 적용 시 렌더링되는 실제 이미지 가로/세로 비율 계산
+      const coverRatio = Math.max(cWidth / natW, cHeight / natH);
+      const renderedW = natW * coverRatio;
+      const renderedH = natH * coverRatio;
+
+      // 줌(scale) 및 object-cover로 인해 컨테이너 밖으로 넘어간 총 여분 크기만큼만 이동 허용
+      const maxTranslateX = Math.max(0, (renderedW * scale - cWidth) / 2);
+      const maxTranslateY = Math.max(0, (renderedH * scale - cHeight) / 2);
 
       currentImagePosX = Math.max(-maxTranslateX, Math.min(maxTranslateX, currentImagePosX));
       currentImagePosY = Math.max(-maxTranslateY, Math.min(maxTranslateY, currentImagePosY));
@@ -1772,6 +1781,11 @@
           currentImageZoom = 100;
           currentImagePosX = 0;
           currentImagePosY = 0;
+
+          // 이미지가 로드된 후 정확한 naturalWidth/naturalHeight를 반영하여 트랜스폼 계산
+          img.onload = () => {
+            updateImageTransform();
+          };
           updateImageTransform();
         };
         reader.readAsDataURL(file);
