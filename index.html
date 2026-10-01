@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
-    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com;
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com;
     frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
     font-src https://fonts.gstatic.com; 
@@ -40,6 +40,14 @@
         }
       }
     }
+    
+    window.addEventListener('load', function() {
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.warn("AdSense deferred error:", e);
+      }
+    });
   </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
