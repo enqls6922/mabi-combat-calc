@@ -6,7 +6,7 @@
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
     script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
-    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net; 
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.xiaoyaoyou.com https://*.runninghub.ai; 
     frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
     font-src https://fonts.gstatic.com; 
@@ -18,7 +18,8 @@
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- html2canvas 대신 화면 CSS를 그대로 복제하는 html-to-image 사용 -->
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
@@ -97,13 +98,13 @@
     #cardExportArea { position: relative; }
     .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
 
-    /* 태그 수직 중앙 정렬 강제 */
+    /* 태그 수직 중앙 정렬 보정 */
     .tag-base {
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
       height: 24px !important;
-      line-height: 1 !important;
+      line-height: 24px !important;
       padding: 0 8px !important;
       border-radius: 4px !important;
       font-size: 10px !important;
@@ -114,9 +115,9 @@
       box-sizing: border-box !important;
     }
     .tag-base * {
-      line-height: 1 !important;
-      display: inline-block !important;
-      vertical-align: middle !important;
+      line-height: normal !important;
+      display: inline-flex !important;
+      align-items: center !important;
     }
     .tag-base:active { cursor: grabbing; }
     .tag-base.dragging { opacity: 0.4; transform: scale(0.95); }
@@ -415,8 +416,8 @@
 
         <!-- 카드 캐릭터 이미지 영역 -->
         <div class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center">
-            <img id="bgBlurImage" src="" class="absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
-            <img id="previewImage" src="" alt="Avatar" class="relative z-10 w-full h-full object-cover hidden transition-transform duration-75">
+            <img id="bgBlurImage" src="" crossorigin="anonymous" class="absolute inset-0 w-full h-full object-cover blur-lg scale-110 opacity-35 hidden pointer-events-none">
+            <img id="previewImage" src="" alt="Avatar" crossorigin="anonymous" class="relative z-10 w-full h-full object-cover hidden transition-transform duration-75">
             
             <div id="defaultAvatarPlaceholder" class="text-center transition-colors duration-500">
               <i data-lucide="swords" class="w-16 h-16 section-icon mb-2 mx-auto"></i>
@@ -1240,11 +1241,13 @@
 
         if (error) throw new Error(error.message || 'AI 변환 서버 응답 오류');
 
-        if (data && data.outputUrl) {
+        const finalUrl = data?.outputUrl || data?.imageUrl || data?.url || data?.output;
+
+        if (finalUrl) {
           adModal.classList.add('hidden');
 
-          previewImg.src = data.outputUrl;
-          bgImg.src = data.outputUrl;
+          previewImg.src = finalUrl;
+          bgImg.src = finalUrl;
           
           const badge = document.getElementById('animeOverlayBadge');
           if (badge) badge.classList.remove('hidden');
@@ -1412,7 +1415,7 @@
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
 
-      // [스펙 카드 다운로드 시 텍스트 수직 쏠림 방지]
+      // [스펙 카드 다운로드: html-to-image로 교체하여 화면 그대로 1:1 저장]
       document.getElementById('saveCardBtn').addEventListener('click', async () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
@@ -1429,11 +1432,11 @@
         if (glowDecorator) glowDecorator.style.display = 'none';
 
         try {
-          const canvas = await html2canvas(exportArea, {
+          // html-to-image는 브라우저 CSS(transform scale, object-position Y%, flex 정렬)를 100% 동일하게 캡처합니다
+          const dataUrl = await htmlToImage.toPng(exportArea, {
+            pixelRatio: 2,
             backgroundColor: '#020617',
-            scale: 2,
-            useCORS: true,
-            logging: false
+            cacheBust: true,
           });
 
           if (panelWasVisible) controlPanel.classList.remove('hidden');
@@ -1442,10 +1445,10 @@
           const link = document.createElement('a');
           const nickname = document.getElementById('nicknameInput').value || '밀레시안';
           link.download = `에린_스펙_${nickname}.png`;
-          link.href = canvas.toDataURL('image/png');
+          link.href = dataUrl;
           link.click();
         } catch (err) {
-          console.error(err);
+          console.error('[이미지 다운로드 에러]:', err);
           alert("이미지 저장 중 오류가 발생했습니다.");
           if (panelWasVisible) controlPanel.classList.remove('hidden');
           if (glowDecorator) glowDecorator.style.display = '';
