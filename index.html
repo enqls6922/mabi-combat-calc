@@ -1426,7 +1426,7 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // [줌아웃(100%) 상태에서도 상하좌우 자유롭게 이동 가능하도록 보정된 변환 함수]
+    // [이미지가 컨테이너 밖으로 벗어나지 않도록 clamp하는 변환 함수]
     function updateImageTransform() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1436,12 +1436,8 @@
       const cWidth = container.clientWidth;
       const cHeight = container.clientHeight;
 
-      // 줌아웃(100%) 상태에서도 캐릭터 전신/상체/얼굴을 자유롭게 맞출 수 있도록 여유 마진 부여
-      const baseFreedomX = cWidth * 0.75;
-      const baseFreedomY = cHeight * 0.9;
-
-      const maxTranslateX = ((cWidth * (scale - 1)) / 2) + (baseFreedomX * scale);
-      const maxTranslateY = ((cHeight * (scale - 1)) / 2) + (baseFreedomY * scale);
+      const maxTranslateX = (cWidth * (scale - 1)) / 2;
+      const maxTranslateY = (cHeight * (scale - 1)) / 2;
 
       currentImagePosX = Math.max(-maxTranslateX, Math.min(maxTranslateX, currentImagePosX));
       currentImagePosY = Math.max(-maxTranslateY, Math.min(maxTranslateY, currentImagePosY));
