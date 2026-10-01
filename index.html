@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Content-Security-Policy" content="
-    default-src 'self'; 
-    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com; 
-    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://ep1.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com;
-    frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
-    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
-    font-src https://fonts.gstatic.com; 
-    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai;
-  ">
+      default-src 'self'; 
+      script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://*.adtrafficquality.google; 
+      connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com; 
+      frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+      font-src 'self' data: https://fonts.gstatic.com; 
+      img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai;
+    ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
@@ -40,7 +40,7 @@
         }
       }
     }
-    
+
     window.addEventListener('load', function() {
       try {
         (adsbygoogle = window.adsbygoogle || []).push({});
@@ -1445,8 +1445,7 @@
             pixelRatio: 2,
             backgroundColor: '#020617',
             cacheBust: true,
-            // 외부 폰트 fetch 실패로 인한 다운로드 중단 방지
-            skipFonts: false,
+            fontEmbedCSS: '', // 외부 웹폰트 변환 시도 중단 방지 (시스템 기본 고딕 적용)
           });
 
           if (panelWasVisible) controlPanel.classList.remove('hidden');
