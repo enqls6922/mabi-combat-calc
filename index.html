@@ -281,7 +281,7 @@
       border-color: var(--theme-main) !important;
     }
 
-    /* Uko Light Mode yinjira muri accordéon y'ibiranga imiterere */
+    /* 라이트 모드: 디테일 보정 아코디언 및 기본 태그 */
     html.light-theme #promptAccordionBtn {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
@@ -314,6 +314,17 @@
     html.light-theme #oddEyeContainer {
       background-color: #edf2f7 !important;
       border-color: #cbd5e1 !important;
+    }
+
+    /* [핵심 수정] 라이트 모드에서 각 아르카나 테마별 선택된 태그 글씨 선명도 강화 */
+    html.light-theme .art-style-chip[class*="bg-theme-bg"],
+    html.light-theme #promptAccordionContent button[class*="bg-theme-bg"],
+    html.light-theme #toggleOddEyeBtn[class*="bg-theme-bg"] {
+      background-color: var(--theme-bg) !important;
+      border-color: var(--theme-main) !important;
+      color: var(--theme-dark) !important;
+      font-weight: 800 !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
     }
 
     html.light-theme #cardExportArea {
@@ -739,7 +750,7 @@
               <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
               <div class="arcana-badge-pill">
                 <span class="arcana-badge-dot"></span>
-                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
               </div>
             </div>
             
