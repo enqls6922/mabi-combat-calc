@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self'; 
-    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://*.adtrafficquality.google; 
-    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com https://images.weserv.nl; 
-    frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com; 
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://*.adtrafficquality.google https://challenges.cloudflare.com; 
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com https://images.weserv.nl https://challenges.cloudflare.com; 
+    frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://challenges.cloudflare.com; 
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
     font-src 'self' data: https://fonts.gstatic.com; 
     img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai https://images.weserv.nl;
@@ -24,6 +24,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Cloudflare Turnstile API 스크립트 -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
     tailwind.config = {
@@ -787,6 +789,9 @@
       <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
       <p id="adModalStatusText" class="text-xs text-slate-400 mb-4">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
       
+      <!-- [추가] Cloudflare Turnstile 스마트 캡차 렌더링 컨테이너 -->
+      <div id="turnstileWidget" class="my-2 min-h-[65px] flex items-center justify-center"></div>
+
       <!-- 모달 내부 반응형 광고 영역 -->
       <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2 mb-4 min-h-[100px] flex flex-col items-center justify-center overflow-hidden">
         <span class="text-[8px] text-slate-600 block mb-1">SPONSORED REWARD</span>
@@ -859,10 +864,12 @@
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
+    // [클라우드플레어 Turnstile Site Key 설정]
+    const TURNSTILE_SITE_KEY = '0x4AAAAAAFL0MEvDRdEC0_oO';
+
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // [개편된 프롬프트 태그 데이터: 깔끔한 해시태그 디자인 & 헤어 길이 세분화]
     const EYE_COLORS = [
       { label: "#흑안", key: "black", val: "black eyes" },
       { label: "#적안", key: "red", val: "red eyes" },
@@ -986,7 +993,6 @@
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
       });
 
-      // 오드아이 토글 스위치
       const toggleOddEyeBtn = document.getElementById('toggleOddEyeBtn');
       const normalContainer = document.getElementById('normalEyeContainer');
       const oddContainer = document.getElementById('oddEyeContainer');
@@ -1007,7 +1013,6 @@
         updatePromptCountUI();
       });
 
-      // 1. 단일 눈색 칩 렌더링
       normalContainer.innerHTML = '';
       EYE_COLORS.forEach(c => {
         const chip = document.createElement('button');
@@ -1031,7 +1036,6 @@
         normalContainer.appendChild(chip);
       });
 
-      // 2. 오드아이(왼쪽 눈 / 오른쪽 눈) 칩 렌더링
       const leftContainer = document.getElementById('leftEyeSubContainer');
       const rightContainer = document.getElementById('rightEyeSubContainer');
 
@@ -1067,7 +1071,6 @@
       renderSubEyeList(leftContainer, true);
       renderSubEyeList(rightContainer, false);
 
-      // 3. 머리, 의상, 장신구 렌더링
       ['head', 'outfit', 'accessories'].forEach(key => {
         const container = document.getElementById(`tags-${key}`);
         container.innerHTML = '';
@@ -1925,6 +1928,35 @@
       return canvas.toDataURL('image/jpeg', 0.92);
     }
 
+    // [Turnstile 토큰 비동기 획득 함수]
+    let turnstileWidgetId = null;
+    function getTurnstileToken() {
+      return new Promise((resolve, reject) => {
+        const container = document.getElementById('turnstileWidget');
+        if (!container || !window.turnstile) {
+          resolve(null);
+          return;
+        }
+
+        if (turnstileWidgetId !== null) {
+          try { turnstile.remove(turnstileWidgetId); } catch (e) {}
+        }
+        container.innerHTML = '';
+
+        turnstileWidgetId = turnstile.render('#turnstileWidget', {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'dark',
+          size: 'flexible',
+          callback: function(token) {
+            resolve(token);
+          },
+          'error-callback': function() {
+            reject(new Error('보안 인증(Turnstile)에 실패했습니다.'));
+          }
+        });
+      });
+    }
+
     async function handleAiIllustrationGeneration() {
       const previewImg = document.getElementById('previewImage');
       const bgImg = document.getElementById('bgBlurImage');
@@ -1954,9 +1986,16 @@
       adModal.classList.remove('hidden');
       aiBtn.disabled = true;
 
+      // 모달 광고 호출
       try {
         (adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) {}
+
+      // 모달이 열림과 동시에 Turnstile 토큰 발급 시작
+      let tokenPromise = Promise.resolve(null);
+      if (remain < 999) {
+        tokenPromise = getTurnstileToken();
+      }
 
       let progressTimer = null;
 
@@ -2000,13 +2039,17 @@
 
         const promptString = getCombinedCustomPrompt();
 
+        // 캡차 토큰 대기
+        const turnstileToken = await tokenPromise;
+
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
           body: { 
             imageBase64: croppedBase64,
             userIdentifier: clientFingerprint,
             arcanaKey: currentArcanaKey,
             adminKey: ADMIN_KEY,
-            customPrompt: promptString
+            customPrompt: promptString,
+            turnstileToken: turnstileToken
           }
         });
 
