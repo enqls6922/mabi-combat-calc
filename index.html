@@ -17,7 +17,6 @@
   <link rel="icon" type="image/svg+xml" href="icon/아이콘.svg">
   <link rel="apple-touch-icon" href="icon/아이콘.svg">
 
-  <!-- 구글 애드센스 전면 광고 및 자동 광고 활성화 설정 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
   <script>
     window.adsbygoogle = window.adsbygoogle || [];
@@ -676,8 +675,9 @@
                 <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime">
                   #애니
                 </button>
-                <button type="button" id="anime2StyleChip" class="art-style-chip hidden px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime2">
-                  #애니2 (관리자)
+                <!-- 애니(퀄리티)로 변경 완료, 모든 사용자에게 기본 노출 -->
+                <button type="button" id="anime2StyleChip" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime2">
+                  #애니(퀄리티)
                 </button>
                 <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="fantasy">
                   #판타지
@@ -754,7 +754,7 @@
               <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
               <div class="arcana-badge-pill">
                 <span class="arcana-badge-dot"></span>
-                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
               </div>
             </div>
             
@@ -809,7 +809,7 @@
     </section>
   </main>
 
-  <!-- [와이드 가로형 배너 영역] 메인 콘텐츠 하단 (좌우 전체를 가로지르는 긴 배너) -->
+  <!-- 메인 콘텐츠 하단 와이드 가로형 배너 영역 -->
   <div class="max-w-7xl mx-auto w-full px-3 sm:px-4 pb-4">
     <div class="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl py-3 px-3 text-center overflow-hidden min-h-[100px] flex flex-col items-center justify-center section-card">
       <span class="text-[9px] text-slate-600 block mb-1">ADVERTISEMENT</span>
@@ -874,7 +874,7 @@
     </div>
   </div>
 
-  <!-- 후원 모달: PC 화면에서 업로드하신 QR.jpg 이미지를 직접 출력 -->
+  <!-- 후원 모달: PC에서는 QR.jpg 이미지만 깔끔하게 단독 출력 (불필요한 버튼/문구 제거 완료) -->
   <div id="donateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
@@ -889,12 +889,12 @@
         서버 유지와 더 나은 기능 업데이트를 위해 후원해 주시는 분들께 진심으로 감사드립니다!
       </p>
       
-      <!-- 업로드해주신 QR.jpg 이미지 출력 영역 -->
+      <!-- QR.jpg 이미지 출력 영역 (버튼 및 불필요 문구 제거) -->
       <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 mb-4 flex flex-col items-center justify-center">
         <div class="bg-white p-2 rounded-lg mb-2 shadow-inner inline-block">
-          <img src="QR.jpg" alt="카카오페이 QR" class="w-40 h-40 object-contain">
+          <img src="QR.jpg" alt="카카오페이 QR" class="w-44 h-44 object-contain">
         </div>
-        <p class="text-[10px] text-slate-400">카카오톡 카메라로 QR 코드를 스캔해 주세요.</p>
+        <p class="text-[11px] text-slate-400">카카오톡 카메라로 QR 코드를 스캔해 주세요.</p>
       </div>
 
       <button id="donateConfirmBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded-lg transition">닫기</button>
@@ -987,7 +987,8 @@
       outfit: [
         { label: "#천옷", value: "fabric clothing, cloth dress, casual tunic" },
         { label: "#가죽옷", value: "leather clothes, leather doublet, leather armor" },
-        { label: "#갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
+        // [수정] 무거운 중갑 대신 세련된 금속 소재 의상으로 프롬프트 교체
+        { label: "#갑옷", value: "metallic fabric outfit, metallic textured clothes, metallic trimmed attire, subtle metal accents on clothing" }
       ],
       accessories: [
         { label: "#헤일로", value: "halo, floating head ornament" },
@@ -1064,6 +1065,9 @@
     let currentImagePosX = 0;
     let currentImagePosY = 0;
 
+    // 일일 잔여 횟수 캐시 객체
+    let cachedUsageData = { remainCount: 3, remainQualityCount: 1, isAdmin: false };
+
     function updatePromptCountUI() {
       let count = selectedGeneralTags.size;
       if (isOddEyeMode) {
@@ -1086,21 +1090,16 @@
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
       });
 
-      const anime2Btn = document.getElementById('anime2StyleChip');
-      if (anime2Btn && ADMIN_KEY && ADMIN_KEY.trim().length > 0) {
-        anime2Btn.classList.remove('hidden');
-      }
-
+      // 스타일 칩 클릭 시 잔여 횟수 UI 즉시 갱신
       document.querySelectorAll('.art-style-chip').forEach(chip => {
         chip.addEventListener('click', () => {
           selectedArtStyle = chip.dataset.style;
           document.querySelectorAll('.art-style-chip').forEach(c => {
             c.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
-            if (c.id === 'anime2StyleChip' && (!ADMIN_KEY || ADMIN_KEY.trim().length === 0)) {
-              c.classList.add('hidden');
-            }
           });
           chip.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+          
+          updateRemainUsageUI();
         });
       });
 
@@ -1939,9 +1938,11 @@
       });
     }
 
+    // 서버와 통신하여 일일 한도 체크 (일반 3회, 퀄리티 1회)
     async function checkDailyAiUsageLimit() {
       if (ADMIN_KEY) {
-        return 999;
+        cachedUsageData = { remainCount: 999, remainQualityCount: 999, isAdmin: true };
+        return cachedUsageData;
       }
 
       if (supabaseClient) {
@@ -1950,23 +1951,35 @@
             body: { action: 'check', adminKey: ADMIN_KEY }
           });
           if (!error && data) {
-            if (data.isAdmin) return 999;
-            if (typeof data.remainCount === 'number') return data.remainCount;
+            cachedUsageData = {
+              remainCount: data.isAdmin ? 999 : (typeof data.remainCount === 'number' ? data.remainCount : 3),
+              remainQualityCount: data.isAdmin ? 999 : (typeof data.remainQualityCount === 'number' ? data.remainQualityCount : 1),
+              isAdmin: Boolean(data.isAdmin)
+            };
+            return cachedUsageData;
           }
         } catch (e) {
           console.warn('[IP 잔여 횟수 확인 중 오류]:', e);
         }
       }
-      return 3;
+      return cachedUsageData;
     }
 
+    // 선택된 스타일에 따라 남은 횟수 텍스트 표시
     async function updateRemainUsageUI() {
-      const remain = await checkDailyAiUsageLimit();
       const el = document.getElementById('aiRemainCountText');
-      if (el) {
-        el.textContent = remain >= 999 ? '∞ (관리자)' : remain;
+      if (!el) return;
+
+      if (cachedUsageData.isAdmin) {
+        el.textContent = '∞ (관리자)';
+        return;
       }
-      return remain;
+
+      if (selectedArtStyle === 'anime2') {
+        el.textContent = `${cachedUsageData.remainQualityCount}`;
+      } else {
+        el.textContent = `${cachedUsageData.remainCount}`;
+      }
     }
 
     async function compressImageForUpload(file) {
@@ -2085,10 +2098,20 @@
         return;
       }
 
-      let remain = await checkDailyAiUsageLimit();
-      if (remain <= 0) {
-        alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
-        return;
+      await checkDailyAiUsageLimit();
+
+      // 스타일별 잔여 횟수 분기 검증
+      if (!cachedUsageData.isAdmin) {
+        if (selectedArtStyle === 'anime2') {
+          if (cachedUsageData.remainQualityCount <= 0) {
+            alert('오늘의 [애니(퀄리티)] 무료 생성 한도(1회)를 소진하셨습니다.\n다른 스타일(#일러스트, #애니 등)을 선택해 주세요!');
+            return;
+          }
+        }
+        if (cachedUsageData.remainCount <= 0) {
+          alert('오늘의 전체 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
+          return;
+        }
       }
 
       preCountdownBox.classList.remove('hidden');
@@ -2102,14 +2125,14 @@
       aiBtn.disabled = true;
 
       let tokenPromise = Promise.resolve(null);
-      if (remain < 999) {
+      if (!cachedUsageData.isAdmin) {
         tokenPromise = getTurnstileToken();
       }
 
       let timerInterval = null;
 
       try {
-        if (remain < 999) {
+        if (!cachedUsageData.isAdmin) {
           const totalMs = 5000;
           const intervalMs = 100;
           let elapsed = 0;
@@ -2236,10 +2259,11 @@
         const badge = document.getElementById('animeOverlayBadge');
         if (badge) badge.classList.remove('hidden');
 
-        const newRemain = await updateRemainUsageUI();
+        await checkDailyAiUsageLimit();
+        await updateRemainUsageUI();
 
         setTimeout(() => {
-          const countMsg = newRemain >= 999 ? '무제한 (관리자 모드)' : `${newRemain}회`;
+          const countMsg = cachedUsageData.isAdmin ? '무제한 (관리자 모드)' : `${cachedUsageData.remainCount}회`;
           alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${countMsg})`);
         }, 100);
 
@@ -2248,6 +2272,7 @@
         console.error('[AI 생성 에러]:', err);
         adModal.classList.add('hidden');
         alert(err.message || 'AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+        await checkDailyAiUsageLimit();
         await updateRemainUsageUI();
       } finally {
         if (timerInterval) clearInterval(timerInterval);
@@ -2293,13 +2318,14 @@
       applyTheme(currentArcanaKey); 
       initThemeMode();
       lucide.createIcons();
+      await checkDailyAiUsageLimit();
       await updateRemainUsageUI();
       initImageControls(); 
       initPromptTagAccordion();
 
       await initSupabaseDataOnce();
 
-      // 후원 모달 제어 이벤트 (모바일은 자동 카카오페이 이동, PC는 QR.jpg 팝업 모달 노출)
+      // 후원 모달 제어 이벤트
       const donateModal = document.getElementById('donateModal');
       const openDonateBtn = document.getElementById('openDonateModalBtn');
       const donateCloseBtn = document.getElementById('donateCloseBtn');
