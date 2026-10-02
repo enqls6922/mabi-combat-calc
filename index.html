@@ -281,7 +281,6 @@
       border-color: var(--theme-main) !important;
     }
 
-    /* 라이트 모드: 디테일 보정 아코디언 및 기본 태그 */
     html.light-theme #promptAccordionBtn {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
@@ -316,7 +315,6 @@
       border-color: #cbd5e1 !important;
     }
 
-    /* 라이트 모드에서 각 아르카나 테마별 선택된 태그 글씨 선명도 강화 */
     html.light-theme .art-style-chip[class*="bg-theme-bg"],
     html.light-theme #promptAccordionContent button[class*="bg-theme-bg"],
     html.light-theme #toggleOddEyeBtn[class*="bg-theme-bg"] {
@@ -661,17 +659,20 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- [변경] 화풍 스타일 선택 -> 이미지 스타일 선택 -->
+            <!-- 이미지 스타일 선택 (anime2 추가) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">이미지 스타일 선택</span>
               <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
-                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition" data-style="illust">
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none" data-style="illust">
                   #일러스트
                 </button>
-                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="anime">
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime">
                   #애니
                 </button>
-                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="fantasy">
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime2">
+                  #애니2
+                </button>
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="fantasy">
                   #판타지
                 </button>
               </div>
@@ -712,7 +713,7 @@
               <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
             </div>
 
-            <!-- 장신구 카테고리 -->
+            <!-- 장신구 카테고리 (꼬리 추가) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
               <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
@@ -909,7 +910,7 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // [화풍 분기 상태 변수: illust(기본 워크플로우), anime, fantasy]
+    // [이미지 스타일 분기 상태 변수: illust, anime, anime2, fantasy]
     let selectedArtStyle = 'illust';
 
     const EYE_COLORS = [
@@ -2092,7 +2093,7 @@
             arcanaKey: currentArcanaKey,
             adminKey: ADMIN_KEY,
             customPrompt: promptString,
-            artStyle: selectedArtStyle, // 순수 워크플로우 분기 파라미터 전송
+            artStyle: selectedArtStyle, // illust, anime, anime2, fantasy 전달
             turnstileToken: turnstileToken
           }
         });
