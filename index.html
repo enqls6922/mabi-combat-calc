@@ -726,24 +726,6 @@
 
       </div>
 
-      <!-- [모바일 최적화 수정] 좌측 컬럼 하단 스폰서 배너: 모바일에서는 숨기고(hidden lg:flex), PC 웹에서만 대칭 노출 -->
-      <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] hidden lg:flex flex-col items-center justify-center section-card">
-        <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-3618604602899898"
-             data-ad-slot="default"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-          window.addEventListener('load', function() {
-            try {
-              (adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {}
-          });
-        </script>
-      </div>
-
     </section>
 
     <!-- 우측: 결과 스펙 카드 영역 -->
@@ -824,6 +806,7 @@
         </button>
       </div>
 
+      <!-- 우측 하단 스폰서 배너 (원래 위치 유지) -->
       <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] flex flex-col items-center justify-center section-card">
         <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
         <ins class="adsbygoogle"
@@ -889,37 +872,33 @@
     </div>
   </div>
 
-  <!-- 푸터 영역: 건의/문의(구글 설문지) 및 후원하기(카카오페이 QR) 버튼 연결 완료 -->
-  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400 w-full transition-colors duration-300">
+  <!-- 푸터 영역: 노골적이지 않도록 차분하게 정돈된 건의/문의 및 후원 링크 -->
+  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-6 px-4 text-xs text-slate-400 w-full transition-colors duration-300">
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="space-y-1 text-center md:text-left">
         <div class="flex items-center justify-center md:justify-start gap-2">
-          <span class="font-bold text-slate-200">에린 스펙 계산기 (Erinn Spec Calculator)</span>
+          <span class="font-bold text-slate-300">에린 스펙 계산기 (Erinn Spec Calculator)</span>
           <span class="text-[10px] text-slate-500">| 비공식 팬 사이트</span>
         </div>
         <p class="text-[11px] text-slate-500">
           본 계산기는 유저 편의를 위해 제작된 팬 프로젝트이며, ㈜넥슨 및 마비노기와 공식적인 제휴 관계가 아닙니다.
         </p>
-        <p class="text-[10px] text-slate-600">
-          Mabinogi is a registered trademark of NEXON Corporation.
-        </p>
       </div>
 
-      <div class="flex flex-wrap items-center justify-center gap-3 text-xs font-medium">
-        <button type="button" class="modal-open-btn hover:text-theme-light transition" data-modal="terms">이용약관</button>
-        <span class="text-slate-700">|</span>
-        <button type="button" class="modal-open-btn hover:text-theme-light transition font-semibold text-slate-300" data-modal="privacy">개인정보처리방침</button>
-        <span class="text-slate-700">|</span>
-        <button type="button" class="modal-open-btn hover:text-theme-light transition" data-modal="disclaimer">면책조항</button>
-        <span class="text-slate-700">|</span>
-        <!-- 건의 및 문의 버튼 (구글 설문지 링크 연결) -->
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfsTJzsmOs8oDFPHnQa5vpVwolZf-AsSiP_oSzbUZzOfw-UKw/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" class="text-theme-light hover:underline font-semibold flex items-center gap-1">
-          <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i> 건의 및 문의
+      <!-- 우측 링크들 (노골적이지 않게 차분한 텍스트 톤으로 정돈) -->
+      <div class="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400 font-normal">
+        <button type="button" class="modal-open-btn hover:text-slate-200 transition" data-modal="terms">이용약관</button>
+        <span class="text-slate-700">·</span>
+        <button type="button" class="modal-open-btn hover:text-slate-200 transition" data-modal="privacy">개인정보처리방침</button>
+        <span class="text-slate-700">·</span>
+        <button type="button" class="modal-open-btn hover:text-slate-200 transition" data-modal="disclaimer">면책조항</button>
+        <span class="text-slate-700">·</span>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSfsTJzsmOs8oDFPHnQa5vpVwolZf-AsSiP_oSzbUZzOfw-UKw/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" class="hover:text-slate-200 transition">
+          건의 및 문의
         </a>
-        <span class="text-slate-700">|</span>
-        <!-- 후원하기 버튼 (카카오페이 송금 링크 연결) -->
-        <a href="https://qr.kakaopay.com/Fcx2Az8q5" target="_blank" rel="noopener noreferrer" class="bg-amber-500/20 border border-amber-500/40 text-amber-300 px-2.5 py-1 rounded-lg hover:bg-amber-500/30 transition flex items-center gap-1 font-bold">
-          <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-400 fill-rose-400"></i> 후원하기
+        <span class="text-slate-700">·</span>
+        <a href="https://qr.kakaopay.com/Fcx2Az8q5" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-rose-400 transition flex items-center gap-1">
+          <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-500/70"></i> 후원하기
         </a>
       </div>
     </div>
