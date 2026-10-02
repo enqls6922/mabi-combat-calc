@@ -316,7 +316,7 @@
       border-color: #cbd5e1 !important;
     }
 
-    /* [핵심 수정] 라이트 모드에서 각 아르카나 테마별 선택된 태그 글씨 선명도 강화 */
+    /* 라이트 모드에서 각 아르카나 테마별 선택된 태그 글씨 선명도 강화 */
     html.light-theme .art-style-chip[class*="bg-theme-bg"],
     html.light-theme #promptAccordionContent button[class*="bg-theme-bg"],
     html.light-theme #toggleOddEyeBtn[class*="bg-theme-bg"] {
@@ -661,9 +661,9 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- 화풍 스타일 선택 (워크플로우 분기용) -->
+            <!-- [변경] 화풍 스타일 선택 -> 이미지 스타일 선택 -->
             <div>
-              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">화풍 스타일 선택</span>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">이미지 스타일 선택</span>
               <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
                 <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition" data-style="illust">
                   #일러스트
@@ -750,7 +750,7 @@
               <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
               <div class="arcana-badge-pill">
                 <span class="arcana-badge-dot"></span>
-                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
               </div>
             </div>
             
@@ -944,7 +944,8 @@
         { label: "#날개", value: "wings, feathered wings" },
         { label: "#망토", value: "flowing cloak, cape" },
         { label: "#반지", value: "rings on fingers, glowing magical ring" },
-        { label: "#귀걸이", value: "earrings, dangling jewelry" }
+        { label: "#귀걸이", value: "earrings, dangling jewelry" },
+        { label: "#꼬리", value: "tail, animal tail" }
       ]
     };
 
@@ -1035,7 +1036,7 @@
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
       });
 
-      // 화풍 스타일 칩 클릭 이벤트
+      // 이미지 스타일 칩 클릭 이벤트
       document.querySelectorAll('.art-style-chip').forEach(chip => {
         chip.addEventListener('click', () => {
           selectedArtStyle = chip.dataset.style;
