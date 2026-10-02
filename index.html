@@ -1,3 +1,20 @@
+구글 애드센스 관리자 콘솔 설정은 **완벽하게 잘하셨습니다.** `오버레이 형식 (3/3개)`으로 켜져 있으면 전면 광고(Interstitial)가 정상적으로 포함되어 활성화된 상태입니다.
+
+다만, 구글 전면 광고가 **"단일 페이지 웹앱(SPA)" 구조인 우리 사이트에서 실제로 트리거되려면 HTML 소스 코드에 딱 1가지 핵심 보완**이 필요합니다.
+
+---
+
+### 소스 코드를 보완해야 하는 이유
+
+현재 사이트는 별도의 링크 이동(`<a href="...">`) 없이 자바스크립트로 모든 계산과 모달이 열리는 구조입니다. 구글 자동 전면 광고 엔진은 기본적으로 **페이지가 전환되거나 링크를 클릭할 때** 전면 광고를 띄우므로, SPA 환경에서도 전면 광고를 감지할 수 있도록 `<head>`의 애드센스 스크립트에 **SPA 페이지 레벨 옵션**을 선언해 주어야 합니다.
+
+또한 **이미지 여백 버그(위쪽 빈 공간)** 방지 로직과 모달 UI 타이머가 모두 합쳐진 최종 완성본 풀 소스입니다.
+
+---
+
+### 최종 `index.html` 풀 소스 코드
+
+```html
 <!DOCTYPE html>
 <html lang="ko" class="overflow-x-hidden">
 <head>
@@ -17,7 +34,16 @@
   <link rel="icon" type="image/svg+xml" href="icon/아이콘.svg">
   <link rel="apple-touch-icon" href="icon/아이콘.svg">
 
+  <!-- 구글 애드센스 전면 광고 및 자동 광고 활성화 설정 -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
+  <script>
+    window.adsbygoogle = window.adsbygoogle || [];
+    window.adsbygoogle.push({
+      google_ad_client: "ca-pub-3618604602899898",
+      enable_page_level_ads: true,
+      overlays: { bottom: true }
+    });
+  </script>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -82,7 +108,7 @@
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
       background-position: right 10px center;
     }
@@ -648,7 +674,6 @@
           <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/드래그, 모바일: 2손가락 줌/이동]으로 위치를 맞출 수 있습니다.</p>
         </div>
 
-        <!-- 아코디언 드롭다운: 캐릭터 디테일 보정 선택 영역 -->
         <div class="mt-3 w-full">
           <button type="button" id="promptAccordionBtn" class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:border-theme-main transition-colors duration-200">
             <span class="flex items-center gap-2">
@@ -659,7 +684,6 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- 이미지 스타일 선택 (anime2는 관리자 전용 노출) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">이미지 스타일 선택</span>
               <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
@@ -678,7 +702,6 @@
               </div>
             </div>
 
-            <!-- 눈색 카테고리 -->
             <div>
               <div class="flex items-center justify-between mb-2">
                 <span class="text-[11px] font-bold text-slate-400">눈색</span>
@@ -701,19 +724,16 @@
               </div>
             </div>
 
-            <!-- 머리/얼굴 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">머리 / 얼굴 장식</span>
               <div class="flex flex-wrap gap-1.5" id="tags-head"></div>
             </div>
 
-            <!-- 의상 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">의상</span>
               <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
             </div>
 
-            <!-- 장신구 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
               <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
@@ -745,6 +765,7 @@
         </div>
 
         <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
+            <!-- 이미지 센터 강제 고정: top 50%, left 50% 및 transform 기준점 안정화 -->
             <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag absolute z-10 hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="top: 50%; left: 50%; transform: translate(-50%, -50%); transform-origin: center center; will-change: transform; max-width: none; max-height: none;">
             
             <div id="defaultAvatarPlaceholder" class="text-center transition-all duration-500 pointer-events-none p-4 flex flex-col items-center justify-center w-full h-full">
@@ -823,7 +844,7 @@
     </section>
   </main>
 
-  <!-- 광고 및 생성 대기 모달 (UI 개선: 회전 스피너 + 경과 시간 타이머 + 소요 안내) -->
+  <!-- 광고 및 생성 대기 모달 -->
   <div id="adSimulationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
       <div class="w-12 h-12 bg-theme-bg border border-theme-border rounded-full flex items-center justify-center mx-auto mb-3 text-theme-main">
@@ -834,7 +855,7 @@
       
       <div id="turnstileWidget" class="my-1 min-h-[65px] flex items-center justify-center"></div>
 
-      <!-- 스폰서 배너 영역 -->
+      <!-- 모달 스폰서 영역 -->
       <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-3 mb-4 min-h-[85px] flex flex-col items-center justify-center text-center">
         <span class="text-[8px] text-slate-600 block mb-1">SPONSORED PARTNER</span>
         <div class="flex items-center justify-center gap-2 text-xs text-slate-400">
@@ -847,13 +868,13 @@
       <!-- 작업 경과 상태 박스 -->
       <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4 flex flex-col items-center justify-center">
         
-        <!-- 상단: 5초 카운트다운용 (광고 대기 단계) -->
+        <!-- 상단: 5초 카운트다운 (스폰서 확인 단계) -->
         <div id="adPreCountdownBox" class="mb-1">
           <div class="text-3xl font-black text-theme-main" id="adCountdownText">5</div>
           <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold block mt-0.5">후원 스폰서 확인 중...</span>
         </div>
 
-        <!-- 하단: 실제 AI 렌더링 단계 -->
+        <!-- 하단: 실제 AI 렌더링 단계 (스피너 + 경과 시간 타이머 + 소요 시간 안내) -->
         <div id="aiRenderTimerBox" class="hidden flex flex-col items-center justify-center w-full mb-1">
           <div class="flex items-center gap-2 mb-1.5">
             <i data-lucide="loader-2" class="w-5 h-5 text-theme-main animate-spin"></i>
@@ -927,7 +948,6 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // [이미지 스타일 분기 상태 변수: illust, anime, anime2, fantasy]
     let selectedArtStyle = 'illust';
 
     const EYE_COLORS = [
@@ -1777,7 +1797,6 @@
       const natW = img.naturalWidth || cW;
       const natH = img.naturalHeight || cH;
 
-      // 이미지가 프레임을 빈틈없이 채우기 위한 기본 배율 (최소 100% 핏)
       const baseScale = Math.max(cW / natW, cH / natH);
       const baseW = natW * baseScale;
       const baseH = natH * baseScale;
@@ -1785,7 +1804,6 @@
       const currentW = baseW * currentImageZoom;
       const currentH = baseH * currentImageZoom;
 
-      // 0.5px 미세 반올림 오차 방지를 위해 안전 계수 적용
       const maxLimitX = Math.max(0, (currentW - cW) / 2);
       const maxLimitY = Math.max(0, (currentH - cH) / 2);
 
@@ -1799,13 +1817,12 @@
 
       if (currentImageZoom < 1.0) currentImageZoom = 1.0;
 
-      // 중심 기준 확대이므로 현재 위치를 컨테이너 초과분의 1/2 내에서만 엄격히 바운드
+      // 상하/좌우 여백이 1px도 노출되지 않도록 경계 바운딩
       currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
       currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
 
       img.style.width = `${dims.baseW}px`;
       img.style.height = `${dims.baseH}px`;
-      // translate(-50%, -50%)를 항상 유지하여 위/아래/좌/우 기준점이 컨테이너 정중앙에 고정되도록 처리
       img.style.transform = `translate(calc(-50% + ${currentImagePosX}px), calc(-50% + ${currentImagePosY}px)) scale(${currentImageZoom})`;
     }
 
