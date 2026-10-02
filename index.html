@@ -1,589 +1,2323 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="overflow-x-hidden">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>마비노기 전투력 계산기 & AI 캐릭터 카드</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self'; 
+    script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://partner.googleadservices.com https://tpc.googlesyndication.com https://adservice.google.com https://*.adtrafficquality.google https://challenges.cloudflare.com; 
+    connect-src 'self' https://gacxaiyzodywqqzcsiqp.supabase.co wss://gacxaiyzodywqqzcsiqp.supabase.co https://unpkg.com https://cdn.jsdelivr.net https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://*.adtrafficquality.google https://*.xiaoyaoyou.com https://*.runninghub.ai https://fonts.googleapis.com https://fonts.gstatic.com https://images.weserv.nl https://challenges.cloudflare.com; 
+    frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://challenges.cloudflare.com; 
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; 
+    font-src 'self' data: https://fonts.gstatic.com; 
+    img-src 'self' data: blob: https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://*.xiaoyaoyou.com https://*.runninghub.ai https://images.weserv.nl;
+  ">
+  <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
+
+  <link rel="icon" type="image/svg+xml" href="icon/아이콘.svg">
+  <link rel="apple-touch-icon" href="icon/아이콘.svg">
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3618604602899898" crossorigin="anonymous"></script>
+  
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: #0b0f19;
-      color: #f3f4f6;
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            theme: {
+              main: 'var(--theme-main)',
+              dark: 'var(--theme-dark)',
+              light: 'var(--theme-light)',
+              bg: 'var(--theme-bg)',
+              border: 'var(--theme-border)',
+              from: 'var(--theme-from)',
+              to: 'var(--theme-to)'
+            }
+          }
+        }
+      }
     }
-    .custom-scrollbar::-webkit-scrollbar {
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+    
+    :root {
+      --theme-main: #f97316; 
+      --theme-dark: #c2410c;
+      --theme-light: #fed7aa;
+      --theme-bg: rgba(249, 115, 22, 0.15);
+      --theme-border: rgba(249, 115, 22, 0.35);
+      --theme-from: #fb923c;
+      --theme-to: #ea580c;
+    }
+
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    .theme-gradient-text {
+      background: linear-gradient(135deg, var(--theme-from) 0%, var(--theme-to) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      transition: all 0.4s ease;
+    }
+    
+    .section-icon {
+      color: var(--theme-dark);
+      filter: drop-shadow(0 0 1px var(--theme-dark));
+      transition: color 0.4s ease, filter 0.4s ease;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    
+    #cardExportArea { position: relative; }
+    .image-ratio-container { aspect-ratio: 3 / 4; width: 100%; max-height: 400px; }
+
+    .no-native-drag {
+      -webkit-user-drag: none;
+      user-drag: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .tag-base {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 24px !important;
+      line-height: 24px !important;
+      padding: 0 8px !important;
+      border-radius: 4px !important;
+      font-size: 10px !important;
+      white-space: nowrap !important;
+      gap: 4px !important;
+      cursor: grab;
+      user-select: none;
+      box-sizing: border-box !important;
+    }
+    .tag-base * {
+      line-height: normal !important;
+      display: inline-flex !important;
+      align-items: center !important;
+    }
+    .tag-base:active { cursor: grabbing; }
+    .tag-base.dragging { opacity: 0.4; transform: scale(0.95); }
+    .tag-base.drag-over { border: 1px dashed var(--theme-main) !important; transform: scale(1.05); }
+
+    .tag-normal { background-color: #1e293b; border: 1px solid #334155; color: #cbd5e1; }
+    .tag-echo { background: linear-gradient(135deg, #064e3b, #065f46); border: 1px solid #34d399; color: #d1fae5; }
+    .tag-max {
+      background: linear-gradient(135deg, #2e1065, #4c1d95);
+      border: 1px solid #a855f7;
+      color: #e9d5ff;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+    }
+    .tag-limit-break { font-weight: 900; }
+
+    input[type=range] { accent-color: var(--theme-main); }
+
+    .arcana-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--theme-border);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 2px 10px -1px var(--theme-bg);
+      transition: all 0.4s ease;
+    }
+    .arcana-badge-dot {
       width: 6px;
       height: 6px;
+      border-radius: 9999px;
+      background-color: var(--theme-main);
+      box-shadow: 0 0 8px var(--theme-main);
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: #111827;
+
+    html.light-theme {
+      color-scheme: light;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #374151;
-      border-radius: 3px;
+    html.light-theme body {
+      background-color: #f1f5f9 !important;
+      color: #1e293b !important;
     }
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #4b5563;
+    html.light-theme header {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme .section-card {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
+      box-shadow: 0 2px 8px -2px rgba(15, 23, 42, 0.05) !important;
+    }
+    html.light-theme .inner-box {
+      background-color: #edf2f7 !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme label,
+    html.light-theme .text-slate-400 {
+      color: #64748b !important;
+    }
+    html.light-theme .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    html.light-theme .text-slate-300 {
+      color: #334155 !important;
+    }
+    html.light-theme .text-slate-200 {
+      color: #1e293b !important;
+    }
+
+    html.light-theme input[type="text"],
+    html.light-theme select {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+
+    html.light-theme select#arcanaSelect {
+      color: var(--theme-main) !important;
+      font-weight: 800 !important;
+    }
+
+    html.light-theme input#baseStatInput {
+      color: var(--theme-dark) !important;
+    }
+
+    html.light-theme .part-dropdown-trigger,
+    html.light-theme .reforge-dropdown-trigger {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    html.light-theme .part-dropdown-menu,
+    html.light-theme .reforge-dropdown-menu {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12) !important;
+    }
+    html.light-theme .part-dropdown-search,
+    html.light-theme .reforge-dropdown-search {
+      background-color: #f1f5f9 !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+    html.light-theme .part-dropdown-item,
+    html.light-theme .reforge-dropdown-item {
+      color: #334155 !important;
+    }
+    html.light-theme .part-dropdown-item:hover,
+    html.light-theme .reforge-dropdown-item:hover {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    html.light-theme .stat-step-btn,
+    html.light-theme .btn-step-down,
+    html.light-theme .btn-step-up {
+      color: #64748b !important;
+    }
+    html.light-theme .stat-step-btn:hover,
+    html.light-theme .btn-step-down:hover,
+    html.light-theme .btn-step-up:hover {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    html.light-theme #reforgeListContainer .bg-slate-900 {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme .tag-level {
+      color: var(--theme-dark) !important;
+    }
+
+    html.light-theme #addReforgeBtn {
+      background-color: #ffffff !important;
+      border-color: var(--theme-main) !important;
+      color: var(--theme-main) !important;
+      font-weight: 700 !important;
+    }
+    html.light-theme #addReforgeBtn i {
+      color: var(--theme-main) !important;
+    }
+
+    html.light-theme #dropZone {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme #dropZone:hover {
+      border-color: var(--theme-main) !important;
+    }
+
+    html.light-theme #cardExportArea {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08) !important;
+    }
+    html.light-theme #cardExportArea div[style*="border-bottom: 1px solid #1e293b"],
+    html.light-theme #cardExportArea div[style*="border-top: 1px solid #1e293b"] {
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #1e293b"] {
+      background-color: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #1e293b"] span {
+      color: #334155 !important;
+    }
+    html.light-theme #cardServerBadge {
+      color: #0f172a !important;
+    }
+    html.light-theme #avatarContainer {
+      background-color: #e2e8f0 !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme .arcana-badge-pill {
+      background: rgba(255, 255, 255, 0.85) !important;
+      border-color: var(--theme-border) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    }
+    html.light-theme #cardExportArea div[style*="background-color: #030712"] {
+      background-color: #ffffff !important;
+      border-color: #e2e8f0 !important;
+    }
+    html.light-theme #breakdownBase {
+      color: #0f172a !important;
+    }
+
+    html.light-theme #saveCardBtn {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    html.light-theme #saveCardBtn:hover {
+      background-color: #cbd5e1 !important;
+    }
+
+    html.light-theme #themeToggleBtn {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #334155 !important;
+    }
+    html.light-theme #themeToggleBtn:hover {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+    }
+
+    html.light-theme footer {
+      background-color: #f8fafc !important;
+      border-color: #e2e8f0 !important;
     }
   </style>
 </head>
-<body class="min-h-screen custom-scrollbar flex flex-col items-center p-4 md:p-8 select-none">
-  <div class="w-full max-w-6xl flex flex-col lg:flex-row gap-8 items-start justify-center">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden transition-colors duration-300">
 
-    <!-- 좌측: 입력 패널 & 스펙 설정 -->
-    <div class="w-full lg:w-1/2 flex flex-col gap-6 bg-gray-900/80 border border-gray-800 p-6 rounded-2xl shadow-xl backdrop-blur-sm">
-      <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 px-4 py-3 shadow-md w-full transition-colors duration-300">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div id="brandHeaderLogo" class="flex items-center space-x-3 cursor-pointer group select-none" title="새로고침">
+        <div class="p-1.5 bg-theme-bg border border-theme-border rounded-lg transition-all duration-500 shrink-0 flex items-center justify-center group-hover:scale-105">
+          <img src="icon/아이콘.svg" alt="Erinn Icon" class="w-7 h-7 object-contain filter drop-shadow-[0_0_2px_var(--theme-main)]">
+        </div>
         <div>
-          <h1 class="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-            ⚔️ 마비노기 전투력 계산기
-          </h1>
-          <p class="text-xs text-gray-400 mt-1">캐릭터 스펙 입력 및 AI 카드 일러스트 생성</p>
-        </div>
-        <span class="text-xs px-2.5 py-1 rounded-full bg-blue-950/80 border border-blue-700/60 text-blue-300 font-medium">v1.2</span>
-      </div>
-
-      <!-- 이미지 업로드 & 조절기 -->
-      <div class="flex flex-col gap-3">
-        <label class="text-sm font-bold text-gray-200 flex items-center justify-between">
-          <span>캐릭터 스크린샷 등록</span>
-          <span class="text-xs font-normal text-gray-400">드래그로 위치 조절 / 휠로 줌 조절</span>
-        </label>
-        <div class="flex items-center gap-3">
-          <input type="file" id="imageInput" accept="image/*" class="hidden" />
-          <button type="button" onclick="document.getElementById('imageInput').click()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-sm font-medium rounded-xl border border-gray-700 transition">
-            📁 파일 선택
-          </button>
-          <button type="button" id="resetPositionBtn" class="px-3 py-2 bg-gray-800/60 hover:bg-gray-700/60 text-xs text-gray-300 rounded-xl border border-gray-700/70 transition">
-            위치 초기화
-          </button>
-          <span id="fileName" class="text-xs text-gray-500 truncate max-w-[200px]">선택된 파일 없음</span>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:gap-2">
+            <h1 class="text-base sm:text-lg font-black theme-gradient-text tracking-wide whitespace-nowrap">에린 스펙 계산기</h1>
+            <span class="text-[9px] sm:text-[10px] text-slate-500 font-medium tracking-tight">Erinn Spec Calculator</span>
+          </div>
         </div>
       </div>
+      
+      <button id="themeToggleBtn" type="button" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white transition flex items-center justify-center shadow-sm" title="화면 모드 변경">
+        <i id="themeToggleIcon" data-lucide="sun" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
 
-      <!-- AI 생성 컨트롤 섹션 -->
-      <div class="flex flex-col gap-3 p-4 rounded-xl bg-gray-800/40 border border-gray-800">
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-bold text-gray-200 flex items-center gap-1.5">
-            ✨ AI 일러스트 카드 변환
-          </span>
-          <span id="remainCountBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-            남은 횟수: 계산 중
-          </span>
-        </div>
+  <div class="max-w-7xl mx-auto w-full px-3 sm:px-4 pt-3 sm:pt-4">
+    <div class="w-full bg-slate-900/50 border border-slate-800/80 rounded-xl py-2 px-2 text-center overflow-hidden min-h-[90px] flex flex-col items-center justify-center section-card">
+      <span class="text-[9px] text-slate-600 block mb-1">ADVERTISEMENT</span>
+      <ins class="adsbygoogle"
+           style="display:block; text-align:center;"
+           data-ad-layout="in-article"
+           data-ad-format="fluid"
+           data-ad-client="ca-pub-3618604602899898"
+           data-ad-slot="default"></ins>
+      <script>
+        window.addEventListener('load', function() {
+          try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+          } catch (e) {}
+        });
+      </script>
+    </div>
+  </div>
 
-        <div class="flex flex-col gap-2">
-          <label class="text-xs text-gray-400">커스텀 스타일/프롬프트 (선택사항)</label>
-          <input type="text" id="customPromptInput" placeholder="예: glowing eyes, magical aura, battle pose" class="w-full bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200 focus:outline-none focus:border-amber-500" />
-        </div>
-
-        <!-- 캡차 위젯 컨테이너 -->
-        <div id="turnstileContainer" class="my-1 flex justify-center"></div>
-
-        <div class="flex items-center gap-2 mt-1">
-          <button type="button" id="generateAiBtn" class="flex-1 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-orange-950/40 transition flex items-center justify-center gap-2">
-            <span>✨ AI 일러스트 생성하기</span>
-          </button>
-          <button type="button" id="revertImageBtn" class="hidden px-3 py-2.5 bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 rounded-xl border border-gray-700 transition">
-            원본 복구
-          </button>
-        </div>
-        <p id="aiStatusMessage" class="text-xs text-center text-gray-400 min-h-[1rem]"></p>
-      </div>
-
-      <!-- 기본 스펙 입력 -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">서버 & 닉네임</label>
-          <div class="flex gap-2">
-            <select id="serverSelect" class="bg-gray-950 border border-gray-800 rounded-lg px-2.5 py-2 text-sm text-gray-200">
+  <main class="max-w-7xl mx-auto w-full p-3 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 flex-1">
+    
+    <section class="lg:col-span-7 space-y-5 sm:space-y-6 w-full">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg section-card">
+        <h2 class="text-sm font-semibold theme-gradient-text mb-3 sm:mb-4 flex items-center gap-2">
+          <i data-lucide="swords" class="w-4 h-4 section-icon"></i> 1. 캐릭터 & 아르카나 정보
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">캐릭터 닉네임</label>
+            <input type="text" id="nicknameInput" maxlength="12" placeholder="밀레시안" value="밀레시안"
+              class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-4 py-2 text-sm focus:border-theme-main focus:outline-none transition-colors duration-300">
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">서버</label>
+            <select id="serverSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
               <option value="류트">류트</option>
               <option value="만돌린">만돌린</option>
               <option value="하프">하프</option>
               <option value="울프">울프</option>
             </select>
-            <input type="text" id="characterNameInput" value="밀레시안" class="flex-1 bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">아르카나 재능</label>
+            <select id="arcanaSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm font-bold text-theme-light focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+              <option value="elemental_knight">엘레멘탈 나이트</option>
+              <option value="dark_mage">다크 메이지</option>
+              <option value="alchemic_stinger">알케믹 스팅어</option>
+              <option value="sacred_guard">세이크리드 가드</option>
+              <option value="blader">블래스트 랜서</option>
+              <option value="variable_gunner">배리어블 거너</option>
+              <option value="forbidden_alchemist">포비든 알케미스트</option>
+              <option value="melodic_puppeteer">멜로딕 퍼펫티어</option>
+              <option value="fury_fighter">퓨리 파이터</option>
+            </select>
           </div>
         </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">아르카나</label>
-          <select id="arcanaSelect" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200">
-            <option value="none">선택 안 함</option>
-            <option value="elemental_knight">엘레멘탈 나이트</option>
-            <option value="mage">세인트 바드</option>
-            <option value="alchemist">알케믹 스팅어</option>
-            <option value="dark_mage">다크메이지</option>
-          </select>
-        </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">최대 공격력 / 마법 공격력</label>
-          <input type="number" id="baseDamageInput" value="1500" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">피어싱 레벨</label>
-          <input type="number" id="piercingInput" value="9" min="0" max="9" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200" />
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">보호 / 마법보호</label>
-          <input type="number" id="defenseInput" value="120" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200" />
-        </div>
-        <div class="flex flex-col gap-1.5">
-          <label class="text-xs font-semibold text-gray-400">크리티컬 대미지 (%)</label>
-          <input type="number" id="critDamageInput" value="250" class="bg-gray-950 border border-gray-800 rounded-lg px-3 py-2 text-sm text-gray-200" />
-        </div>
-      </div>
-    </div>
-
-    <!-- 우측: 캐릭터 카드 뷰 -->
-    <div class="w-full lg:w-[460px] flex flex-col items-center">
-      <div id="characterCard" class="w-full bg-[#0d1322] border border-[#1e293b] rounded-2xl p-5 shadow-2xl flex flex-col gap-4 relative overflow-hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4 section-card">
+        <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 section-icon"></i> 2. 노도핑 전투 베이스 스펙
+        </h2>
         
-        <!-- 카드 상단 헤더 -->
-        <div class="flex items-center justify-between z-10">
-          <span class="text-xs px-3 py-1 rounded-full bg-blue-950/70 border border-blue-800/50 text-blue-300 font-medium">
-            에린 스펙 계산 기준
-          </span>
-          <span id="cardHeaderUser" class="text-xs font-bold text-gray-200 tracking-wide">
-            류트 | 밀레시안
-          </span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div>
+            <label id="baseStatLabel" class="block text-xs text-slate-400 mb-1">노도핑 최대 공격력 (스탯 세공 포함)</label>
+            <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors inner-box">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="baseStatInput" data-step="-10" data-min="0" data-max="8000">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" id="baseStatInput" value="1500" min="0" max="8000" step="1"
+                class="w-full bg-transparent text-center font-bold text-theme-light focus:outline-none text-sm min-w-0">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="baseStatInput" data-step="10" data-min="0" data-max="8000">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">피어싱 레벨 (0~11)</label>
+            <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-1 focus-within:border-theme-main transition-colors inner-box">
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="piercingInput" data-step="-1" data-min="0" data-max="11">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" id="piercingInput" value="4" min="0" max="11" step="1"
+                class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-sm min-w-0">
+              <span class="text-xs text-slate-500 pr-1 select-none font-semibold shrink-0">Lv</span>
+              <button type="button" class="stat-step-btn px-2.5 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition shrink-0" data-target="piercingInput" data-step="1" data-min="0" data-max="11">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-slate-950 p-3 rounded-lg border border-slate-800 inner-box">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">무기 장착 타입</label>
+              <select id="weaponTypeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                <option value="two_handed" selected>양손무기</option>
+                <option value="one_handed">한손무기</option>
+                <option value="dual_wield">쌍수무기</option>
+              </select>
+            </div>
+            
+            <div id="singleRGradeContainer">
+              <label class="block text-xs text-slate-400 mb-1">특별개조 (R강)</label>
+              <select id="upgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                <option value="0">노개조 / S강</option>
+                <option value="1">R1강</option>
+                <option value="2">R2강</option>
+                <option value="3">R3강</option>
+                <option value="4">R4강</option>
+                <option value="5">R5강</option>
+                <option value="6">R6강</option>
+                <option value="7" selected>R7강</option>
+                <option value="8">R8강</option>
+              </select>
+            </div>
+
+            <div id="dualRGradeContainer" class="hidden flex gap-2">
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">오른손 R강</label>
+                <select id="mainHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                  <option value="0">노개조</option>
+                  <option value="6">R6강</option>
+                  <option value="7" selected>R7강</option>
+                  <option value="8">R8강</option>
+                </select>
+              </div>
+              <div class="flex-1">
+                <label class="block text-xs text-slate-400 mb-1">왼손 R강</label>
+                <select id="offHandUpgradeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-3 pr-8 py-2 text-sm focus:border-theme-main focus:outline-none cursor-pointer transition-colors duration-300">
+                  <option value="0">노개조</option>
+                  <option value="6">R6강</option>
+                  <option value="7">R7강</option>
+                  <option value="8">R8강</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="sm:col-span-2 grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-2.5 border-t border-slate-800 pt-3">
+            <div>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">아르카나 댐증 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="-1" data-min="0" data-max="60">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                </button>
+                <input type="number" id="arcanaDamageInput" value="10" min="0" max="60" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="arcanaDamageInput" data-step="1" data-min="0" data-max="60">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">보너스 대미지 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="bonusDamageInput" data-step="-0.5" data-min="0" data-max="60">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                </button>
+                <input type="number" id="bonusDamageInput" value="15" min="0" max="60" step="0.5"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="bonusDamageInput" data-step="0.5" data-min="0" data-max="60">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">크리티컬 상한 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="neleInput" data-step="-0.1" data-min="0" data-max="7.5">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                </button>
+                <input type="number" id="neleInput" value="7.5" min="0" max="7.5" step="0.1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="neleInput" data-step="0.1" data-min="0" data-max="7.5">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">이보나 크댐증 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="yvonaInput" data-step="-1" data-min="0" data-max="10">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                </button>
+                <input type="number" id="yvonaInput" value="10" min="0" max="10" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="yvonaInput" data-step="1" data-min="0" data-max="10">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-span-2 md:col-span-1">
+              <label class="block text-[10px] sm:text-[11px] text-slate-400 mb-1 truncate">토템/농장 크댐증 (%)</label>
+              <div class="flex items-center bg-slate-950 border border-slate-700 rounded-lg p-0.5 focus-within:border-theme-main transition-colors inner-box">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="totemCritInput" data-step="-1" data-min="0" data-max="30">
+                  <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+                </button>
+                <input type="number" id="totemCritInput" value="3" min="0" max="30" step="1"
+                  class="w-full bg-transparent text-center font-bold text-slate-200 focus:outline-none text-xs min-w-0">
+                <button type="button" class="stat-step-btn w-6 h-7 text-slate-400 hover:text-white hover:bg-slate-800 rounded flex items-center justify-center transition shrink-0" data-target="totemCritInput" data-step="1" data-min="0" data-max="30">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-4 section-card">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 section-icon"></i> 3. 장비 세공 및 에코스톤 등록
+            </h2>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">장비 타입과 세공 내용 모두 클릭하여 검색 및 선택할 수 있습니다.</p>
+          </div>
+          <button id="addReforgeBtn" class="shrink-0 flex items-center gap-1 text-xs bg-theme-bg border border-theme-border text-theme-light px-3 py-1.5 rounded-lg hover:brightness-125 transition-all duration-300">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i> 장비 추가
+          </button>
+        </div>
+        <div id="reforgeListContainer" class="space-y-3 w-full"></div>
+      </div>
+
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 sm:p-5 shadow-lg space-y-3 section-card">
+        <h2 class="text-sm font-semibold theme-gradient-text flex items-center gap-2">
+          <i data-lucide="image" class="w-4 h-4 section-icon"></i> 4. 캐릭터 외형 등록 (선택)
+        </h2>
+        <div id="dropZone" class="border-2 border-dashed border-slate-700 hover:border-theme-main rounded-xl p-5 sm:p-6 text-center cursor-pointer transition-colors duration-300 bg-slate-950/40 inner-box">
+          <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp" class="hidden">
+          <i data-lucide="upload-cloud" class="w-8 h-8 text-slate-400 mx-auto mb-2"></i>
+          <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
+          <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/드래그, 모바일: 2손가락 줌/이동]으로 위치를 맞출 수 있습니다.</p>
         </div>
 
-        <!-- 이미지 컨테이너 (스크린샷 / AI 일러스트 렌더링 프레임) -->
-        <div id="imageViewport" class="relative w-full h-[380px] rounded-xl overflow-hidden bg-black border border-gray-800/80 cursor-grab active:cursor-grabbing flex items-center justify-center">
-          <canvas id="cardCanvas" class="absolute pointer-events-none"></canvas>
-          <div id="emptyImagePrompt" class="flex flex-col items-center justify-center gap-2 text-gray-600 pointer-events-none">
-            <span class="text-3xl">🖼️</span>
-            <span class="text-xs">스크린샷을 업로드해 주세요</span>
-          </div>
-          <!-- AI 일러스트 배지 -->
-          <div id="aiBadge" class="hidden absolute top-3 right-3 z-20 flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold text-[11px] rounded-full shadow-md pointer-events-none">
-            <span>✨</span> AI Illustration
-          </div>
-        </div>
+        <!-- 아코디언 드롭다운: 캐릭터 디테일 보정 선택 영역 -->
+        <div class="mt-3 w-full">
+          <button type="button" id="promptAccordionBtn" class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:border-theme-main transition-colors duration-200">
+            <span class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-theme-main"></i>
+              캐릭터 디테일 보정 선택 (<span id="selectedPromptCount" class="text-theme-main font-bold">0</span>개 선택됨)
+            </span>
+            <i id="promptAccordionArrow" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform duration-200"></i>
+          </button>
+          
+          <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
+            <!-- [추가] 화풍 스타일 선택 (워크플로우 분기용) -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">화풍 스타일 선택</span>
+              <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition" data-style="illust">
+                  #일러스트
+                </button>
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="anime">
+                  #애니
+                </button>
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="fantasy">
+                  #판타지
+                </button>
+              </div>
+            </div>
 
-        <!-- 계산 스코어 보드 -->
-        <div class="w-full bg-[#080d18] border border-[#1b263b] rounded-xl p-4 flex flex-col items-center justify-center gap-1">
-          <span class="text-xs text-gray-400 font-medium">종합 전투력 환산 스코어 (최대 공격력 기준)</span>
-          <span id="totalCombatScore" class="text-3xl font-black text-orange-500 tracking-tight">
-            2,544
-          </span>
-        </div>
+            <!-- 눈색 카테고리 -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-slate-400">눈색</span>
+                <button type="button" id="toggleOddEyeBtn" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition">
+                  #오드아이 OFF
+                </button>
+              </div>
 
-        <!-- 하단 세부 스펙 표 -->
-        <div class="flex flex-col gap-2 text-xs">
-          <div class="flex justify-between items-center text-gray-400">
-            <span>전투 베이스 스펙</span>
-            <span id="displayBaseDmg" class="text-gray-200 font-semibold">1,500</span>
-          </div>
-          <div class="flex justify-between items-center text-gray-400">
-            <span>피어싱 관통 환산치</span>
-            <span id="displayPiercingDmg" class="text-gray-200 font-semibold">+ 180</span>
-          </div>
-          <div class="flex justify-between items-center text-gray-400">
-            <span>크리티컬 배율 환산 계수</span>
-            <span id="displayCritScale" class="text-gray-200 font-semibold">x 2.50</span>
+              <div id="normalEyeContainer" class="flex flex-wrap gap-1.5"></div>
+
+              <div id="oddEyeContainer" class="hidden space-y-2 p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg">
+                <div>
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">왼쪽 눈</span>
+                  <div class="flex flex-wrap gap-1.5" id="leftEyeSubContainer"></div>
+                </div>
+                <div class="border-t border-slate-800/80 pt-2">
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">오른쪽 눈</span>
+                  <div class="flex flex-wrap gap-1.5" id="rightEyeSubContainer"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 머리/얼굴 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">머리 / 얼굴 장식</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-head"></div>
+            </div>
+
+            <!-- 의상 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">의상</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
+            </div>
+
+            <!-- 장신구 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
+            </div>
           </div>
         </div>
 
       </div>
-    </div>
 
+    </section>
+
+    <!-- 우측: 결과 스펙 카드 영역 -->
+    <section class="lg:col-span-5 space-y-5 sm:space-y-6 w-full">
+      
+      <div class="bg-slate-900 border border-theme-border rounded-2xl p-5 shadow-2xl relative overflow-hidden transition-all duration-500 w-full" id="cardExportArea">
+        <div id="cardGlowDecorator" class="absolute -right-10 -bottom-10 w-40 h-40 rounded-full blur-3xl pointer-events-none bg-theme-main opacity-20 transition-all duration-500"></div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; height: 38px; margin-bottom: 16px; width: 100%;">
+          <div style="display: inline-flex; align-items: center; justify-content: center; height: 26px; padding: 0 10px; border-radius: 9999px; background-color: #1e293b; border: 1px solid #334155; line-height: 1;">
+            <span style="font-size: 11px; font-weight: 700; color: #cbd5e1; white-space: nowrap; line-height: 1; display: inline-block;">
+              에린 스펙 계산 기준
+            </span>
+          </div>
+          <div style="display: inline-flex; align-items: center; justify-content: flex-end; height: 26px; line-height: 1;">
+            <span id="cardServerBadge" style="font-size: 12px; font-weight: 700; color: #e2e8f0; white-space: nowrap; line-height: 1; display: inline-block;">
+              류트 | 밀레시안
+            </span>
+          </div>
+        </div>
+
+        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
+            <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag absolute z-10 hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform; max-width: none; max-height: none;">
+            
+            <div id="defaultAvatarPlaceholder" class="text-center transition-all duration-500 pointer-events-none p-4 flex flex-col items-center justify-center w-full h-full">
+              <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
+              <div class="arcana-badge-pill">
+                <span class="arcana-badge-dot"></span>
+                <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">엘레멘탈 나이트</span>
+              </div>
+            </div>
+            
+            <div id="animeOverlayBadge" style="position: absolute; top: 10px; right: 10px; background-color: var(--theme-main); color: #ffffff; font-size: 10px; font-weight: 700; height: 22px; padding: 0 8px; border-radius: 6px; z-index: 20; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; line-height: 1;" class="hidden pointer-events-none">
+              ✨ AI Illustration
+            </div>
+        </div>
+
+        <div style="text-align: center; background-color: #030712; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 10px; margin-bottom: 16px;">
+          <span id="cardFinalLabel" style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; line-height: 1;">종합 전투력 환산 스코어</span>
+          <div style="font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: var(--theme-main);" id="totalScoreText">
+            3,250
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #1e293b; padding-top: 14px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
+            <span>전투 베이스 스펙</span>
+            <span id="breakdownBase" style="color: #e2e8f0; font-weight: 600;">0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
+            <span>피어싱 관통 환산치</span>
+            <span id="breakdownPiercing" style="color: var(--theme-light); font-weight: 600;">+ 0</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: #94a3b8; line-height: 1.3;">
+            <span>크뎀/보뎀/아뎀 환산치</span>
+            <span id="breakdownMult" style="color: #38bdf8; font-weight: 600;">+ 0</span>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid #1e293b; padding-top: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; line-height: 1;">Equipment Options</span>
+            <span style="font-size: 9px; color: #475569; display: flex; align-items: center; gap: 4px; line-height: 1;">
+              <i data-lucide="move" class="w-2.5 h-2.5"></i> 순서 변경 가능
+            </span>
+          </div>
+          <div id="cardTagsArea" style="display: flex; flex-wrap: wrap; gap: 6px; min-height: 32px; align-items: center;"></div>
+        </div>
+      </div>
+
+      <div class="space-y-2">
+        <button id="aiTransformBtn" class="w-full text-white font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition-all" style="background: linear-gradient(135deg, var(--theme-from), var(--theme-to))">
+          <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i> 
+          <span>AI 일러스트 카드 생성 (광고 5초 / 오늘 <span id="aiRemainCountText">3</span>회 가능)</span>
+        </button>
+        <button id="saveCardBtn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-3.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition">
+          <i data-lucide="download" class="w-4 h-4"></i> 스펙 카드 이미지 저장
+        </button>
+      </div>
+
+      <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] flex flex-col items-center justify-center section-card">
+        <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3618604602899898"
+             data-ad-slot="default"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+          window.addEventListener('load', function() {
+            try {
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {}
+          });
+        </script>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- 광고 및 생성 대기 모달 -->
+  <div id="adSimulationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl relative">
+      <div class="w-12 h-12 bg-theme-bg border border-theme-border rounded-full flex items-center justify-center mx-auto mb-4 text-theme-main">
+        <i data-lucide="sparkles" class="w-6 h-6 animate-pulse"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
+      <p id="adModalStatusText" class="text-xs text-slate-400 mb-4">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
+      
+      <div id="turnstileWidget" class="my-2 min-h-[65px] flex items-center justify-center"></div>
+
+      <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2 mb-4 min-h-[100px] flex flex-col items-center justify-center overflow-hidden">
+        <span class="text-[8px] text-slate-600 block mb-1">SPONSORED REWARD</span>
+        <ins class="adsbygoogle"
+             style="display:block; width:100%; min-height:80px;"
+             data-ad-client="ca-pub-3618604602899898"
+             data-ad-slot="default"
+             data-ad-format="horizontal"
+             data-full-width-responsive="false"></ins>
+      </div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4">
+        <div class="text-3xl font-black text-theme-main mb-1" id="adCountdownText">5</div>
+        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">진행 중...</span>
+        <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden relative">
+          <div id="adProgressBar" class="h-full bg-theme-main rounded-full" style="width: 0%; transition: width 0.15s ease-out;"></div>
+        </div>
+      </div>
+      <p class="text-[10px] text-slate-500">※ 창을 닫지 마시고 잠시만 기다려 주세요.</p>
+    </div>
+  </div>
+
+  <footer class="bg-slate-900/90 border-t border-slate-800 mt-12 py-8 px-4 text-xs text-slate-400 w-full transition-colors duration-300">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="space-y-1 text-center md:text-left">
+        <div class="flex items-center justify-center md:justify-start gap-2">
+          <span class="font-bold text-slate-200">에린 스펙 계산기 (Erinn Spec Calculator)</span>
+          <span class="text-[10px] text-slate-500">| 비공식 팬 사이트</span>
+        </div>
+        <p class="text-[11px] text-slate-500">
+          본 계산기는 유저 편의를 위해 제작된 팬 프로젝트이며, ㈜넥슨 및 마비노기와 공식적인 제휴 관계가 아닙니다.
+        </p>
+        <p class="text-[10px] text-slate-600">
+          Mabinogi is a registered trademark of NEXON Corporation.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-medium">
+        <button type="button" class="modal-open-btn hover:text-theme-light transition" data-modal="terms">이용약관</button>
+        <span class="text-slate-700">|</span>
+        <button type="button" class="modal-open-btn hover:text-theme-light transition font-semibold text-slate-300" data-modal="privacy">개인정보처리방침</button>
+        <span class="text-slate-700">|</span>
+        <button type="button" class="modal-open-btn hover:text-theme-light transition" data-modal="disclaimer">면책조항</button>
+        <span class="text-slate-700">|</span>
+        <a href="mailto:support@example.com" class="hover:text-theme-light transition">문의하기</a>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto mt-4 pt-4 border-t border-slate-800/60 text-center text-[11px] text-slate-600">
+      © 2026 Erinn Spec Calculator. All rights reserved.
+    </div>
+  </footer>
+
+  <div id="policyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full max-h-[80vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 p-4">
+        <h3 id="modalTitle" class="text-sm font-bold text-slate-200">약관 안내</h3>
+        <button id="modalCloseBtn" class="text-slate-400 hover:text-white p-1 rounded-lg transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="modalContent" class="p-5 text-xs text-slate-300 leading-relaxed overflow-y-auto space-y-3"></div>
+      <div class="border-t border-slate-800 p-3 bg-slate-950 rounded-b-2xl text-right">
+        <button id="modalConfirmBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg transition">닫기</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    // -------------------------------------------------------------
-    // 상태 및 엘리먼트 참조
-    // -------------------------------------------------------------
-    const EDGE_FUNCTION_URL = "https://gacxaiyzodywqqzcsiqp.supabase.co/functions/v1/generate-art";
-    const TURNSTILE_SITE_KEY = "0x4AAAAAAAi7f30gq5gY78qH"; // Cloudflare Turnstile 공개 키
+    const SUPABASE_URL = 'https://gacxaiyzodywqqzcsiqp.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
+    const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-    const imageInput = document.getElementById("imageInput");
-    const fileNameDisplay = document.getElementById("fileName");
-    const imageViewport = document.getElementById("imageViewport");
-    const cardCanvas = document.getElementById("cardCanvas");
-    const ctx = cardCanvas.getContext("2d");
-    const emptyImagePrompt = document.getElementById("emptyImagePrompt");
-    const resetPositionBtn = document.getElementById("resetPositionBtn");
+    const TURNSTILE_SITE_KEY = '0x4AAAAAAFL0MEvDRdEC0_oO';
 
-    const serverSelect = document.getElementById("serverSelect");
-    const characterNameInput = document.getElementById("characterNameInput");
-    const cardHeaderUser = document.getElementById("cardHeaderUser");
-    const baseDamageInput = document.getElementById("baseDamageInput");
-    const piercingInput = document.getElementById("piercingInput");
-    const critDamageInput = document.getElementById("critDamageInput");
-    const totalCombatScore = document.getElementById("totalCombatScore");
-    const displayBaseDmg = document.getElementById("displayBaseDmg");
-    const displayPiercingDmg = document.getElementById("displayPiercingDmg");
-    const displayCritScale = document.getElementById("displayCritScale");
+    let memoryReforgeMap = {};
+    let memoryPartList = [];
 
-    const generateAiBtn = document.getElementById("generateAiBtn");
-    const revertImageBtn = document.getElementById("revertImageBtn");
-    const aiBadge = document.getElementById("aiBadge");
-    const aiStatusMessage = document.getElementById("aiStatusMessage");
-    const remainCountBadge = document.getElementById("remainCountBadge");
-    const customPromptInput = document.getElementById("customPromptInput");
+    // [화풍 분기 상태 변수: illust(기본 워크플로우), anime, fantasy]
+    let selectedArtStyle = 'illust';
 
-    let originalImage = null;
-    let currentImage = null;
-    let isAiMode = false;
-    let turnstileWidgetId = null;
-    let turnstileToken = null;
+    const EYE_COLORS = [
+      { label: "#흑안", key: "black", val: "black eyes" },
+      { label: "#적안", key: "red", val: "red eyes" },
+      { label: "#벽안", key: "blue", val: "blue eyes" },
+      { label: "#자안", key: "purple", val: "purple eyes" },
+      { label: "#금안", key: "gold", val: "golden eyes, yellow eyes" },
+      { label: "#녹안", key: "green", val: "green eyes" }
+    ];
 
-    // 캔버스 뷰포트 드래그 & 줌 트랜스폼 상태
-    let transform = {
-      x: 0,
-      y: 0,
-      scale: 1,
-      minScale: 1,
+    const GENERAL_TAGS = {
+      head: [
+        { label: "#장발", value: "very long hair, straight long hair" },
+        { label: "#단발", value: "medium hair, bob cut hair" },
+        { label: "#숏컷", value: "short hair, pixie cut" },
+        { label: "#천모자", value: "fabric hat, cloth cap" },
+        { label: "#가죽모자", value: "leather hat, leather cap" },
+        { label: "#투구", value: "knight helmet, armored helm, headgear" },
+        { label: "#안경", value: "glasses, eyewear" },
+        { label: "#동물귀", value: "animal ears, cat ears" },
+        { label: "#얼굴장식", value: "face tattoo, facial markings, forehead ornament" },
+        { label: "#안대", value: "eyepatch, eye patch over one eye" }
+      ],
+      outfit: [
+        { label: "#천옷", value: "fabric clothing, cloth dress, casual tunic" },
+        { label: "#가죽옷", value: "leather clothes, leather doublet, leather armor" },
+        { label: "#갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
+      ],
+      accessories: [
+        { label: "#헤일로", value: "halo, floating head ornament" },
+        { label: "#날개", value: "wings, feathered wings" },
+        { label: "#망토", value: "flowing cloak, cape" },
+        { label: "#반지", value: "rings on fingers, glowing magical ring" },
+        { label: "#귀걸이", value: "earrings, dangling jewelry" }
+      ]
     };
-    let isDragging = false;
-    let dragStartX = 0;
-    let dragStartY = 0;
 
-    // -------------------------------------------------------------
-    // 초기 캔버스 사이즈 세팅
-    // -------------------------------------------------------------
-    function updateCanvasSize() {
-      const rect = imageViewport.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      cardCanvas.width = rect.width * dpr;
-      cardCanvas.height = rect.height * dpr;
-      cardCanvas.style.width = `${rect.width}px`;
-      cardCanvas.style.height = `${rect.height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
+    let isOddEyeMode = false;
+    let selectedNormalEye = "";
+    let selectedLeftEye = "";
+    let selectedRightEye = "";
+    let selectedGeneralTags = new Set();
 
-    // -------------------------------------------------------------
-    // 이미지 경계선 이탈 방지 (컨테이너 내부 검은 여백 노출 방지)
-    // -------------------------------------------------------------
-    function clampTransform() {
-      if (!currentImage) return;
-      const vpW = imageViewport.clientWidth;
-      const vpH = imageViewport.clientHeight;
-
-      // 이미지가 뷰포트를 항상 채울 수 있는 최소 배율 산출 (Cover)
-      const scaleX = vpW / currentImage.width;
-      const scaleY = vpH / currentImage.height;
-      transform.minScale = Math.max(scaleX, scaleY);
-
-      // 최소 배율 미만으로 축소되지 않도록 제한
-      if (transform.scale < transform.minScale) {
-        transform.scale = transform.minScale;
+    const Security = {
+      sanitizeString(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, function(m) {
+          return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[m];
+        });
+      },
+      clampNumber(val, min, max, defaultVal = 0) {
+        if (val === '' || val === null || val === undefined) return defaultVal;
+        const num = parseFloat(val);
+        if (isNaN(num)) return defaultVal;
+        return Math.min(Math.max(num, min), max);
       }
+    };
 
-      const drawW = currentImage.width * transform.scale;
-      const drawH = currentImage.height * transform.scale;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('admin_key')) {
+      localStorage.setItem('erinn_admin_key', urlParams.get('admin_key'));
+    }
+    const ADMIN_KEY = localStorage.getItem('erinn_admin_key') || '';
 
-      // 가로/세로 이동 시 뷰포트 바깥의 빈 검은 배경이 노출되지 않도록 좌표 클램핑
-      const minX = vpW - drawW;
-      const maxX = 0;
-      if (drawW >= vpW) {
-        transform.x = Math.min(maxX, Math.max(minX, transform.x));
+    const THEMES = {
+      elemental_knight:    { main: '#f97316', dark: '#c2410c', light: '#fed7aa', from: '#fb923c', to: '#ea580c', stat: '최대 공격력' },
+      dark_mage:           { main: '#a855f7', dark: '#6b21a8', light: '#e9d5ff', from: '#c084fc', to: '#7e22ce', stat: '마법 공격력' },
+      alchemic_stinger:    { main: '#eab308', dark: '#a16207', light: '#fef08a', from: '#facc15', to: '#ca8a04', stat: '최대 공격력' },
+      sacred_guard:        { main: '#ea580c', dark: '#9a3412', light: '#ffedd5', from: '#f97316', to: '#c2410c', stat: '최대 공격력' },
+      blader:              { main: '#06b6d4', dark: '#0e7490', light: '#cffafe', from: '#22d3ee', to: '#0891b2', stat: '최대 공격력' },
+      variable_gunner:     { main: '#3b82f6', dark: '#1d4ed8', light: '#dbeafe', from: '#60a5fa', to: '#2563eb', stat: '최대 공격력' },
+      forbidden_alchemist: { main: '#ca8a04', dark: '#854d0e', light: '#fef08a', from: '#eab308', to: '#a16207', stat: '연금술 대미지' },
+      melodic_puppeteer:   { main: '#ec4899', dark: '#be185d', light: '#fce7f3', from: '#f472b6', to: '#db2777', stat: '최대 공격력' },
+      fury_fighter:        { main: '#dc2626', dark: '#991b1b', light: '#fee2e2', from: '#ef4444', to: '#b91c1c', stat: '최대 공격력' }
+    };
+
+    const ARCANA_CRESTS = {
+      elemental_knight:    'icon/엘나.webp',
+      dark_mage:           'icon/닼메.webp',
+      alchemic_stinger:    'icon/알스.webp',
+      sacred_guard:        'icon/세가.webp',
+      blader:              'icon/블랜.webp',
+      variable_gunner:     'icon/배거.webp',
+      forbidden_alchemist: 'icon/포알.webp',
+      melodic_puppeteer:   'icon/멜퍼.webp',
+      fury_fighter:        'icon/퓨파.webp'
+    };
+
+    const R_GRADE_DATA = {
+      two_handed: { 0: 0, 1: 0.06, 2: 0.16, 3: 0.26, 4: 0.38, 5: 0.50, 6: 0.62, 7: 0.74, 8: 0.89 },
+      one_handed: { 0: 0, 1: 0.04, 2: 0.11, 3: 0.18, 4: 0.26, 5: 0.34, 6: 0.42, 7: 0.50, 8: 0.60 }
+    };
+    const PIERCING_BASE_MULT = 0.03;
+
+    let currentArcanaKey = 'elemental_knight';
+    let userTags = [];
+    let draggedTagIndex = null;
+
+    let currentImageZoom = 1.0;
+    let currentImagePosX = 0;
+    let currentImagePosY = 0;
+
+    function updatePromptCountUI() {
+      let count = selectedGeneralTags.size;
+      if (isOddEyeMode) {
+        if (selectedLeftEye) count++;
+        if (selectedRightEye) count++;
       } else {
-        transform.x = (vpW - drawW) / 2;
+        if (selectedNormalEye) count++;
       }
-
-      const minY = vpH - drawH;
-      const maxY = 0;
-      if (drawH >= vpH) {
-        transform.y = Math.min(maxY, Math.max(minY, transform.y));
-      } else {
-        transform.y = (vpH - drawH) / 2;
-      }
+      document.getElementById('selectedPromptCount').textContent = count;
     }
 
-    // -------------------------------------------------------------
-    // 이미지 뷰포트 맞춤 초기화 (Cover 모드 & 중앙 정렬)
-    // -------------------------------------------------------------
-    function fitImageToCover() {
-      if (!currentImage) return;
-      const vpW = imageViewport.clientWidth;
-      const vpH = imageViewport.clientHeight;
+    function initPromptTagAccordion() {
+      const btn = document.getElementById('promptAccordionBtn');
+      const content = document.getElementById('promptAccordionContent');
+      const arrow = document.getElementById('promptAccordionArrow');
 
-      const scaleX = vpW / currentImage.width;
-      const scaleY = vpH / currentImage.height;
-      const baseScale = Math.max(scaleX, scaleY);
+      btn.addEventListener('click', () => {
+        const isHidden = content.classList.contains('hidden');
+        content.classList.toggle('hidden', !isHidden);
+        arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
 
-      transform.minScale = baseScale;
-      transform.scale = baseScale;
-      transform.x = (vpW - currentImage.width * baseScale) / 2;
-      transform.y = (vpH - currentImage.height * baseScale) / 2;
-      clampTransform();
-      render();
-    }
+      // 화풍 스타일 칩 클릭 이벤트
+      document.querySelectorAll('.art-style-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          selectedArtStyle = chip.dataset.style;
+          document.querySelectorAll('.art-style-chip').forEach(c => {
+            c.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          });
+          chip.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+        });
+      });
 
-    // -------------------------------------------------------------
-    // 캔버스 렌더링 루틴
-    // -------------------------------------------------------------
-    function render() {
-      const vpW = imageViewport.clientWidth;
-      const vpH = imageViewport.clientHeight;
+      const toggleOddEyeBtn = document.getElementById('toggleOddEyeBtn');
+      const normalContainer = document.getElementById('normalEyeContainer');
+      const oddContainer = document.getElementById('oddEyeContainer');
 
-      ctx.clearRect(0, 0, vpW, vpH);
+      toggleOddEyeBtn.addEventListener('click', () => {
+        isOddEyeMode = !isOddEyeMode;
+        if (isOddEyeMode) {
+          toggleOddEyeBtn.textContent = '#오드아이 ON';
+          toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-theme-main bg-theme-bg text-theme-light font-bold transition';
+          normalContainer.classList.add('hidden');
+          oddContainer.classList.remove('hidden');
+        } else {
+          toggleOddEyeBtn.textContent = '#오드아이 OFF';
+          toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition';
+          normalContainer.classList.remove('hidden');
+          oddContainer.classList.add('hidden');
+        }
+        updatePromptCountUI();
+      });
 
-      if (!currentImage) {
-        emptyImagePrompt.classList.remove("hidden");
-        return;
-      }
-      emptyImagePrompt.classList.add("hidden");
+      normalContainer.innerHTML = '';
+      EYE_COLORS.forEach(c => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+        chip.textContent = c.label;
 
-      ctx.save();
-      ctx.drawImage(
-        currentImage,
-        transform.x,
-        transform.y,
-        currentImage.width * transform.scale,
-        currentImage.height * transform.scale
-      );
-      ctx.restore();
-    }
+        chip.addEventListener('click', () => {
+          if (selectedNormalEye === c.val) {
+            selectedNormalEye = "";
+            chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          } else {
+            selectedNormalEye = c.val;
+            normalContainer.querySelectorAll('button').forEach(b => {
+              b.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            });
+            chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+          }
+          updatePromptCountUI();
+        });
+        normalContainer.appendChild(chip);
+      });
 
-    // -------------------------------------------------------------
-    // 이미지 파일 로드 핸들러
-    // -------------------------------------------------------------
-    imageInput.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+      const leftContainer = document.getElementById('leftEyeSubContainer');
+      const rightContainer = document.getElementById('rightEyeSubContainer');
 
-      fileNameDisplay.textContent = file.name;
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          originalImage = img;
-          currentImage = img;
-          isAiMode = false;
-          aiBadge.classList.add("hidden");
-          revertImageBtn.classList.add("hidden");
-          updateCanvasSize();
-          fitImageToCover();
-        };
-        img.src = event.target.result;
+      const renderSubEyeList = (container, isLeft) => {
+        container.innerHTML = '';
+        EYE_COLORS.forEach(c => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          chip.textContent = c.label;
+
+          chip.addEventListener('click', () => {
+            const currentVal = isLeft ? selectedLeftEye : selectedRightEye;
+            if (currentVal === c.key) {
+              if (isLeft) selectedLeftEye = "";
+              else selectedRightEye = "";
+              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            } else {
+              if (isLeft) selectedLeftEye = c.key;
+              else selectedRightEye = c.key;
+
+              container.querySelectorAll('button').forEach(b => {
+                b.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+              });
+              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+            }
+            updatePromptCountUI();
+          });
+          container.appendChild(chip);
+        });
       };
-      reader.readAsDataURL(file);
-    });
 
-    // -------------------------------------------------------------
-    // 마우스 드래그 & 휠 줌 인터랙션 (바운딩 보호 포함)
-    // -------------------------------------------------------------
-    imageViewport.addEventListener("mousedown", (e) => {
-      if (!currentImage) return;
-      isDragging = true;
-      dragStartX = e.clientX - transform.x;
-      dragStartY = e.clientY - transform.y;
-    });
+      renderSubEyeList(leftContainer, true);
+      renderSubEyeList(rightContainer, false);
 
-    window.addEventListener("mousemove", (e) => {
-      if (!isDragging || !currentImage) return;
-      transform.x = e.clientX - dragStartX;
-      transform.y = e.clientY - dragStartY;
-      clampTransform();
-      render();
-    });
+      ['head', 'outfit', 'accessories'].forEach(key => {
+        const container = document.getElementById(`tags-${key}`);
+        container.innerHTML = '';
+        GENERAL_TAGS[key].forEach(tag => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          chip.textContent = tag.label;
 
-    window.addEventListener("mouseup", () => {
-      isDragging = false;
-    });
-
-    imageViewport.addEventListener("wheel", (e) => {
-      if (!currentImage) return;
-      e.preventDefault();
-
-      const rect = imageViewport.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      const newScale = Math.min(Math.max(transform.scale * zoomFactor, transform.minScale), 6);
-
-      // 마우스 포인터 중심 확대/축소
-      transform.x = mouseX - (mouseX - transform.x) * (newScale / transform.scale);
-      transform.y = mouseY - (mouseY - transform.y) * (newScale / transform.scale);
-      transform.scale = newScale;
-
-      clampTransform();
-      render();
-    }, { passive: false });
-
-    resetPositionBtn.addEventListener("click", () => {
-      if (currentImage) fitImageToCover();
-    });
-
-    // -------------------------------------------------------------
-    // 전투력 수치 계산 공식
-    // -------------------------------------------------------------
-    function updateCombatScore() {
-      const base = parseFloat(baseDamageInput.value) || 0;
-      const piercing = parseFloat(piercingInput.value) || 0;
-      const crit = parseFloat(critDamageInput.value) || 100;
-
-      const piercingValue = piercing * 20;
-      const critScale = (crit / 100);
-      const total = Math.round((base + piercingValue) * (critScale * 0.6 + 0.4));
-
-      totalCombatScore.textContent = total.toLocaleString();
-      displayBaseDmg.textContent = base.toLocaleString();
-      displayPiercingDmg.textContent = `+ ${piercingValue.toLocaleString()}`;
-      displayCritScale.textContent = `x ${(crit / 100).toFixed(2)}`;
-    }
-
-    [baseDamageInput, piercingInput, critDamageInput].forEach((input) => {
-      input.addEventListener("input", updateCombatScore);
-    });
-
-    function updateHeaderInfo() {
-      cardHeaderUser.textContent = `${serverSelect.value} | ${characterNameInput.value || "밀레시안"}`;
-    }
-    serverSelect.addEventListener("change", updateHeaderInfo);
-    characterNameInput.addEventListener("input", updateHeaderInfo);
-
-    // -------------------------------------------------------------
-    // Cloudflare Turnstile 렌더링 및 사용 횟수 확인
-    // -------------------------------------------------------------
-    async function checkRemainUsage() {
-      try {
-        const res = await fetch(EDGE_FUNCTION_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "check" }),
+          chip.addEventListener('click', () => {
+            if (selectedGeneralTags.has(tag.value)) {
+              selectedGeneralTags.delete(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            } else {
+              selectedGeneralTags.add(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+            }
+            updatePromptCountUI();
+          });
+          container.appendChild(chip);
         });
-        const data = await res.json();
-        if (data && typeof data.remainCount !== "undefined") {
-          remainCountBadge.textContent = `오늘 남은 횟수: ${data.remainCount}회`;
-          if (data.remainCount <= 0 && !data.isAdmin) {
-            generateAiBtn.disabled = true;
-            generateAiBtn.classList.add("opacity-50", "cursor-not-allowed");
+      });
+    }
+
+    function getCombinedCustomPrompt() {
+      const parts = [];
+
+      if (isOddEyeMode) {
+        if (selectedLeftEye || selectedRightEye) {
+          parts.push("heterochromia, odd eyes");
+          if (selectedLeftEye) parts.push(`left eye ${selectedLeftEye}`);
+          if (selectedRightEye) parts.push(`right eye ${selectedRightEye}`);
+        }
+      } else {
+        if (selectedNormalEye) parts.push(selectedNormalEye);
+      }
+
+      selectedGeneralTags.forEach(t => parts.push(t));
+      return parts.join(", ");
+    }
+
+    async function initSupabaseDataOnce() {
+      if (!supabaseClient) return;
+
+      try {
+        let { data, error } = await supabaseClient.from('TCALC001').select('*');
+        if ((!data || data.length === 0) && !error) {
+          const retry = await supabaseClient.from('tcalc001').select('*');
+          if (retry.data && retry.data.length > 0) {
+            data = retry.data;
+            error = retry.error;
+          }
+        }
+
+        if (error) {
+          console.error('[조회 오류]:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          memoryReforgeMap = {};
+
+          data.forEach(row => {
+            const eqType = String(row.EQ_TYPE || row.eq_type || '').trim();
+            const rfNm = String(row.RF_NM || row.rf_nm || '').trim();
+
+            if (!eqType || !rfNm) return;
+
+            const minLvl = parseInt(row.RF_MIN_LV || row.rf_min_lv || 1);
+            const maxLvl = parseInt(row.RF_MAX_LV || row.rf_max_lv || 20);
+            const limitYn = String(row.RF_LIMIT_YN || row.rf_limit_yn || 'N').trim().toUpperCase();
+            
+            let limitMinLvl = maxLvl + 1;
+            let limitMaxLvl = maxLvl;
+
+            if (limitYn === 'Y') {
+              limitMinLvl = parseInt(row.RF_LIMIT_MIN_LV || row.rf_limit_min_lv || (maxLvl + 1));
+              limitMaxLvl = parseInt(row.RF_LIMIT_MAX_LV || row.rf_limit_max_lv || maxLvl);
+            }
+
+            if (!memoryReforgeMap[eqType]) {
+              memoryReforgeMap[eqType] = [];
+            }
+
+            memoryReforgeMap[eqType].push({
+              name: rfNm,
+              min_level: minLvl,
+              max_level: maxLvl,
+              limit_yn: limitYn,
+              limit_min_level: limitMinLvl,
+              limit_max_level: limitMaxLvl
+            });
+          });
+
+          memoryPartList = Object.keys(memoryReforgeMap);
+
+          if (memoryPartList.length > 0) {
+            const firstPart = memoryPartList[0];
+            const firstOpt = memoryReforgeMap[firstPart][0];
+            userTags = [{
+              part: firstPart,
+              name: firstOpt.name,
+              level: firstOpt.max_level,
+              min: firstOpt.min_level,
+              max: firstOpt.max_level,
+              limit_yn: firstOpt.limit_yn,
+              limit_max: firstOpt.limit_max_level
+            }];
+            renderTagInputList();
           }
         }
       } catch (err) {
-        remainCountBadge.textContent = "남은 횟수 확인 불가";
+        console.error('[치명적 예외]:', err);
       }
     }
 
-    function initTurnstile() {
-      if (window.turnstile && document.getElementById("turnstileContainer")) {
-        turnstileWidgetId = window.turnstile.render("#turnstileContainer", {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: function (token) {
-            turnstileToken = token;
-          },
-          "expired-callback": function () {
-            turnstileToken = null;
-          }
-        });
+    function applyTheme(key) {
+      const t = THEMES[key] || THEMES.elemental_knight;
+      const root = document.documentElement;
+      root.style.setProperty('--theme-main', t.main);
+      root.style.setProperty('--theme-dark', t.dark);
+      root.style.setProperty('--theme-light', t.light);
+      root.style.setProperty('--theme-from', t.from);
+      root.style.setProperty('--theme-to', t.to);
+      root.style.setProperty('--theme-bg', `${t.main}26`);
+      root.style.setProperty('--theme-border', `${t.main}59`);
+
+      document.getElementById('baseStatLabel').textContent = `노도핑 ${t.stat} (스탯세공 포함 직접 기입)`;
+      document.getElementById('cardFinalLabel').textContent = `종합 전투력 환산 스코어 (${t.stat} 기준)`;
+      
+      const crestImg = document.getElementById('arcanaCrestImg');
+      if (crestImg) {
+        crestImg.src = ARCANA_CRESTS[key] || 'icon/엘나.webp';
       }
     }
 
-    window.addEventListener("load", () => {
-      updateCanvasSize();
-      updateCombatScore();
-      checkRemainUsage();
-      setTimeout(initTurnstile, 500);
-    });
+    function initThemeMode() {
+      const savedTheme = localStorage.getItem('site_theme_mode') || 'dark';
+      applyThemeMode(savedTheme);
 
-    window.addEventListener("resize", () => {
-      updateCanvasSize();
-      if (currentImage) {
-        clampTransform();
-        render();
+      document.getElementById('themeToggleBtn').addEventListener('click', () => {
+        const isDark = !document.documentElement.classList.contains('light-theme');
+        const nextMode = isDark ? 'light' : 'dark';
+        applyThemeMode(nextMode);
+      });
+    }
+
+    function applyThemeMode(mode) {
+      const root = document.documentElement;
+      const icon = document.getElementById('themeToggleIcon');
+
+      if (mode === 'light') {
+        root.classList.remove('dark-theme');
+        root.classList.add('light-theme');
+        icon.setAttribute('data-lucide', 'moon');
+        localStorage.setItem('site_theme_mode', 'light');
+      } else {
+        root.classList.remove('light-theme');
+        root.classList.add('dark-theme');
+        icon.setAttribute('data-lucide', 'sun');
+        localStorage.setItem('site_theme_mode', 'dark');
       }
-    });
+      lucide.createIcons();
+    }
 
-    // -------------------------------------------------------------
-    // AI 일러스트 생성 요청 핸들러
-    // -------------------------------------------------------------
-    generateAiBtn.addEventListener("click", async () => {
-      if (!originalImage) {
-        alert("먼저 캐릭터 스크린샷 이미지를 등록해 주세요.");
+    function renderTagInputList() {
+      const container = document.getElementById('reforgeListContainer');
+      container.innerHTML = '';
+
+      if (userTags.length === 0) {
+        container.innerHTML = `<p class="text-[11px] text-slate-500 py-1">등록된 장비 옵션이 없습니다.</p>`;
+        renderCardTags();
         return;
       }
 
-      // 현재 뷰포트에 표시된 구도 그대로 캔버스 스냅샷 추출 (고화질 추출)
-      const exportCanvas = document.createElement("canvas");
-      const vpW = imageViewport.clientWidth;
-      const vpH = imageViewport.clientHeight;
-      exportCanvas.width = vpW * 2;
-      exportCanvas.height = vpH * 2;
-      const exportCtx = exportCanvas.getContext("2d");
-      exportCtx.scale(2, 2);
-      exportCtx.drawImage(
-        originalImage,
-        transform.x,
-        transform.y,
-        originalImage.width * transform.scale,
-        originalImage.height * transform.scale
-      );
-      const snapshotBase64 = exportCanvas.toDataURL("image/png");
-
-      generateAiBtn.disabled = true;
-      generateAiBtn.classList.add("opacity-60", "cursor-wait");
-      aiStatusMessage.textContent = "RunningHub AI 작업 생성 및 일러스트 변환 진행 중...";
-
-      try {
-        const response = await fetch(EDGE_FUNCTION_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            imageBase64: snapshotBase64,
-            arcanaKey: document.getElementById("arcanaSelect").value,
-            customPrompt: customPromptInput.value,
-            turnstileToken: turnstileToken,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || result.error) {
-          throw new Error(result.error || "AI 일러스트 생성에 실패했습니다.");
-        }
-
-        const aiImg = new Image();
-        aiImg.onload = () => {
-          currentImage = aiImg;
-          isAiMode = true;
-          aiBadge.classList.remove("hidden");
-          revertImageBtn.classList.remove("hidden");
-
-          // AI 이미지로 전환 시 뷰포트 크기에 맞춰 새로 피팅하고 바운딩 재설정
-          fitImageToCover();
-
-          aiStatusMessage.textContent = "AI 일러스트 변환 완료!";
-          if (typeof result.remainCount !== "undefined") {
-            remainCountBadge.textContent = `오늘 남은 횟수: ${result.remainCount}회`;
-          }
+      userTags.forEach((item, index) => {
+        const options = memoryReforgeMap[item.part] || [];
+        let currentOpt = options.find(o => o.name === item.name) || options[0] || { 
+          name: item.name, min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
         };
-        aiImg.src = result.outputUrl || result.imageUrl || result.url;
+        
+        item.min = currentOpt.min_level;
+        item.max = currentOpt.max_level;
+        item.limit_yn = currentOpt.limit_yn;
+        item.limit_max = currentOpt.limit_max_level;
 
-      } catch (err) {
-        console.error(err);
-        aiStatusMessage.textContent = `오류: ${err.message}`;
-        alert(`오류: ${err.message}`);
-      } finally {
-        generateAiBtn.disabled = false;
-        generateAiBtn.classList.remove("opacity-60", "cursor-wait");
-        if (window.turnstile && turnstileWidgetId) {
-          window.turnstile.reset(turnstileWidgetId);
-          turnstileToken = null;
-        }
-      }
+        const allowedMaxLevel = item.limit_yn === 'Y' ? item.limit_max : item.max;
+
+        const row = document.createElement('div');
+        row.className = "flex flex-col gap-2 bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-800 text-xs w-full inner-box";
+        
+        row.innerHTML = `
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full relative">
+            <div class="w-full sm:w-36 shrink-0 relative">
+              <button type="button" 
+                class="part-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
+                data-index="${index}">
+                <span class="truncate">${Security.sanitizeString(item.part || '부위 선택')}</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+              </button>
+
+              <div class="part-dropdown-menu hidden absolute top-full left-0 w-full sm:w-48 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+                <div class="relative mb-2">
+                  <input type="text" placeholder="부위 검색..." 
+                    class="part-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
+                    data-index="${index}">
+                </div>
+                <div class="part-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
+                  ${memoryPartList.map(p => `
+                    <div class="part-dropdown-item px-2 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${p === item.part ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
+                         data-part="${Security.sanitizeString(p)}">
+                      <span>${Security.sanitizeString(p)}</span>
+                      ${p === item.part ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400 shrink-0"></i>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            
+            <div class="flex-1 min-w-0 relative">
+              <button type="button" 
+                class="reforge-dropdown-trigger w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-left text-slate-200 flex items-center justify-between hover:border-theme-main transition-colors"
+                data-index="${index}">
+                <span class="truncate">${Security.sanitizeString(item.name || '옵션 선택')}</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 shrink-0"></i>
+              </button>
+
+              <div class="reforge-dropdown-menu hidden absolute top-full left-0 right-0 mt-1 bg-slate-900 border border-slate-700 rounded-lg shadow-2xl z-50 p-2" data-index="${index}">
+                <div class="relative mb-2">
+                  <input type="text" placeholder="세공명 검색..." 
+                    class="reforge-dropdown-search w-full bg-slate-950 border border-slate-800 rounded px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-theme-main"
+                    data-index="${index}">
+                </div>
+                <div class="reforge-dropdown-list max-h-48 overflow-y-auto space-y-1 pr-1">
+                  ${options.map(o => {
+                    const isSelected = (o.name === item.name);
+                    return `
+                      <div class="reforge-dropdown-item px-2.5 py-1.5 rounded hover:bg-slate-800 cursor-pointer text-slate-300 hover:text-white flex items-center justify-between text-xs transition-colors ${isSelected ? 'bg-slate-800/80 font-bold text-emerald-400' : ''}"
+                           data-name="${Security.sanitizeString(o.name)}">
+                        <span class="truncate pr-2">${Security.sanitizeString(o.name)}</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                          <span class="text-[10px] text-slate-500">${o.max_level}Lv${o.limit_yn === 'Y' ? `(한돌:${o.limit_max_level})` : ''}</span>
+                          ${isSelected ? '<i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>' : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="hidden sm:flex items-center gap-2 shrink-0">
+              <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
+                <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                  <i data-lucide="minus" class="w-3 h-3"></i>
+                </button>
+                <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" 
+                  class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
+                  data-index="${index}">
+                <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
+                <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-6 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                  <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+
+              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-2 rounded transition" data-index="${index}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex sm:hidden items-center justify-between border-t border-slate-800/80 pt-2 mt-0.5">
+            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg p-0.5 shadow-inner">
+              <button type="button" class="btn-step-down text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="minus" class="w-3.5 h-3.5"></i>
+              </button>
+              <input type="number" min="${item.min}" max="${allowedMaxLevel}" value="${item.level}" 
+                class="tag-level w-10 bg-transparent text-theme-light font-bold text-center text-xs focus:outline-none" 
+                data-index="${index}">
+              <span class="text-[10px] text-slate-400 font-medium pr-1 select-none">Lv</span>
+              <button type="button" class="btn-step-up text-slate-400 hover:text-white hover:bg-slate-800 w-7 h-7 rounded flex items-center justify-center transition" data-index="${index}">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500 font-medium">
+                상한: ${item.max}Lv ${item.limit_yn === 'Y' ? `/ 한돌: ${item.limit_max}Lv` : ''}
+              </span>
+              <button class="remove-tag-btn text-rose-400 hover:bg-rose-500/10 p-1.5 rounded transition" data-index="${index}">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      lucide.createIcons();
+      attachTagEvents();
+      renderCardTags();
+    }
+
+    function attachTagEvents() {
+      const closeAllDropdowns = () => {
+        document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
+      };
+
+      document.querySelectorAll('.part-dropdown-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = btn.dataset.index;
+          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
+          const isHidden = menu.classList.contains('hidden');
+          closeAllDropdowns();
+          if (isHidden) {
+            menu.classList.remove('hidden');
+            const searchInput = menu.querySelector('.part-dropdown-search');
+            searchInput.value = '';
+            searchInput.focus();
+            menu.querySelectorAll('.part-dropdown-item').forEach(it => it.classList.remove('hidden'));
+          }
+        });
+      });
+
+      document.querySelectorAll('.part-dropdown-search').forEach(input => {
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('input', (e) => {
+          const idx = input.dataset.index;
+          const query = e.target.value.toLowerCase().trim();
+          const menu = document.querySelector(`.part-dropdown-menu[data-index="${idx}"]`);
+          menu.querySelectorAll('.part-dropdown-item').forEach(item => {
+            const partName = item.dataset.part.toLowerCase();
+            if (partName.includes(query)) item.classList.remove('hidden');
+            else item.classList.add('hidden');
+          });
+        });
+      });
+
+      document.querySelectorAll('.part-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menu = item.closest('.part-dropdown-menu');
+          const idx = menu.dataset.index;
+          const selectedPart = item.dataset.part;
+
+          userTags[idx].part = selectedPart;
+          const options = memoryReforgeMap[selectedPart] || [];
+          const firstOpt = options[0] || { name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 };
+
+          userTags[idx].name = firstOpt.name;
+          userTags[idx].min = firstOpt.min_level;
+          userTags[idx].max = firstOpt.max_level;
+          userTags[idx].limit_yn = firstOpt.limit_yn;
+          userTags[idx].limit_max = firstOpt.limit_max_level;
+          userTags[idx].level = firstOpt.max_level;
+
+          closeAllDropdowns();
+          renderTagInputList();
+        });
+      });
+
+      document.querySelectorAll('.reforge-dropdown-trigger').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = btn.dataset.index;
+          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
+          const isHidden = menu.classList.contains('hidden');
+          closeAllDropdowns();
+          if (isHidden) {
+            menu.classList.remove('hidden');
+            const searchInput = menu.querySelector('.reforge-dropdown-search');
+            searchInput.value = '';
+            searchInput.focus();
+            menu.querySelectorAll('.reforge-dropdown-item').forEach(it => it.classList.remove('hidden'));
+          }
+        });
+      });
+
+      document.querySelectorAll('.reforge-dropdown-search').forEach(input => {
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('input', (e) => {
+          const idx = input.dataset.index;
+          const query = e.target.value.toLowerCase().trim();
+          const menu = document.querySelector(`.reforge-dropdown-menu[data-index="${idx}"]`);
+          menu.querySelectorAll('.reforge-dropdown-item').forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            if (name.includes(query)) item.classList.remove('hidden');
+            else item.classList.add('hidden');
+          });
+        });
+      });
+
+      document.querySelectorAll('.reforge-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const menu = item.closest('.reforge-dropdown-menu');
+          const idx = menu.dataset.index;
+          const selectedName = item.dataset.name;
+
+          userTags[idx].name = selectedName;
+          const options = memoryReforgeMap[userTags[idx].part] || [];
+          const opt = options.find(o => o.name === selectedName);
+
+          if (opt) {
+            userTags[idx].min = opt.min_level;
+            userTags[idx].max = opt.max_level;
+            userTags[idx].limit_yn = opt.limit_yn;
+            userTags[idx].limit_max = opt.limit_max_level;
+            const allowedMax = opt.limit_yn === 'Y' ? opt.limit_max_level : opt.max_level;
+            if (userTags[idx].level > allowedMax) userTags[idx].level = allowedMax;
+          }
+
+          closeAllDropdowns();
+          renderTagInputList();
+        });
+      });
+
+      document.querySelectorAll('.btn-step-down').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.dataset.index;
+          const tag = userTags[idx];
+          const minLvl = tag.min || 1;
+          if (tag.level > minLvl) {
+            tag.level -= 1;
+            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
+            renderCardTags();
+          }
+        });
+      });
+
+      document.querySelectorAll('.btn-step-up').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = btn.dataset.index;
+          const tag = userTags[idx];
+          const maxLvl = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
+          if (tag.level < maxLvl) {
+            tag.level += 1;
+            document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(inp => inp.value = tag.level);
+            renderCardTags();
+          }
+        });
+      });
+
+      document.querySelectorAll('.tag-level').forEach(inp => {
+        inp.addEventListener('input', (e) => { 
+          const idx = e.target.dataset.index;
+          const tag = userTags[idx];
+          const allowedMax = tag.limit_yn === 'Y' ? tag.limit_max : tag.max;
+          const allowedMin = tag.min || 1;
+          let val = parseInt(e.target.value);
+          if (isNaN(val)) val = allowedMin;
+          tag.level = Math.min(Math.max(val, allowedMin), allowedMax);
+          document.querySelectorAll(`.tag-level[data-index="${idx}"]`).forEach(i => i.value = tag.level);
+          renderCardTags(); 
+        });
+      });
+
+      document.querySelectorAll('.remove-tag-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => { 
+          userTags.splice(e.currentTarget.dataset.index, 1); 
+          renderTagInputList(); 
+        });
+      });
+    }
+
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.part-dropdown-menu, .reforge-dropdown-menu').forEach(m => m.classList.add('hidden'));
     });
 
-    // 원본 복구 버튼
-    revertImageBtn.addEventListener("click", () => {
-      if (!originalImage) return;
-      currentImage = originalImage;
-      isAiMode = false;
-      aiBadge.classList.add("hidden");
-      revertImageBtn.classList.add("hidden");
-      aiStatusMessage.textContent = "원본 이미지로 복구되었습니다.";
-      fitImageToCover();
+    document.getElementById('addReforgeBtn').addEventListener('click', () => {
+      if (memoryPartList.length === 0) return;
+      const defaultPart = memoryPartList[0];
+      const defaultOpt = (memoryReforgeMap[defaultPart] && memoryReforgeMap[defaultPart][0]) || { 
+        name: '옵션', min_level: 1, max_level: 20, limit_yn: 'N', limit_max_level: 20 
+      };
+      userTags.push({ 
+        part: defaultPart, name: defaultOpt.name, level: defaultOpt.max_level, 
+        min: defaultOpt.min_level, max: defaultOpt.max_level, limit_yn: defaultOpt.limit_yn,
+        limit_max: defaultOpt.limit_max_level 
+      });
+      renderTagInputList();
+    });
+
+    function renderCardTags() {
+      const area = document.getElementById('cardTagsArea');
+      area.innerHTML = '';
+      if (userTags.length === 0) {
+        area.innerHTML = `<span class="text-[10px] text-slate-500 italic">등록된 장비 옵션이 없습니다.</span>`;
+        return;
+      }
+      
+      userTags.forEach((t, index) => {
+        if (!t.name || !t.name.trim()) return;
+        
+        const maxLvl = t.max || 20;
+        const limitMaxLvl = t.limit_max || maxLvl;
+        const level = parseInt(t.level);
+
+        const span = document.createElement('span');
+        span.className = "tag-base ";
+        span.draggable = true;
+        span.dataset.index = index;
+        
+        let shortPart = t.part.replace('무기','').replace('/투구','').replace('/갑옷','').replace('/건틀렛','').replace(' 블레이드','');
+
+        if (t.part.includes('에코')) {
+          span.className += "tag-echo";
+          span.innerHTML = `<span class="opacity-70 leading-none">[에코]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black leading-none">${level}</span>`;
+        } else if (level < maxLvl) {
+          span.className += "tag-normal";
+          span.innerHTML = `<span class="opacity-70 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black leading-none">${level}</span>`;
+        } else if (level === maxLvl) {
+          span.className += "tag-max font-bold";
+          span.innerHTML = `<span class="opacity-70 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black text-[11px] leading-none">${level}</span>`;
+        } else {
+          let diff = Math.max(limitMaxLvl - maxLvl, 1);
+          let ratio = (level - maxLvl) / diff;
+          if (ratio > 1) ratio = 1;
+          
+          const tiers = [
+            { bg: 'linear-gradient(135deg, #713f12, #a16207)', shadow: '0 0 6px rgba(234,179,8,0.5)', text: '#fef08a' },
+            { bg: 'linear-gradient(135deg, #9a3412, #c2410c)', shadow: '0 0 8px rgba(249,115,22,0.7)', text: '#fed7aa' },
+            { bg: 'linear-gradient(135deg, #9f1239, #be123c)', shadow: '0 0 10px rgba(225,29,72,0.8)', text: '#fecdd3' },
+            { bg: 'linear-gradient(135deg, #831843, #e11d48)', shadow: '0 0 12px rgba(244,63,94,0.9)', text: '#ffe4e6' },
+            { bg: 'linear-gradient(135deg, #4c0519, #f43f5e)', shadow: '0 0 16px rgba(251,113,133,1.0)', text: '#fff1f2' }
+          ];
+          
+          let tierIndex = Math.ceil(ratio * 5) - 1; 
+          if (tierIndex < 0) tierIndex = 0;
+          if (tierIndex > 4) tierIndex = 4;
+          
+          const styleConfig = tiers[tierIndex];
+          span.className += "tag-limit-break";
+          span.style.background = styleConfig.bg;
+          span.style.boxShadow = styleConfig.shadow;
+          span.style.color = styleConfig.text;
+          span.style.borderColor = styleConfig.text + '40';
+          
+          span.innerHTML = `<span class="opacity-80 leading-none">[${Security.sanitizeString(shortPart)}]</span> <span class="leading-none">${Security.sanitizeString(t.name)}</span> <span class="font-black text-[11px] leading-none">${level}</span> <span class="text-[9px] leading-none">✨</span>`;
+        }
+
+        span.addEventListener('dragstart', (e) => {
+          draggedTagIndex = parseInt(span.dataset.index);
+          span.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        });
+
+        span.addEventListener('dragend', () => {
+          span.classList.remove('dragging');
+          document.querySelectorAll('.tag-base').forEach(el => el.classList.remove('drag-over'));
+        });
+
+        span.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          span.classList.add('drag-over');
+        });
+
+        span.addEventListener('dragleave', () => span.classList.remove('drag-over'));
+
+        span.addEventListener('drop', (e) => {
+          e.preventDefault();
+          span.classList.remove('drag-over');
+          const targetIndex = parseInt(span.dataset.index);
+          if (draggedTagIndex !== null && draggedTagIndex !== targetIndex) {
+            const movedItem = userTags.splice(draggedTagIndex, 1)[0];
+            userTags.splice(targetIndex, 0, movedItem);
+            renderTagInputList();
+          }
+        });
+
+        area.appendChild(span);
+      });
+    }
+
+    function calculateTotal() {
+      const parseInput = (val, defaultVal) => {
+        if (val === '' || val === null || val === undefined) return defaultVal;
+        let num = parseFloat(val);
+        return isNaN(num) ? defaultVal : num;
+      };
+
+      const baseStat = parseInput(document.getElementById('baseStatInput').value, 0);
+      const piercing = parseInput(document.getElementById('piercingInput').value, 0);
+      const weaponType = document.getElementById('weaponTypeSelect').value;
+      const arcanaDmgRate = parseInput(document.getElementById('arcanaDamageInput').value, 0) / 100;
+      const bonusDmgRate = parseInput(document.getElementById('bonusDamageInput').value, 0) / 100;
+      const nele = parseInput(document.getElementById('neleInput').value, 0);
+      const yvona = parseInput(document.getElementById('yvonaInput').value, 0);
+      const totemCrit = parseInput(document.getElementById('totemCritInput').value, 0);
+      
+      const addFromPiercing = Math.round(baseStat * (piercing * PIERCING_BASE_MULT));
+
+      let rawCritDmg = 0;
+      if (weaponType === 'dual_wield') {
+        const rMain = document.getElementById('mainHandUpgradeSelect').value;
+        const rOff = document.getElementById('offHandUpgradeSelect').value;
+        rawCritDmg = ((R_GRADE_DATA['one_handed'][rMain] || 0) + (R_GRADE_DATA['one_handed'][rOff] || 0)) / 2;
+      } else {
+        rawCritDmg = R_GRADE_DATA[weaponType][document.getElementById('upgradeSelect').value] || 0;
+      }
+
+      const critRateCap = 30 + nele;
+      const totalCritDmgMult = rawCritDmg + (yvona / 100) + (totemCrit / 100);
+      const expectedCritMult = totalCritDmgMult * (critRateCap / 100); 
+      const addFromCrit = Math.round(baseStat * expectedCritMult);
+
+      const addFromMult = Math.round(baseStat * (bonusDmgRate + arcanaDmgRate));
+      const totalScore = baseStat + addFromPiercing + addFromCrit + addFromMult;
+
+      document.getElementById('totalScoreText').textContent = Math.round(totalScore).toLocaleString();
+      document.getElementById('breakdownBase').textContent = Math.round(baseStat).toLocaleString();
+      document.getElementById('breakdownPiercing').textContent = `+ ${addFromPiercing.toLocaleString()}`;
+      document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
+    }
+
+    function getImageDimensions() {
+      const img = document.getElementById('previewImage');
+      const container = document.getElementById('avatarContainer');
+      if (!img || !container || img.classList.contains('hidden')) return null;
+
+      const cW = container.clientWidth || 300;
+      const cH = container.clientHeight || 400;
+      const natW = img.naturalWidth || cW;
+      const natH = img.naturalHeight || cH;
+
+      const baseScale = Math.max(cW / natW, cH / natH);
+      const baseW = natW * baseScale;
+      const baseH = natH * baseScale;
+
+      const currentW = baseW * currentImageZoom;
+      const currentH = baseH * currentImageZoom;
+
+      const maxLimitX = Math.max(0, (currentW - cW) / 2);
+      const maxLimitY = Math.max(0, (currentH - cH) / 2);
+
+      return { cW, cH, baseW, baseH, currentW, currentH, maxLimitX, maxLimitY };
+    }
+
+    function updateImageTransform() {
+      const img = document.getElementById('previewImage');
+      const dims = getImageDimensions();
+      if (!img || !dims) return;
+
+      if (currentImageZoom < 1.0) currentImageZoom = 1.0;
+
+      currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
+      currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
+
+      img.style.width = `${dims.baseW}px`;
+      img.style.height = `${dims.baseH}px`;
+      img.style.transform = `translate3d(${currentImagePosX}px, ${currentImagePosY}px, 0px) scale(${currentImageZoom})`;
+    }
+
+    function initImageControls() {
+      const avatarContainer = document.getElementById('avatarContainer');
+      const img = document.getElementById('previewImage');
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let initialPosX = 0;
+      let initialPosY = 0;
+
+      let initialPinchDistance = 0;
+      let initialZoomAtPinch = 1.0;
+
+      avatarContainer.addEventListener('wheel', (e) => {
+        if (img.classList.contains('hidden')) return;
+        e.preventDefault();
+
+        const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+        currentImageZoom = Math.min(Math.max(1.0, currentImageZoom * zoomFactor), 4.0);
+        updateImageTransform();
+      }, { passive: false });
+
+      avatarContainer.addEventListener('mousedown', (e) => {
+        if (img.classList.contains('hidden')) return;
+        e.preventDefault(); 
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        initialPosX = currentImagePosX;
+        initialPosY = currentImagePosY;
+        img.classList.remove('cursor-grab');
+        img.classList.add('cursor-grabbing');
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        currentImagePosX = initialPosX + (e.clientX - startX);
+        currentImagePosY = initialPosY + (e.clientY - startY);
+        updateImageTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          img.classList.remove('cursor-grabbing');
+          img.classList.add('cursor-grab');
+        }
+      });
+
+      avatarContainer.addEventListener('touchstart', (e) => {
+        if (img.classList.contains('hidden')) return;
+
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
+        } else if (e.touches.length === 2) {
+          isDragging = false;
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          initialPinchDistance = Math.hypot(dx, dy);
+          initialZoomAtPinch = currentImageZoom;
+        }
+      }, { passive: true });
+
+      avatarContainer.addEventListener('touchmove', (e) => {
+        if (img.classList.contains('hidden')) return;
+
+        if (e.touches.length === 1 && isDragging) {
+          if (e.cancelable) e.preventDefault();
+          currentImagePosX = initialPosX + (e.touches[0].clientX - startX);
+          currentImagePosY = initialPosY + (e.touches[0].clientY - startY);
+          updateImageTransform();
+        } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+          if (e.cancelable) e.preventDefault();
+          const dx = e.touches[0].clientX - e.touches[1].clientX;
+          const dy = e.touches[0].clientY - e.touches[1].clientY;
+          const distance = Math.hypot(dx, dy);
+          const factor = distance / initialPinchDistance;
+          currentImageZoom = Math.max(1.0, Math.min(4.0, initialZoomAtPinch * factor));
+          updateImageTransform();
+        }
+      }, { passive: false });
+
+      avatarContainer.addEventListener('touchend', (e) => {
+        if (e.touches.length === 0) {
+          isDragging = false;
+          initialPinchDistance = 0;
+        } else if (e.touches.length === 1) {
+          initialPinchDistance = 0;
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
+        }
+      });
+    }
+
+    async function checkDailyAiUsageLimit() {
+      if (ADMIN_KEY) {
+        return 999;
+      }
+
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+            body: { action: 'check', adminKey: ADMIN_KEY }
+          });
+          if (!error && data) {
+            if (data.isAdmin) return 999;
+            if (typeof data.remainCount === 'number') return data.remainCount;
+          }
+        } catch (e) {
+          console.warn('[IP 잔여 횟수 확인 중 오류]:', e);
+        }
+      }
+      return 3;
+    }
+
+    async function updateRemainUsageUI() {
+      const remain = await checkDailyAiUsageLimit();
+      const el = document.getElementById('aiRemainCountText');
+      if (el) {
+        el.textContent = remain >= 999 ? '∞ (관리자)' : remain;
+      }
+      return remain;
+    }
+
+    async function compressImageForUpload(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1200;
+            let w = img.width;
+            let h = img.height;
+
+            if (w > maxDim || h > maxDim) {
+              if (w > h) {
+                h = Math.round((h * maxDim) / w);
+                w = maxDim;
+              } else {
+                w = Math.round((w * maxDim) / h);
+                h = maxDim;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.90);
+            resolve(compressedBase64);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getCroppedCardImage() {
+      const img = document.getElementById('previewImage');
+      const dims = getImageDimensions();
+      if (!img || !dims) return null;
+
+      const targetW = 864;
+      const targetH = 1152;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = '#030712';
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      const scaleMultiplier = targetW / dims.cW;
+      const renderW = dims.currentW * scaleMultiplier;
+      const renderH = dims.currentH * scaleMultiplier;
+
+      const renderX = ((targetW - renderW) / 2) + (currentImagePosX * scaleMultiplier);
+      const renderY = ((targetH - renderH) / 2) + (currentImagePosY * scaleMultiplier);
+
+      ctx.drawImage(img, renderX, renderY, renderW, renderH);
+
+      return canvas.toDataURL('image/png');
+    }
+
+    let turnstileWidgetId = null;
+    function getTurnstileToken() {
+      return new Promise((resolve, reject) => {
+        const container = document.getElementById('turnstileWidget');
+        if (!container || !window.turnstile) {
+          resolve(null);
+          return;
+        }
+
+        if (turnstileWidgetId !== null) {
+          try { turnstile.remove(turnstileWidgetId); } catch (e) {}
+        }
+        container.innerHTML = '';
+
+        turnstileWidgetId = turnstile.render('#turnstileWidget', {
+          sitekey: TURNSTILE_SITE_KEY,
+          theme: 'dark',
+          size: 'flexible',
+          callback: function(token) {
+            resolve(token);
+          },
+          'error-callback': function() {
+            reject(new Error('보안 인증(Turnstile)에 실패했습니다.'));
+          }
+        });
+      });
+    }
+
+    async function handleAiIllustrationGeneration() {
+      const previewImg = document.getElementById('previewImage');
+      const aiBtn = document.getElementById('aiTransformBtn');
+      const adModal = document.getElementById('adSimulationModal');
+      const adCountdownText = document.getElementById('adCountdownText');
+      const adProgressBar = document.getElementById('adProgressBar');
+      const adStatusText = document.getElementById('adModalStatusText');
+
+      if (!previewImg.src || previewImg.src === '' || previewImg.classList.contains('hidden')) {
+        alert('먼저 4번 항목에서 캐릭터 스크린샷을 업로드해 주세요!');
+        return;
+      }
+
+      const croppedBase64 = getCroppedCardImage();
+      if (!croppedBase64) {
+        alert('이미지를 처리하는 데 실패했습니다.');
+        return;
+      }
+
+      let remain = await checkDailyAiUsageLimit();
+      if (remain <= 0) {
+        alert('오늘의 무료 AI 일러스트 생성 횟수(3회)를 모두 소진하셨습니다.\n내일 다시 이용해 주세요!');
+        return;
+      }
+
+      adModal.classList.remove('hidden');
+      aiBtn.disabled = true;
+
+      try {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {}
+
+      let tokenPromise = Promise.resolve(null);
+      if (remain < 999) {
+        tokenPromise = getTurnstileToken();
+      }
+
+      let progressTimer = null;
+
+      try {
+        if (remain < 999) {
+          const totalMs = 5000;
+          const intervalMs = 100;
+          let elapsed = 0;
+
+          await new Promise((resolve) => {
+            const timer = setInterval(() => {
+              elapsed += intervalMs;
+              const remainingSec = Math.max(1, Math.ceil((totalMs - elapsed) / 1000));
+              adCountdownText.textContent = remainingSec;
+
+              const percent = Math.min(100, (elapsed / totalMs) * 100);
+              adProgressBar.style.width = `${percent}%`;
+
+              if (elapsed >= totalMs) {
+                clearInterval(timer);
+                resolve();
+              }
+            }, intervalMs);
+          });
+        }
+
+        adCountdownText.textContent = "AI";
+        adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
+
+        let currentPercent = 10;
+        adProgressBar.style.width = `${currentPercent}%`;
+        progressTimer = setInterval(() => {
+          if (currentPercent < 92) {
+            currentPercent += 1.5;
+            adProgressBar.style.width = `${currentPercent}%`;
+          }
+        }, 300);
+
+        const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
+        localStorage.setItem('client_fp', clientFingerprint);
+
+        const promptString = getCombinedCustomPrompt();
+        const turnstileToken = await tokenPromise;
+
+        const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+          body: { 
+            imageBase64: croppedBase64,
+            userIdentifier: clientFingerprint,
+            arcanaKey: currentArcanaKey,
+            adminKey: ADMIN_KEY,
+            customPrompt: promptString,
+            artStyle: selectedArtStyle, // 순수 워크플로우 분기 파라미터 전송
+            turnstileToken: turnstileToken
+          }
+        });
+
+        if (progressTimer) clearInterval(progressTimer);
+
+        if (error) {
+          if (error.message && error.message.includes("한도")) {
+            throw new Error("오늘 무료 AI 일러스트 생성 한도(3회)를 초과했습니다.");
+          }
+          throw new Error(error.message || 'AI 변환 서버 응답 오류');
+        }
+
+        const finalUrl = data?.outputUrl || data?.imageUrl || data?.url || data?.output;
+
+        if (finalUrl) {
+          adProgressBar.style.width = "100%";
+          await new Promise(r => setTimeout(r, 200));
+
+          adModal.classList.add('hidden');
+
+          previewImg.src = finalUrl;
+          
+          currentImageZoom = 1.0;
+          currentImagePosX = 0;
+          currentImagePosY = 0;
+          updateImageTransform();
+
+          const badge = document.getElementById('animeOverlayBadge');
+          if (badge) badge.classList.remove('hidden');
+
+          const newRemain = await updateRemainUsageUI();
+
+          setTimeout(() => {
+            const countMsg = newRemain >= 999 ? '무제한 (관리자 모드)' : `${newRemain}회`;
+            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${countMsg})`);
+          }, 100);
+        } else {
+          throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
+        }
+      } catch (err) {
+        if (progressTimer) clearInterval(progressTimer);
+        console.error('[AI 생성 에러]:', err);
+        adModal.classList.add('hidden');
+        alert(err.message || 'AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
+        await updateRemainUsageUI();
+      } finally {
+        aiBtn.disabled = false;
+        adProgressBar.style.width = '0%';
+        adCountdownText.textContent = '5';
+        adStatusText.textContent = '스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.';
+      }
+    }
+
+    const POLICY_DATA = {
+      terms: {
+        title: "이용약관 (Terms of Service)",
+        content: `
+          <p><strong>제1조 (목적)</strong><br>본 약관은 '에린 스펙 계산기'(Erinn Spec Calculator, 이하 "서비스")가 제공하는 모든 전투력 환산 및 인증 카드 생성 서비스의 이용과 관련하여 서비스와 이용자의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+          <p><strong>제2조 (제공 서비스의 한계)</strong><br>1. 본 계산기에서 제공하는 환산 전투력 수치 및 대미지 기여도 분석은 커뮤니티의 통계적 기댓값을 토대로 산출된 참고용 데이터입니다.<br>2. 넥슨 공식 인게임 공식 패치나 보정치에 따라 실제 인게임 체감 성능과 차이가 발생할 수 있습니다.</p>
+          <p><strong>제3조 (저작권 및 면책)</strong><br>본 서비스에 등장하는 마비노기(Mabinogi)와 관련된 모든 이미지, 텍스트, 재능 명칭 및 세공 옵션 등의 원저작권은 ㈜넥슨에 귀속됩니다.</p>
+        `
+      },
+      privacy: {
+        title: "개인정보처리방침 (Privacy Policy)",
+        content: `
+          <p><strong>1. 수집하는 개인정보 항목</strong><br>본 서비스는 별도의 회원가입이 없으며, 서버에 사용자의 개인식별정보(이름, 주민번호, 비밀번호 등)를 일체 저장하지 않습니다.</p>
+          <p><strong>2. 캐릭터 이미지 및 닉네임 처리</strong><br>사용자가 입력하는 캐릭터 닉네임과 업로드하는 인게임 스크린샷은 전적으로 사용자의 웹 브라우저 메모리 내(클라이언트 단)에서만 처리되며, 본 웹사이트의 서버 데이터베이스로 전송되거나 저장되지 않습니다.</p>
+          <p><strong>3. 구글 애드센스(Google AdSense) 및 쿠키 정책</strong><br>본 사이트는 구글 애드센스를 통한 광고를 게재할 수 있습니다. 구글은 사용자의 이전 방문 기록 등을 바탕으로 맞춤형 광고를 제공하기 위해 쿠키(Cookie)를 사용할 수 있습니다. 사용자는 브라우저 설정에서 쿠키 저장을 거부할 수 있습니다.</p>
+        `
+      },
+      disclaimer: {
+        title: "면책조항 및 법적 고지 (Disclaimer)",
+        content: `
+          <p>1. 본 웹사이트는 개인이 취미 및 정보 공유 목적으로 제작한 비영리 비공식 팬 사이트입니다.<br>2. ㈜넥슨 및 마비노기 개발/운영진과는 일체의 공식적인 제휴, 승인, 계약 관계가 없습니다.<br>3. 본 계산기의 환산 스탯 수치를 이용한 유저 간 거래 분쟁이나 게임 내 손실에 대하여 제작자는 법적 책임을 지지 않습니다.</p>
+        `
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('brandHeaderLogo').addEventListener('click', () => {
+        window.location.reload();
+      });
+
+      applyTheme(currentArcanaKey); 
+      initThemeMode();
+      lucide.createIcons();
+      await updateRemainUsageUI();
+      initImageControls(); 
+      initPromptTagAccordion();
+
+      await initSupabaseDataOnce();
+
+      document.querySelectorAll('.stat-step-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const targetId = btn.dataset.target;
+          const input = document.getElementById(targetId);
+          if (!input) return;
+
+          const step = parseFloat(btn.dataset.step);
+          const min = parseFloat(btn.dataset.min);
+          const max = parseFloat(btn.dataset.max);
+
+          let currentVal = parseFloat(input.value) || 0;
+          let nextVal = currentVal + step;
+
+          nextVal = Math.round(nextVal * 10) / 10;
+          nextVal = Math.min(Math.max(nextVal, min), max);
+
+          input.value = nextVal;
+          calculateTotal();
+        });
+      });
+
+      document.getElementById('arcanaSelect').addEventListener('change', (e) => {
+        currentArcanaKey = e.target.value;
+        applyTheme(currentArcanaKey); 
+        
+        const arcName = e.target.options[e.target.selectedIndex].text;
+        const crestFile = ARCANA_CRESTS[currentArcanaKey] || 'icon/엘나.webp';
+        
+        document.getElementById('defaultAvatarPlaceholder').innerHTML = `
+          <img id="arcanaCrestImg" src="${crestFile}" alt="${arcName}" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
+          <div class="arcana-badge-pill">
+            <span class="arcana-badge-dot"></span>
+            <span id="arcanaBadge" class="text-xs font-black tracking-wide theme-gradient-text">${arcName}</span>
+          </div>
+        `;
+        lucide.createIcons();
+      });
+
+      document.getElementById('weaponTypeSelect').addEventListener('change', (e) => {
+        const isDual = e.target.value === 'dual_wield';
+        document.getElementById('singleRGradeContainer').classList.toggle('hidden', isDual);
+        document.getElementById('dualRGradeContainer').classList.toggle('hidden', !isDual);
+        calculateTotal();
+      });
+
+      document.querySelectorAll('input[type="number"]').forEach(inp => {
+        inp.addEventListener('blur', (e) => {
+          if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+            if (e.target.classList.contains('tag-level')) e.target.value = '1';
+            else e.target.value = '0';
+          }
+          calculateTotal();
+        });
+        inp.addEventListener('input', calculateTotal);
+        inp.addEventListener('change', calculateTotal);
+      });
+
+      ['upgradeSelect', 'mainHandUpgradeSelect', 'offHandUpgradeSelect'].forEach(id => {
+        document.getElementById(id).addEventListener('change', calculateTotal);
+      });
+
+      document.getElementById('nicknameInput').addEventListener('input', (e) => { 
+        document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(e.target.value)}`; 
+      });
+      document.getElementById('serverSelect').addEventListener('change', () => { 
+        document.getElementById('cardServerBadge').textContent = `${document.getElementById('serverSelect').value} | ${Security.sanitizeString(document.getElementById('nicknameInput').value)}`; 
+      });
+
+      const dropZone = document.getElementById('dropZone');
+      const imageInput = document.getElementById('imageInput');
+      dropZone.addEventListener('click', () => imageInput.click());
+      
+      imageInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { alert('이미지 파일만 업로드할 수 있습니다.'); e.target.value = ''; return; }
+        
+        try {
+          const compressedUrl = await compressImageForUpload(file);
+          const img = document.getElementById('previewImage');
+          
+          img.src = compressedUrl;
+          img.classList.remove('hidden');
+          document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
+          
+          currentImageZoom = 1.0;
+          currentImagePosX = 0;
+          currentImagePosY = 0;
+
+          img.onload = () => {
+            updateImageTransform();
+          };
+          updateImageTransform();
+        } catch (err) {
+          console.error('[이미지 압축 처리 실패]:', err);
+          alert('이미지를 처리하는 중 오류가 발생했습니다.');
+        }
+      });
+
+      document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
+
+      document.getElementById('saveCardBtn').addEventListener('click', async () => {
+        const exportArea = document.getElementById('cardExportArea');
+        const btn = document.getElementById('saveCardBtn');
+        const glowDecorator = document.getElementById('cardGlowDecorator');
+        const previewImg = document.getElementById('previewImage');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> 카드 이미지 생성 중...';
+        btn.disabled = true;
+        lucide.createIcons();
+
+        if (glowDecorator) glowDecorator.style.display = 'none';
+        const originalBoxShadow = exportArea.style.boxShadow;
+        exportArea.style.boxShadow = 'none';
+
+        if (previewImg.src && previewImg.src.startsWith('http')) {
+          try {
+            const proxyUrl = 'https://images.weserv.nl/?url=' + encodeURIComponent(previewImg.src);
+            const res = await fetch(proxyUrl);
+            const blob = await res.blob();
+            const base64Data = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+            previewImg.src = base64Data;
+          } catch (corsErr) {
+            console.warn('[CORS 변환 우회 실패, 원본 시도]:', corsErr);
+          }
+        }
+
+        try {
+          const dataUrl = await htmlToImage.toPng(exportArea, {
+            pixelRatio: 2,
+            backgroundColor: null, 
+            cacheBust: true,
+            fontEmbedCSS: ''
+          });
+
+          if (glowDecorator) glowDecorator.style.display = '';
+          exportArea.style.boxShadow = originalBoxShadow;
+
+          const link = document.createElement('a');
+          const nickname = document.getElementById('nicknameInput').value || '밀레시안';
+          link.download = `에린_스펙_${nickname}.png`;
+          link.href = dataUrl;
+          link.click();
+        } catch (err) {
+          console.error('[이미지 다운로드 에러]:', err);
+          alert("이미지 저장 중 오류가 발생했습니다.");
+          if (glowDecorator) glowDecorator.style.display = '';
+          exportArea.style.boxShadow = originalBoxShadow;
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          lucide.createIcons();
+        }
+      });
+
+      const modal = document.getElementById('policyModal');
+      document.querySelectorAll('.modal-open-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.dataset.modal;
+          const data = POLICY_DATA[type];
+          if (data) {
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalContent').innerHTML = data.content;
+            modal.classList.remove('hidden');
+          }
+        });
+      });
+
+      const closeModal = () => modal.classList.add('hidden');
+      document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+      document.getElementById('modalConfirmBtn').addEventListener('click', closeModal);
+      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      calculateTotal();
     });
   </script>
 </body>
