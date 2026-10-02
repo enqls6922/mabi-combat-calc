@@ -211,7 +211,6 @@
       color: #0f172a !important;
     }
 
-    /* 아르카나 재능 콤보박스는 고유 테마 컬러 유지 */
     html.light-theme select#arcanaSelect {
       color: var(--theme-main) !important;
       font-weight: 800 !important;
@@ -619,7 +618,7 @@
           <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/드래그, 모바일: 2손가락 줌/이동]으로 위치를 맞출 수 있습니다.</p>
         </div>
 
-        <!-- [추가] 아코디언 드롭다운: 캐릭터 디테일 보정 선택 영역 -->
+        <!-- 아코디언 드롭다운: 캐릭터 디테일 보정 선택 영역 -->
         <div class="mt-3 w-full">
           <button type="button" id="promptAccordionBtn" class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:border-theme-main transition-colors duration-200">
             <span class="flex items-center gap-2">
@@ -629,23 +628,45 @@
             <i id="promptAccordionArrow" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform duration-200"></i>
           </button>
           
-          <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-3.5">
-            <!-- 눈색 카테고리 -->
+          <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
+            <!-- 눈색 카테고리 (단일/오드아이 분기) -->
             <div>
-              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">눈색</span>
-              <div class="flex flex-wrap gap-1.5" id="tags-eyes"></div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold text-slate-400">눈색 (양쪽 또는 개별 지정)</span>
+                <button type="button" id="toggleOddEyeBtn" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition">
+                  오드아이 모드 OFF
+                </button>
+              </div>
+
+              <!-- 일반 모드 (양쪽 동일) -->
+              <div id="normalEyeContainer" class="flex flex-wrap gap-1.5"></div>
+
+              <!-- 오드아이 모드 (왼쪽 / 오른쪽 분리) -->
+              <div id="oddEyeContainer" class="hidden space-y-2 p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg">
+                <div>
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">왼쪽 눈 색상</span>
+                  <div class="flex flex-wrap gap-1.5" id="leftEyeSubContainer"></div>
+                </div>
+                <div class="border-t border-slate-800/80 pt-2">
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">오른쪽 눈 색상</span>
+                  <div class="flex flex-wrap gap-1.5" id="rightEyeSubContainer"></div>
+                </div>
+              </div>
             </div>
+
             <!-- 머리/얼굴 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">머리 / 얼굴 장식</span>
               <div class="flex flex-wrap gap-1.5" id="tags-head"></div>
             </div>
+
             <!-- 의상 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">의상</span>
               <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
             </div>
-            <!-- 장신구 카테고리 -->
+
+            <!-- 장신구 카테고리 (헤일로 포함) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
               <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
@@ -766,7 +787,7 @@
       <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
       <p id="adModalStatusText" class="text-xs text-slate-400 mb-4">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
       
-      <!-- 모달 내부 반응형 광고 영역 -->
+      <!-- 모달 내부 광고 영역 -->
       <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2 mb-4 min-h-[100px] flex flex-col items-center justify-center overflow-hidden">
         <span class="text-[8px] text-slate-600 block mb-1">SPONSORED REWARD</span>
         <ins class="adsbygoogle"
@@ -779,9 +800,9 @@
 
       <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 mb-4">
         <div class="text-3xl font-black text-theme-main mb-1" id="adCountdownText">5</div>
-        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">광고 시청 대기 중...</span>
+        <span class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">진행 중...</span>
         <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden relative">
-          <div id="adProgressBar" class="h-full bg-theme-main rounded-full" style="width: 0%; transition: width 0.1s linear;"></div>
+          <div id="adProgressBar" class="h-full bg-theme-main rounded-full" style="width: 0%; transition: width 0.15s ease-out;"></div>
         </div>
       </div>
       <p class="text-[10px] text-slate-500">※ 창을 닫지 마시고 잠시만 기다려 주세요.</p>
@@ -841,22 +862,22 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // [추가] 캐릭터 외형 특징 선택 태그 데이터 및 상태
-    const PROMPT_TAGS_DATA = {
-      eyes: [
-        { label: "빨간눈(적안)", value: "red eyes" },
-        { label: "파란눈(벽안)", value: "blue eyes" },
-        { label: "보라눈(자안)", value: "purple eyes" },
-        { label: "금색눈(금안)", value: "golden eyes, yellow eyes" },
-        { label: "초록눈(녹안)", value: "green eyes" },
-        { label: "오드아이", value: "heterochromia, odd eyes" }
-      ],
+    // [개편된 프롬프트 태그 데이터]
+    const EYE_COLORS = [
+      { label: "검은눈(흑안)", key: "black", val: "black eyes" },
+      { label: "빨간눈(적안)", key: "red", val: "red eyes" },
+      { label: "파란눈(벽안)", key: "blue", val: "blue eyes" },
+      { label: "보라눈(자안)", key: "purple", val: "purple eyes" },
+      { label: "금색눈(금안)", key: "gold", val: "golden eyes, yellow eyes" },
+      { label: "초록눈(녹안)", key: "green", val: "green eyes" }
+    ];
+
+    const GENERAL_TAGS = {
       head: [
         { label: "천모자", value: "fabric hat, cloth cap" },
         { label: "가죽모자", value: "leather hat, leather cap" },
         { label: "투구", value: "knight helmet, armored helm, headgear" },
         { label: "안경", value: "glasses, eyewear" },
-        { label: "헤일로", value: "halo, floating head ornament" },
         { label: "동물귀", value: "animal ears, cat ears" },
         { label: "얼굴장식", value: "face tattoo, facial markings, forehead ornament" },
         { label: "안대", value: "eyepatch, eye patch over one eye" }
@@ -867,13 +888,19 @@
         { label: "갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
       ],
       accessories: [
+        { label: "헤일로(광배)", value: "halo, floating head ornament" },
         { label: "날개", value: "wings, feathered wings" },
         { label: "망토", value: "flowing cloak, cape" },
         { label: "반지", value: "rings on fingers, glowing magical ring" },
         { label: "귀걸이", value: "earrings, dangling jewelry" }
       ]
     };
-    let selectedPromptTags = new Set();
+
+    let isOddEyeMode = false;
+    let selectedNormalEye = "";
+    let selectedLeftEye = "";
+    let selectedRightEye = "";
+    let selectedGeneralTags = new Set();
 
     const Security = {
       sanitizeString(str) {
@@ -934,7 +961,17 @@
     let currentImagePosX = 0;
     let currentImagePosY = 0;
 
-    // [추가] 아코디언 및 태그 칩 초기화
+    function updatePromptCountUI() {
+      let count = selectedGeneralTags.size;
+      if (isOddEyeMode) {
+        if (selectedLeftEye) count++;
+        if (selectedRightEye) count++;
+      } else {
+        if (selectedNormalEye) count++;
+      }
+      document.getElementById('selectedPromptCount').textContent = count;
+    }
+
     function initPromptTagAccordion() {
       const btn = document.getElementById('promptAccordionBtn');
       const content = document.getElementById('promptAccordionContent');
@@ -946,36 +983,127 @@
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
       });
 
-      const categories = [
-        { key: 'eyes', elId: 'tags-eyes' },
-        { key: 'head', elId: 'tags-head' },
-        { key: 'outfit', elId: 'tags-outfit' },
-        { key: 'accessories', elId: 'tags-accessories' }
-      ];
+      // 오드아이 토글 스위치
+      const toggleOddEyeBtn = document.getElementById('toggleOddEyeBtn');
+      const normalContainer = document.getElementById('normalEyeContainer');
+      const oddContainer = document.getElementById('oddEyeContainer');
 
-      categories.forEach(cat => {
-        const container = document.getElementById(cat.elId);
+      toggleOddEyeBtn.addEventListener('click', () => {
+        isOddEyeMode = !isOddEyeMode;
+        if (isOddEyeMode) {
+          toggleOddEyeBtn.textContent = '오드아이 모드 ON';
+          toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-theme-main bg-theme-bg text-theme-light font-bold transition';
+          normalContainer.classList.add('hidden');
+          oddContainer.classList.remove('hidden');
+        } else {
+          toggleOddEyeBtn.textContent = '오드아이 모드 OFF';
+          toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition';
+          normalContainer.classList.remove('hidden');
+          oddContainer.classList.add('hidden');
+        }
+        updatePromptCountUI();
+      });
+
+      // 1. 단일 눈색 칩 렌더링
+      normalContainer.innerHTML = '';
+      EYE_COLORS.forEach(c => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+        chip.textContent = c.label;
+
+        chip.addEventListener('click', () => {
+          if (selectedNormalEye === c.val) {
+            selectedNormalEye = "";
+            chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          } else {
+            selectedNormalEye = c.val;
+            normalContainer.querySelectorAll('button').forEach(b => {
+              b.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            });
+            chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+          }
+          updatePromptCountUI();
+        });
+        normalContainer.appendChild(chip);
+      });
+
+      // 2. 오드아이(왼쪽 눈 / 오른쪽 눈) 칩 렌더링
+      const leftContainer = document.getElementById('leftEyeSubContainer');
+      const rightContainer = document.getElementById('rightEyeSubContainer');
+
+      const renderSubEyeList = (container, isLeft) => {
         container.innerHTML = '';
-        PROMPT_TAGS_DATA[cat.key].forEach(tag => {
+        EYE_COLORS.forEach(c => {
           const chip = document.createElement('button');
           chip.type = 'button';
-          chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200 transition-all select-none';
+          chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          chip.textContent = c.label;
+
+          chip.addEventListener('click', () => {
+            const currentVal = isLeft ? selectedLeftEye : selectedRightEye;
+            if (currentVal === c.key) {
+              if (isLeft) selectedLeftEye = "";
+              else selectedRightEye = "";
+              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            } else {
+              if (isLeft) selectedLeftEye = c.key;
+              else selectedRightEye = c.key;
+
+              container.querySelectorAll('button').forEach(b => {
+                b.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+              });
+              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+            }
+            updatePromptCountUI();
+          });
+          container.appendChild(chip);
+        });
+      };
+
+      renderSubEyeList(leftContainer, true);
+      renderSubEyeList(rightContainer, false);
+
+      // 3. 머리, 의상, 장신구 렌더링
+      ['head', 'outfit', 'accessories'].forEach(key => {
+        const container = document.getElementById(`tags-${key}`);
+        container.innerHTML = '';
+        GENERAL_TAGS[key].forEach(tag => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
           chip.textContent = tag.label;
 
           chip.addEventListener('click', () => {
-            if (selectedPromptTags.has(tag.value)) {
-              selectedPromptTags.delete(tag.value);
-              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200 transition-all select-none';
+            if (selectedGeneralTags.has(tag.value)) {
+              selectedGeneralTags.delete(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
             } else {
-              selectedPromptTags.add(tag.value);
-              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition-all select-none';
+              selectedGeneralTags.add(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
             }
-            document.getElementById('selectedPromptCount').textContent = selectedPromptTags.size;
+            updatePromptCountUI();
           });
-
           container.appendChild(chip);
         });
       });
+    }
+
+    function getCombinedCustomPrompt() {
+      const parts = [];
+
+      if (isOddEyeMode) {
+        if (selectedLeftEye || selectedRightEye) {
+          parts.push("heterochromia, odd eyes");
+          if (selectedLeftEye) parts.push(`left eye ${selectedLeftEye}`);
+          if (selectedRightEye) parts.push(`right eye ${selectedRightEye}`);
+        }
+      } else {
+        if (selectedNormalEye) parts.push(selectedNormalEye);
+      }
+
+      selectedGeneralTags.forEach(t => parts.push(t));
+      return parts.join(", ");
     }
 
     async function initSupabaseDataOnce() {
@@ -1594,7 +1722,6 @@
       let pinchCenterStartX = 0;
       let pinchCenterStartY = 0;
 
-      // PC 마우스 휠
       avatarContainer.addEventListener('wheel', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault();
@@ -1608,7 +1735,6 @@
         updateImageTransform();
       }, { passive: false });
 
-      // PC 마우스 드래그
       avatarContainer.addEventListener('mousedown', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault(); 
@@ -1637,7 +1763,6 @@
         }
       });
 
-      // 모바일 2손가락 터치 제스처
       avatarContainer.addEventListener('touchstart', (e) => {
         if (img.classList.contains('hidden')) return;
 
@@ -1830,7 +1955,10 @@
         (adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) {}
 
+      let progressTimer = null;
+
       try {
+        // [수정] 일반 유저는 5초 카운트다운 완료 후 AI 렌더링, 관리자는 즉시 부드러운 프로그레스 바 실행
         if (remain < 999) {
           const totalMs = 5000;
           const intervalMs = 100;
@@ -1854,14 +1982,23 @@
         }
 
         adCountdownText.textContent = "AI";
-        adProgressBar.style.width = "100%";
         adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
+
+        // AI 생성 대기 중 프로그레스바가 멈춰 보이지 않도록 95%까지 전진
+        let currentPercent = 10;
+        adProgressBar.style.width = `${currentPercent}%`;
+        progressTimer = setInterval(() => {
+          if (currentPercent < 92) {
+            currentPercent += 1.5;
+            adProgressBar.style.width = `${currentPercent}%`;
+          }
+        }, 300);
 
         const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
         localStorage.setItem('client_fp', clientFingerprint);
 
-        // [추가] 선택된 태그 목록을 쉼표로 연결하여 customPrompt로 전송
-        const promptString = Array.from(selectedPromptTags).join(', ');
+        // 합성된 커스텀 프롬프트 추출
+        const promptString = getCombinedCustomPrompt();
 
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
           body: { 
@@ -1873,6 +2010,8 @@
           }
         });
 
+        if (progressTimer) clearInterval(progressTimer);
+
         if (error) {
           if (error.message && error.message.includes("한도")) {
             throw new Error("오늘 무료 AI 일러스트 생성 한도(3회)를 초과했습니다.");
@@ -1883,6 +2022,9 @@
         const finalUrl = data?.outputUrl || data?.imageUrl || data?.url || data?.output;
 
         if (finalUrl) {
+          adProgressBar.style.width = "100%";
+          await new Promise(r => setTimeout(r, 200));
+
           adModal.classList.add('hidden');
 
           previewImg.src = finalUrl;
@@ -1906,6 +2048,7 @@
           throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
         }
       } catch (err) {
+        if (progressTimer) clearInterval(progressTimer);
         console.error('[AI 생성 에러]:', err);
         adModal.classList.add('hidden');
         alert(err.message || 'AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
@@ -1953,7 +2096,7 @@
       lucide.createIcons();
       await updateRemainUsageUI();
       initImageControls(); 
-      initPromptTagAccordion(); // [추가] 아코디언 컴포넌트 이벤트 연결
+      initPromptTagAccordion();
 
       await initSupabaseDataOnce();
 
