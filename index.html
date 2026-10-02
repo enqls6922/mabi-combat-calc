@@ -659,7 +659,7 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- 이미지 스타일 선택 (anime2 추가) -->
+            <!-- 이미지 스타일 선택 (anime2는 관리자 전용 노출) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">이미지 스타일 선택</span>
               <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
@@ -669,8 +669,8 @@
                 <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime">
                   #애니
                 </button>
-                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime2">
-                  #애니2
+                <button type="button" id="anime2StyleChip" class="art-style-chip hidden px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="anime2">
+                  #애니2 (관리자)
                 </button>
                 <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none" data-style="fantasy">
                   #판타지
@@ -713,7 +713,7 @@
               <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
             </div>
 
-            <!-- 장신구 카테고리 (꼬리 추가) -->
+            <!-- 장신구 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
               <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
@@ -1037,12 +1037,21 @@
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
       });
 
+      // 관리자 모드 검증 및 #애니2 버튼 노출 분기
+      const anime2Btn = document.getElementById('anime2StyleChip');
+      if (anime2Btn && ADMIN_KEY && ADMIN_KEY.trim().length > 0) {
+        anime2Btn.classList.remove('hidden');
+      }
+
       // 이미지 스타일 칩 클릭 이벤트
       document.querySelectorAll('.art-style-chip').forEach(chip => {
         chip.addEventListener('click', () => {
           selectedArtStyle = chip.dataset.style;
           document.querySelectorAll('.art-style-chip').forEach(c => {
             c.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+            if (c.id === 'anime2StyleChip' && (!ADMIN_KEY || ADMIN_KEY.trim().length === 0)) {
+              c.classList.add('hidden');
+            }
           });
           chip.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
         });
@@ -1773,7 +1782,6 @@
 
       if (currentImageZoom < 1.0) currentImageZoom = 1.0;
 
-      // 컨테이너 크기보다 확대되어 커진 영역 내에서만 이동을 엄격히 제한 (검은 여백 노출 완전 차단)
       const maxLimitX = Math.max(0, (dims.currentW - dims.cW) / 2);
       const maxLimitY = Math.max(0, (dims.currentH - dims.cH) / 2);
 
@@ -2097,7 +2105,7 @@
             arcanaKey: currentArcanaKey,
             adminKey: ADMIN_KEY,
             customPrompt: promptString,
-            artStyle: selectedArtStyle, // illust, anime, anime2, fantasy 전달
+            artStyle: selectedArtStyle,
             turnstileToken: turnstileToken
           }
         });
@@ -2119,7 +2127,6 @@
 
           adModal.classList.add('hidden');
 
-          // 이미지 갱신 및 로드 완료 시 중앙 위치 초기화
           previewImg.onload = () => {
             currentImageZoom = 1.0;
             currentImagePosX = 0;
