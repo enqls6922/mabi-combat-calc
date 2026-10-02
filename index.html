@@ -629,12 +629,12 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- 눈색 카테고리 (단일/오드아이 분기) -->
+            <!-- 눈색 카테고리 -->
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-bold text-slate-400">눈색 (양쪽 또는 개별 지정)</span>
+                <span class="text-[11px] font-bold text-slate-400">눈색</span>
                 <button type="button" id="toggleOddEyeBtn" class="text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition">
-                  오드아이 모드 OFF
+                  #오드아이 OFF
                 </button>
               </div>
 
@@ -644,11 +644,11 @@
               <!-- 오드아이 모드 (왼쪽 / 오른쪽 분리) -->
               <div id="oddEyeContainer" class="hidden space-y-2 p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg">
                 <div>
-                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">왼쪽 눈 색상</span>
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">왼쪽 눈</span>
                   <div class="flex flex-wrap gap-1.5" id="leftEyeSubContainer"></div>
                 </div>
                 <div class="border-t border-slate-800/80 pt-2">
-                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">오른쪽 눈 색상</span>
+                  <span class="text-[10px] text-slate-500 font-semibold block mb-1">오른쪽 눈</span>
                   <div class="flex flex-wrap gap-1.5" id="rightEyeSubContainer"></div>
                 </div>
               </div>
@@ -666,7 +666,7 @@
               <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
             </div>
 
-            <!-- 장신구 카테고리 (헤일로 포함) -->
+            <!-- 장신구 카테고리 -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
               <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
@@ -787,7 +787,7 @@
       <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
       <p id="adModalStatusText" class="text-xs text-slate-400 mb-4">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
       
-      <!-- 모달 내부 광고 영역 -->
+      <!-- 모달 내부 반응형 광고 영역 -->
       <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2 mb-4 min-h-[100px] flex flex-col items-center justify-center overflow-hidden">
         <span class="text-[8px] text-slate-600 block mb-1">SPONSORED REWARD</span>
         <ins class="adsbygoogle"
@@ -862,37 +862,40 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
-    // [개편된 프롬프트 태그 데이터]
+    // [개편된 프롬프트 태그 데이터: 깔끔한 해시태그 디자인 & 헤어 길이 세분화]
     const EYE_COLORS = [
-      { label: "검은눈(흑안)", key: "black", val: "black eyes" },
-      { label: "빨간눈(적안)", key: "red", val: "red eyes" },
-      { label: "파란눈(벽안)", key: "blue", val: "blue eyes" },
-      { label: "보라눈(자안)", key: "purple", val: "purple eyes" },
-      { label: "금색눈(금안)", key: "gold", val: "golden eyes, yellow eyes" },
-      { label: "초록눈(녹안)", key: "green", val: "green eyes" }
+      { label: "#흑안", key: "black", val: "black eyes" },
+      { label: "#적안", key: "red", val: "red eyes" },
+      { label: "#벽안", key: "blue", val: "blue eyes" },
+      { label: "#자안", key: "purple", val: "purple eyes" },
+      { label: "#금안", key: "gold", val: "golden eyes, yellow eyes" },
+      { label: "#녹안", key: "green", val: "green eyes" }
     ];
 
     const GENERAL_TAGS = {
       head: [
-        { label: "천모자", value: "fabric hat, cloth cap" },
-        { label: "가죽모자", value: "leather hat, leather cap" },
-        { label: "투구", value: "knight helmet, armored helm, headgear" },
-        { label: "안경", value: "glasses, eyewear" },
-        { label: "동물귀", value: "animal ears, cat ears" },
-        { label: "얼굴장식", value: "face tattoo, facial markings, forehead ornament" },
-        { label: "안대", value: "eyepatch, eye patch over one eye" }
+        { label: "#장발", value: "very long hair, straight long hair" },
+        { label: "#단발", value: "medium hair, bob cut hair" },
+        { label: "#숏컷", value: "short hair, pixie cut" },
+        { label: "#천모자", value: "fabric hat, cloth cap" },
+        { label: "#가죽모자", value: "leather hat, leather cap" },
+        { label: "#투구", value: "knight helmet, armored helm, headgear" },
+        { label: "#안경", value: "glasses, eyewear" },
+        { label: "#동물귀", value: "animal ears, cat ears" },
+        { label: "#얼굴장식", value: "face tattoo, facial markings, forehead ornament" },
+        { label: "#안대", value: "eyepatch, eye patch over one eye" }
       ],
       outfit: [
-        { label: "천옷", value: "fabric clothing, cloth dress, casual tunic" },
-        { label: "가죽옷", value: "leather clothes, leather doublet, leather armor" },
-        { label: "갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
+        { label: "#천옷", value: "fabric clothing, cloth dress, casual tunic" },
+        { label: "#가죽옷", value: "leather clothes, leather doublet, leather armor" },
+        { label: "#갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
       ],
       accessories: [
-        { label: "헤일로(광배)", value: "halo, floating head ornament" },
-        { label: "날개", value: "wings, feathered wings" },
-        { label: "망토", value: "flowing cloak, cape" },
-        { label: "반지", value: "rings on fingers, glowing magical ring" },
-        { label: "귀걸이", value: "earrings, dangling jewelry" }
+        { label: "#헤일로", value: "halo, floating head ornament" },
+        { label: "#날개", value: "wings, feathered wings" },
+        { label: "#망토", value: "flowing cloak, cape" },
+        { label: "#반지", value: "rings on fingers, glowing magical ring" },
+        { label: "#귀걸이", value: "earrings, dangling jewelry" }
       ]
     };
 
@@ -991,12 +994,12 @@
       toggleOddEyeBtn.addEventListener('click', () => {
         isOddEyeMode = !isOddEyeMode;
         if (isOddEyeMode) {
-          toggleOddEyeBtn.textContent = '오드아이 모드 ON';
+          toggleOddEyeBtn.textContent = '#오드아이 ON';
           toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-theme-main bg-theme-bg text-theme-light font-bold transition';
           normalContainer.classList.add('hidden');
           oddContainer.classList.remove('hidden');
         } else {
-          toggleOddEyeBtn.textContent = '오드아이 모드 OFF';
+          toggleOddEyeBtn.textContent = '#오드아이 OFF';
           toggleOddEyeBtn.className = 'text-[10px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-400 hover:border-theme-main transition';
           normalContainer.classList.remove('hidden');
           oddContainer.classList.add('hidden');
@@ -1958,7 +1961,6 @@
       let progressTimer = null;
 
       try {
-        // [수정] 일반 유저는 5초 카운트다운 완료 후 AI 렌더링, 관리자는 즉시 부드러운 프로그레스 바 실행
         if (remain < 999) {
           const totalMs = 5000;
           const intervalMs = 100;
@@ -1984,7 +1986,6 @@
         adCountdownText.textContent = "AI";
         adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
 
-        // AI 생성 대기 중 프로그레스바가 멈춰 보이지 않도록 95%까지 전진
         let currentPercent = 10;
         adProgressBar.style.width = `${currentPercent}%`;
         progressTimer = setInterval(() => {
@@ -1997,7 +1998,6 @@
         const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
         localStorage.setItem('client_fp', clientFingerprint);
 
-        // 합성된 커스텀 프롬프트 추출
         const promptString = getCombinedCustomPrompt();
 
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
