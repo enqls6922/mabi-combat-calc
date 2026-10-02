@@ -618,6 +618,41 @@
           <p class="text-xs text-slate-300 font-medium">인게임 스크린샷을 업로드해 인증 카드를 꾸며보세요!</p>
           <p class="text-[10px] sm:text-[11px] text-slate-500 mt-1">등록 후 카드 이미지 위에서 [마우스 휠/드래그, 모바일: 2손가락 줌/이동]으로 위치를 맞출 수 있습니다.</p>
         </div>
+
+        <!-- [추가] 아코디언 드롭다운: 캐릭터 디테일 보정 선택 영역 -->
+        <div class="mt-3 w-full">
+          <button type="button" id="promptAccordionBtn" class="w-full flex items-center justify-between px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-lg text-xs font-semibold text-slate-300 hover:border-theme-main transition-colors duration-200">
+            <span class="flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-theme-main"></i>
+              캐릭터 디테일 보정 선택 (<span id="selectedPromptCount" class="text-theme-main font-bold">0</span>개 선택됨)
+            </span>
+            <i id="promptAccordionArrow" data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform duration-200"></i>
+          </button>
+          
+          <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-3.5">
+            <!-- 눈색 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">눈색</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-eyes"></div>
+            </div>
+            <!-- 머리/얼굴 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">머리 / 얼굴 장식</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-head"></div>
+            </div>
+            <!-- 의상 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">의상</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-outfit"></div>
+            </div>
+            <!-- 장신구 카테고리 -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">장신구</span>
+              <div class="flex flex-wrap gap-1.5" id="tags-accessories"></div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -806,6 +841,40 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
+    // [추가] 캐릭터 외형 특징 선택 태그 데이터 및 상태
+    const PROMPT_TAGS_DATA = {
+      eyes: [
+        { label: "빨간눈(적안)", value: "red eyes" },
+        { label: "파란눈(벽안)", value: "blue eyes" },
+        { label: "보라눈(자안)", value: "purple eyes" },
+        { label: "금색눈(금안)", value: "golden eyes, yellow eyes" },
+        { label: "초록눈(녹안)", value: "green eyes" },
+        { label: "오드아이", value: "heterochromia, odd eyes" }
+      ],
+      head: [
+        { label: "천모자", value: "fabric hat, cloth cap" },
+        { label: "가죽모자", value: "leather hat, leather cap" },
+        { label: "투구", value: "knight helmet, armored helm, headgear" },
+        { label: "안경", value: "glasses, eyewear" },
+        { label: "헤일로", value: "halo, floating head ornament" },
+        { label: "동물귀", value: "animal ears, cat ears" },
+        { label: "얼굴장식", value: "face tattoo, facial markings, forehead ornament" },
+        { label: "안대", value: "eyepatch, eye patch over one eye" }
+      ],
+      outfit: [
+        { label: "천옷", value: "fabric clothing, cloth dress, casual tunic" },
+        { label: "가죽옷", value: "leather clothes, leather doublet, leather armor" },
+        { label: "갑옷", value: "dark fantasy plate armor, steel breastplate, shoulder armor plates" }
+      ],
+      accessories: [
+        { label: "날개", value: "wings, feathered wings" },
+        { label: "망토", value: "flowing cloak, cape" },
+        { label: "반지", value: "rings on fingers, glowing magical ring" },
+        { label: "귀걸이", value: "earrings, dangling jewelry" }
+      ]
+    };
+    let selectedPromptTags = new Set();
+
     const Security = {
       sanitizeString(str) {
         if (!str) return '';
@@ -864,6 +933,50 @@
     let currentImageZoom = 100;
     let currentImagePosX = 0;
     let currentImagePosY = 0;
+
+    // [추가] 아코디언 및 태그 칩 초기화
+    function initPromptTagAccordion() {
+      const btn = document.getElementById('promptAccordionBtn');
+      const content = document.getElementById('promptAccordionContent');
+      const arrow = document.getElementById('promptAccordionArrow');
+
+      btn.addEventListener('click', () => {
+        const isHidden = content.classList.contains('hidden');
+        content.classList.toggle('hidden', !isHidden);
+        arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+
+      const categories = [
+        { key: 'eyes', elId: 'tags-eyes' },
+        { key: 'head', elId: 'tags-head' },
+        { key: 'outfit', elId: 'tags-outfit' },
+        { key: 'accessories', elId: 'tags-accessories' }
+      ];
+
+      categories.forEach(cat => {
+        const container = document.getElementById(cat.elId);
+        container.innerHTML = '';
+        PROMPT_TAGS_DATA[cat.key].forEach(tag => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200 transition-all select-none';
+          chip.textContent = tag.label;
+
+          chip.addEventListener('click', () => {
+            if (selectedPromptTags.has(tag.value)) {
+              selectedPromptTags.delete(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200 transition-all select-none';
+            } else {
+              selectedPromptTags.add(tag.value);
+              chip.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition-all select-none';
+            }
+            document.getElementById('selectedPromptCount').textContent = selectedPromptTags.size;
+          });
+
+          container.appendChild(chip);
+        });
+      });
+    }
 
     async function initSupabaseDataOnce() {
       if (!supabaseClient) return;
@@ -1639,13 +1752,11 @@
       });
     }
 
-    // [핵심] 현재 카드 뷰포트(3:4 비율)에 맞춰 조작된 시각적 영역을 864x1152 정밀 규격으로 크롭 렌더링
     function getCroppedCardImage() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
       if (!img || img.classList.contains('hidden')) return null;
 
-      // 3:4 비율 및 SDXL VAE 8의 배수 표준 규격
       const targetW = 864;
       const targetH = 1152;
 
@@ -1654,7 +1765,6 @@
       canvas.height = targetH;
       const ctx = canvas.getContext('2d');
 
-      // VAE 투명 채널 손상 방지용 배경 채우기
       ctx.fillStyle = '#030712';
       ctx.fillRect(0, 0, targetW, targetH);
 
@@ -1701,7 +1811,6 @@
         return;
       }
 
-      // 조작해 둔 3:4 구도 그대로 크롭
       const croppedBase64 = getCroppedCardImage();
       if (!croppedBase64) {
         alert('이미지를 처리하는 데 실패했습니다.');
@@ -1717,13 +1826,11 @@
       adModal.classList.remove('hidden');
       aiBtn.disabled = true;
 
-      // 모달 내부 광고 태그 렌더링 시도
       try {
         (adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) {}
 
       try {
-        // [부드러운 프로그레스 바 & 카운트다운 5초 진행]
         if (remain < 999) {
           const totalMs = 5000;
           const intervalMs = 100;
@@ -1753,13 +1860,16 @@
         const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
         localStorage.setItem('client_fp', clientFingerprint);
 
-        // 크롭된 864x1152 이미지를 엣지 펑션으로 전달
+        // [추가] 선택된 태그 목록을 쉼표로 연결하여 customPrompt로 전송
+        const promptString = Array.from(selectedPromptTags).join(', ');
+
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
           body: { 
             imageBase64: croppedBase64,
             userIdentifier: clientFingerprint,
             arcanaKey: currentArcanaKey,
-            adminKey: ADMIN_KEY
+            adminKey: ADMIN_KEY,
+            customPrompt: promptString
           }
         });
 
@@ -1778,7 +1888,6 @@
           previewImg.src = finalUrl;
           bgImg.src = finalUrl;
           
-          // 생성 완료 후 프레임에 맞춰 위치 초기화
           currentImageZoom = 100;
           currentImagePosX = 0;
           currentImagePosY = 0;
@@ -1844,6 +1953,7 @@
       lucide.createIcons();
       await updateRemainUsageUI();
       initImageControls(); 
+      initPromptTagAccordion(); // [추가] 아코디언 컴포넌트 이벤트 연결
 
       await initSupabaseDataOnce();
 
@@ -1952,7 +2062,6 @@
 
       document.getElementById('aiTransformBtn').addEventListener('click', handleAiIllustrationGeneration);
 
-      // [스펙 카드 다운로드]
       document.getElementById('saveCardBtn').addEventListener('click', async () => {
         const exportArea = document.getElementById('cardExportArea');
         const btn = document.getElementById('saveCardBtn');
