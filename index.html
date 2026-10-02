@@ -14,7 +14,6 @@
   ">
   <title>에린 스펙 계산기 (Erinn Spec Calculator)</title>
 
-  <!-- 파비콘 및 즐겨찾기(북마크) 아이콘 등록 -->
   <link rel="icon" type="image/svg+xml" href="icon/아이콘.svg">
   <link rel="apple-touch-icon" href="icon/아이콘.svg">
 
@@ -24,7 +23,6 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Cloudflare Turnstile API 스크립트 -->
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
   <script>
@@ -147,7 +145,6 @@
 
     input[type=range] { accent-color: var(--theme-main); }
 
-    /* [아르카나 문장 뱃지 스타일] */
     .arcana-badge-pill {
       display: inline-flex;
       align-items: center;
@@ -168,9 +165,6 @@
       box-shadow: 0 0 8px var(--theme-main);
     }
 
-    /* ========================================================
-       [라이트 모드 전용 세부 오버라이드 및 눈부심 방지 테마]
-       ======================================================== */
     html.light-theme {
       color-scheme: light;
     }
@@ -205,7 +199,6 @@
       color: #1e293b !important;
     }
 
-    /* 일반 인풋 및 셀렉트 */
     html.light-theme input[type="text"],
     html.light-theme select {
       background-color: #ffffff !important;
@@ -222,7 +215,6 @@
       color: var(--theme-dark) !important;
     }
 
-    /* 드롭다운 메뉴 및 검색창 */
     html.light-theme .part-dropdown-trigger,
     html.light-theme .reforge-dropdown-trigger {
       background-color: #ffffff !important;
@@ -251,7 +243,6 @@
       color: #0f172a !important;
     }
 
-    /* 상/하단 스텝 조절 버튼 (+ / -) 및 세공 레벨 조절 박스 */
     html.light-theme .stat-step-btn,
     html.light-theme .btn-step-down,
     html.light-theme .btn-step-up {
@@ -264,7 +255,6 @@
       color: #0f172a !important;
     }
 
-    /* 세공 레벨 높낮이 조절창 라이트 모드 전환 */
     html.light-theme #reforgeListContainer .bg-slate-900 {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
@@ -273,7 +263,6 @@
       color: var(--theme-dark) !important;
     }
 
-    /* 장비 추가 버튼 텍스트 시인성 확보 */
     html.light-theme #addReforgeBtn {
       background-color: #ffffff !important;
       border-color: var(--theme-main) !important;
@@ -284,7 +273,6 @@
       color: var(--theme-main) !important;
     }
 
-    /* 드롭존 영역 */
     html.light-theme #dropZone {
       background-color: #f8fafc !important;
       border-color: #cbd5e1 !important;
@@ -293,7 +281,6 @@
       border-color: var(--theme-main) !important;
     }
 
-    /* 우측 스펙 카드 라이트 모드 전환 */
     html.light-theme #cardExportArea {
       background: #f8fafc !important;
       border-color: #cbd5e1 !important;
@@ -330,7 +317,6 @@
       color: #0f172a !important;
     }
 
-    /* 스펙 카드 이미지 저장 버튼 라이트 모드 전환 */
     html.light-theme #saveCardBtn {
       background-color: #e2e8f0 !important;
       color: #0f172a !important;
@@ -340,7 +326,6 @@
       background-color: #cbd5e1 !important;
     }
 
-    /* 테마 모드 버튼 */
     html.light-theme #themeToggleBtn {
       background-color: #ffffff !important;
       border-color: #cbd5e1 !important;
@@ -351,7 +336,6 @@
       color: #0f172a !important;
     }
 
-    /* 하단 푸터 */
     html.light-theme footer {
       background-color: #f8fafc !important;
       border-color: #e2e8f0 !important;
@@ -640,10 +624,8 @@
                 </button>
               </div>
 
-              <!-- 일반 모드 (양쪽 동일) -->
               <div id="normalEyeContainer" class="flex flex-wrap gap-1.5"></div>
 
-              <!-- 오드아이 모드 (왼쪽 / 오른쪽 분리) -->
               <div id="oddEyeContainer" class="hidden space-y-2 p-2.5 bg-slate-900/60 border border-slate-800 rounded-lg">
                 <div>
                   <span class="text-[10px] text-slate-500 font-semibold block mb-1">왼쪽 눈</span>
@@ -699,10 +681,9 @@
           </div>
         </div>
 
-        <!-- 카드 캐릭터 이미지 영역 -->
-        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: pan-y;">
-            <img id="bgBlurImage" src="" draggable="false" class="no-native-drag absolute inset-0 w-full h-full object-cover blur-md scale-110 opacity-30 hidden pointer-events-none">
-            <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag relative z-10 w-full h-full object-contain hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform;">
+        <!-- 카드 캐릭터 이미지 영역: 여백 없는 cover 모드 및 경계 고정 -->
+        <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
+            <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag absolute z-10 hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform; max-width: none; max-height: none;">
             
             <div id="defaultAvatarPlaceholder" class="text-center transition-all duration-500 pointer-events-none p-4 flex flex-col items-center justify-center w-full h-full">
               <img id="arcanaCrestImg" src="icon/엘나.webp" alt="Arcana Crest" class="w-44 h-44 object-contain filter drop-shadow-[0_0_12px_var(--theme-main)] transition-all duration-500 mb-3">
@@ -789,10 +770,8 @@
       <h3 class="text-base font-bold text-slate-100 mb-1">AI 일러스트 렌더링 준비</h3>
       <p id="adModalStatusText" class="text-xs text-slate-400 mb-4">스폰서 광고 송출 후 고화질 판타지 일러스트 생성이 시작됩니다.</p>
       
-      <!-- [추가] Cloudflare Turnstile 스마트 캡차 렌더링 컨테이너 -->
       <div id="turnstileWidget" class="my-2 min-h-[65px] flex items-center justify-center"></div>
 
-      <!-- 모달 내부 반응형 광고 영역 -->
       <div id="modalAdContainer" class="w-full bg-slate-950/80 border border-slate-800 rounded-xl p-2 mb-4 min-h-[100px] flex flex-col items-center justify-center overflow-hidden">
         <span class="text-[8px] text-slate-600 block mb-1">SPONSORED REWARD</span>
         <ins class="adsbygoogle"
@@ -864,7 +843,6 @@
     const SUPABASE_KEY = 'sb_publishable_SXld7oHOYcSSueUpr5MNJg_zoQFya64';
     const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 
-    // [클라우드플레어 Turnstile Site Key 설정]
     const TURNSTILE_SITE_KEY = '0x4AAAAAAFL0MEvDRdEC0_oO';
 
     let memoryReforgeMap = {};
@@ -967,7 +945,8 @@
     let userTags = [];
     let draggedTagIndex = null;
 
-    let currentImageZoom = 100;
+    // 이미지 컨트롤 변수
+    let currentImageZoom = 1.0; // 1.0 = 컨테이너 여백 없이 꼭 맞춘 기본 cover 배율
     let currentImagePosX = 0;
     let currentImagePosY = 0;
 
@@ -1058,9 +1037,9 @@
               else selectedRightEye = c.key;
 
               container.querySelectorAll('button').forEach(b => {
-                b.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+                b.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
               });
-              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+              chip.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
             }
             updatePromptCountUI();
           });
@@ -1688,29 +1667,48 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    function updateImageTransform() {
+    // ---------------------------------------------------------------------------------
+    // [이미지 완벽 구속 및 Cover 모드 구현: 빈 공간(검은 배경) 노출 완전 차단]
+    // ---------------------------------------------------------------------------------
+    function getImageDimensions() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
-      if (!img || !container) return;
+      if (!img || !container || img.classList.contains('hidden')) return null;
 
-      const scale = currentImageZoom / 100;
       const cW = container.clientWidth || 300;
       const cH = container.clientHeight || 400;
-
       const natW = img.naturalWidth || cW;
       const natH = img.naturalHeight || cH;
 
-      const containRatio = Math.min(cW / natW, cH / natH);
-      const renderedW = natW * containRatio;
-      const renderedH = natH * containRatio;
+      // 컨테이너를 빈틈없이 꽉 채우는 기본 배율(cover scale)
+      const baseScale = Math.max(cW / natW, cH / natH);
+      const baseW = natW * baseScale;
+      const baseH = natH * baseScale;
 
-      const maxLimitX = Math.max(0, (renderedW * scale - cW) / 2 + (cW * 0.15));
-      const maxLimitY = Math.max(0, (renderedH * scale - cH) / 2 + (cH * 0.15));
+      const currentW = baseW * currentImageZoom;
+      const currentH = baseH * currentImageZoom;
 
-      currentImagePosX = Math.max(-maxLimitX, Math.min(maxLimitX, currentImagePosX));
-      currentImagePosY = Math.max(-maxLimitY, Math.min(maxLimitY, currentImagePosY));
+      const maxLimitX = Math.max(0, (currentW - cW) / 2);
+      const maxLimitY = Math.max(0, (currentH - cH) / 2);
 
-      img.style.transform = `translate3d(${currentImagePosX}px, ${currentImagePosY}px, 0px) scale(${scale})`;
+      return { cW, cH, baseW, baseH, currentW, currentH, maxLimitX, maxLimitY };
+    }
+
+    function updateImageTransform() {
+      const img = document.getElementById('previewImage');
+      const dims = getImageDimensions();
+      if (!img || !dims) return;
+
+      // 줌 배율이 1.0보다 작아져 빈 공간이 나오지 못하도록 강제
+      if (currentImageZoom < 1.0) currentImageZoom = 1.0;
+
+      // 이미지가 프레임 경계 밖으로 벗어나지 못하도록 1픽셀 오차 없이 구속
+      currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
+      currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
+
+      img.style.width = `${dims.baseW}px`;
+      img.style.height = `${dims.baseH}px`;
+      img.style.transform = `translate3d(${currentImagePosX}px, ${currentImagePosY}px, 0px) scale(${currentImageZoom})`;
     }
 
     function initImageControls() {
@@ -1724,20 +1722,14 @@
       let initialPosY = 0;
 
       let initialPinchDistance = 0;
-      let initialZoomAtPinch = 100;
-      let pinchCenterStartX = 0;
-      let pinchCenterStartY = 0;
+      let initialZoomAtPinch = 1.0;
 
       avatarContainer.addEventListener('wheel', (e) => {
         if (img.classList.contains('hidden')) return;
         e.preventDefault();
 
-        const step = 10;
-        if (e.deltaY < 0) {
-          currentImageZoom = Math.min(currentImageZoom + step, 300);
-        } else {
-          currentImageZoom = Math.max(currentImageZoom - step, 100);
-        }
+        const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+        currentImageZoom = Math.min(Math.max(1.0, currentImageZoom * zoomFactor), 4.0);
         updateImageTransform();
       }, { passive: false });
 
@@ -1769,49 +1761,55 @@
         }
       });
 
+      // 모바일 터치 이벤트: 1손가락(드래그 이동), 2손가락(핀치 줌)
       avatarContainer.addEventListener('touchstart', (e) => {
         if (img.classList.contains('hidden')) return;
 
-        if (e.touches.length === 2) {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
+        } else if (e.touches.length === 2) {
           isDragging = false;
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           initialPinchDistance = Math.hypot(dx, dy);
           initialZoomAtPinch = currentImageZoom;
-
-          pinchCenterStartX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-          pinchCenterStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-          initialPosX = currentImagePosX;
-          initialPosY = currentImagePosY;
         }
       }, { passive: true });
 
       avatarContainer.addEventListener('touchmove', (e) => {
         if (img.classList.contains('hidden')) return;
 
-        if (e.touches.length === 2 && initialPinchDistance > 0) {
+        if (e.touches.length === 1 && isDragging) {
           if (e.cancelable) e.preventDefault();
-
+          currentImagePosX = initialPosX + (e.touches[0].clientX - startX);
+          currentImagePosY = initialPosY + (e.touches[0].clientY - startY);
+          updateImageTransform();
+        } else if (e.touches.length === 2 && initialPinchDistance > 0) {
+          if (e.cancelable) e.preventDefault();
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           const distance = Math.hypot(dx, dy);
-
           const factor = distance / initialPinchDistance;
-          currentImageZoom = Math.max(100, Math.min(300, initialZoomAtPinch * factor));
-
-          const currentCenterX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-          const currentCenterY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
-          currentImagePosX = initialPosX + (currentCenterX - pinchCenterStartX);
-          currentImagePosY = initialPosY + (currentCenterY - pinchCenterStartY);
-
+          currentImageZoom = Math.max(1.0, Math.min(4.0, initialZoomAtPinch * factor));
           updateImageTransform();
         }
       }, { passive: false });
 
       avatarContainer.addEventListener('touchend', (e) => {
-        if (e.touches.length < 2) {
+        if (e.touches.length === 0) {
+          isDragging = false;
           initialPinchDistance = 0;
+        } else if (e.touches.length === 1) {
+          initialPinchDistance = 0;
+          isDragging = true;
+          startX = e.touches[0].clientX;
+          startY = e.touches[0].clientY;
+          initialPosX = currentImagePosX;
+          initialPosY = currentImagePosY;
         }
       });
     }
@@ -1852,7 +1850,7 @@
         reader.onload = (e) => {
           const img = new Image();
           img.onload = () => {
-            const maxDim = 1024;
+            const maxDim = 1200;
             let w = img.width;
             let h = img.height;
 
@@ -1872,7 +1870,7 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
 
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.88);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.90);
             resolve(compressedBase64);
           };
           img.onerror = reject;
@@ -1883,10 +1881,11 @@
       });
     }
 
+    // [864x1152 규격에 정확히 잘라내기: 빈틈 없는 1:1 대응 크롭]
     function getCroppedCardImage() {
       const img = document.getElementById('previewImage');
-      const container = document.getElementById('avatarContainer');
-      if (!img || img.classList.contains('hidden')) return null;
+      const dims = getImageDimensions();
+      if (!img || !dims) return null;
 
       const targetW = 864;
       const targetH = 1152;
@@ -1899,36 +1898,18 @@
       ctx.fillStyle = '#030712';
       ctx.fillRect(0, 0, targetW, targetH);
 
-      const cW = container.clientWidth || 300;
-      const cH = container.clientHeight || 400;
+      const scaleMultiplier = targetW / dims.cW;
+      const renderW = dims.currentW * scaleMultiplier;
+      const renderH = dims.currentH * scaleMultiplier;
 
-      const natW = img.naturalWidth || cW;
-      const natH = img.naturalHeight || cH;
-      const containRatio = Math.min(cW / natW, cH / natH);
-      const baseW = natW * containRatio;
-      const baseH = natH * containRatio;
+      const renderX = ((targetW - renderW) / 2) + (currentImagePosX * scaleMultiplier);
+      const renderY = ((targetH - renderH) / 2) + (currentImagePosY * scaleMultiplier);
 
-      const scale = currentImageZoom / 100;
-      const currentW = baseW * scale;
-      const currentH = baseH * scale;
+      ctx.drawImage(img, renderX, renderY, renderW, renderH);
 
-      const renderX = (cW - currentW) / 2 + currentImagePosX;
-      const renderY = (cH - currentH) / 2 + currentImagePosY;
-
-      const canvasScale = targetW / cW;
-
-      ctx.drawImage(
-        img,
-        renderX * canvasScale,
-        renderY * canvasScale,
-        currentW * canvasScale,
-        currentH * canvasScale
-      );
-
-      return canvas.toDataURL('image/jpeg', 0.92);
+      return canvas.toDataURL('image/png');
     }
 
-    // [Turnstile 토큰 비동기 획득 함수]
     let turnstileWidgetId = null;
     function getTurnstileToken() {
       return new Promise((resolve, reject) => {
@@ -1959,7 +1940,6 @@
 
     async function handleAiIllustrationGeneration() {
       const previewImg = document.getElementById('previewImage');
-      const bgImg = document.getElementById('bgBlurImage');
       const aiBtn = document.getElementById('aiTransformBtn');
       const adModal = document.getElementById('adSimulationModal');
       const adCountdownText = document.getElementById('adCountdownText');
@@ -1986,12 +1966,10 @@
       adModal.classList.remove('hidden');
       aiBtn.disabled = true;
 
-      // 모달 광고 호출
       try {
         (adsbygoogle = window.adsbygoogle || []).push({});
       } catch (e) {}
 
-      // 모달이 열림과 동시에 Turnstile 토큰 발급 시작
       let tokenPromise = Promise.resolve(null);
       if (remain < 999) {
         tokenPromise = getTurnstileToken();
@@ -2038,8 +2016,6 @@
         localStorage.setItem('client_fp', clientFingerprint);
 
         const promptString = getCombinedCustomPrompt();
-
-        // 캡차 토큰 대기
         const turnstileToken = await tokenPromise;
 
         const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
@@ -2071,9 +2047,8 @@
           adModal.classList.add('hidden');
 
           previewImg.src = finalUrl;
-          bgImg.src = finalUrl;
           
-          currentImageZoom = 100;
+          currentImageZoom = 1.0;
           currentImagePosX = 0;
           currentImagePosY = 0;
           updateImageTransform();
@@ -2223,16 +2198,12 @@
         try {
           const compressedUrl = await compressImageForUpload(file);
           const img = document.getElementById('previewImage');
-          const bgImg = document.getElementById('bgBlurImage');
           
           img.src = compressedUrl;
-          bgImg.src = compressedUrl;
-
           img.classList.remove('hidden');
-          bgImg.classList.remove('hidden');
           document.getElementById('defaultAvatarPlaceholder').classList.add('hidden');
           
-          currentImageZoom = 100;
+          currentImageZoom = 1.0;
           currentImagePosX = 0;
           currentImagePosY = 0;
 
@@ -2260,7 +2231,6 @@
         lucide.createIcons();
 
         if (glowDecorator) glowDecorator.style.display = 'none';
-
         const originalBoxShadow = exportArea.style.boxShadow;
         exportArea.style.boxShadow = 'none';
 
@@ -2285,11 +2255,7 @@
             pixelRatio: 2,
             backgroundColor: null, 
             cacheBust: true,
-            fontEmbedCSS: '', 
-            filter: (node) => {
-              if (node.id === 'bgBlurImage') return false;
-              return true;
-            }
+            fontEmbedCSS: ''
           });
 
           if (glowDecorator) glowDecorator.style.display = '';
