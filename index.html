@@ -91,7 +91,7 @@
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%2364748b" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
       background-repeat: no-repeat;
       background-position: right 10px center;
     }
@@ -726,6 +726,24 @@
 
       </div>
 
+      <!-- [추가된 영역] 좌측 컬럼 하단 스폰서 배너 (우측 사이드 배너와 높이 균형 일치) -->
+      <div class="w-full bg-slate-900/60 border border-slate-800 rounded-xl p-3 text-center overflow-hidden min-h-[250px] flex flex-col items-center justify-center section-card">
+        <span class="text-[9px] text-slate-600 block mb-2">SPONSORED</span>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3618604602899898"
+             data-ad-slot="default"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+          window.addEventListener('load', function() {
+            try {
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {}
+          });
+        </script>
+      </div>
+
     </section>
 
     <!-- 우측: 결과 스펙 카드 영역 -->
@@ -765,7 +783,7 @@
         </div>
 
         <div style="text-align: center; background-color: #030712; border: 1px solid #1e293b; border-radius: 12px; padding: 14px 10px; margin-bottom: 16px;">
-          <span id="cardFinalLabel" style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 6px; line-height: 1;">종합 전투력 환산 스코어</span>
+          <span id="cardFinalLabel" style="font-size: 11px; color: #94a3b8; display: block; margin-mb: 6px; line-height: 1;">종합 전투력 환산 스코어</span>
           <div style="font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -0.02em; color: var(--theme-main);" id="totalScoreText">
             3,250
           </div>
@@ -1549,7 +1567,7 @@
       document.querySelectorAll('.reforge-dropdown-item').forEach(item => {
         item.addEventListener('click', (e) => {
           e.stopPropagation();
-          const menu = item.closest('.reforge-dropdown-menu');
+          const menu = item.closest('.part-dropdown-menu');
           const idx = menu.dataset.index;
           const selectedName = item.dataset.name;
 
@@ -1800,7 +1818,6 @@
 
       if (currentImageZoom < 1.0) currentImageZoom = 1.0;
 
-      // 상하/좌우 여백이 1px도 노출되지 않도록 경계 바운딩
       currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
       currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
 
