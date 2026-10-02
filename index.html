@@ -615,6 +615,22 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
+            <!-- [추가] 화풍 스타일 선택 (워크플로우 분기용) -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-400 block mb-1.5">화풍 스타일 선택</span>
+              <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition" data-style="illust">
+                  #일러스트
+                </button>
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="anime">
+                  #애니
+                </button>
+                <button type="button" class="art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition" data-style="fantasy">
+                  #판타지
+                </button>
+              </div>
+            </div>
+
             <!-- 눈색 카테고리 -->
             <div>
               <div class="flex items-center justify-between mb-2">
@@ -681,7 +697,6 @@
           </div>
         </div>
 
-        <!-- 카드 캐릭터 이미지 영역: 여백 없는 cover 모드 및 경계 고정 -->
         <div id="avatarContainer" class="relative image-ratio-container bg-slate-950 rounded-xl border border-slate-800 overflow-hidden mb-4 flex flex-col items-center justify-center select-none" style="touch-action: none;">
             <img id="previewImage" src="" alt="Avatar" draggable="false" class="no-native-drag absolute z-10 hidden pointer-events-auto cursor-grab active:cursor-grabbing select-none" style="transform-origin: center center; will-change: transform; max-width: none; max-height: none;">
             
@@ -848,6 +863,9 @@
     let memoryReforgeMap = {};
     let memoryPartList = [];
 
+    // [화풍 분기 상태 변수: illust(기본 워크플로우), anime, fantasy]
+    let selectedArtStyle = 'illust';
+
     const EYE_COLORS = [
       { label: "#흑안", key: "black", val: "black eyes" },
       { label: "#적안", key: "red", val: "red eyes" },
@@ -945,8 +963,7 @@
     let userTags = [];
     let draggedTagIndex = null;
 
-    // 이미지 컨트롤 변수
-    let currentImageZoom = 1.0; // 1.0 = 컨테이너 여백 없이 꼭 맞춘 기본 cover 배율
+    let currentImageZoom = 1.0;
     let currentImagePosX = 0;
     let currentImagePosY = 0;
 
@@ -970,6 +987,17 @@
         const isHidden = content.classList.contains('hidden');
         content.classList.toggle('hidden', !isHidden);
         arrow.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+      });
+
+      // 화풍 스타일 칩 클릭 이벤트
+      document.querySelectorAll('.art-style-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          selectedArtStyle = chip.dataset.style;
+          document.querySelectorAll('.art-style-chip').forEach(c => {
+            c.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+          });
+          chip.className = 'art-style-chip px-3 py-1 rounded-full text-[11px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+        });
       });
 
       const toggleOddEyeBtn = document.getElementById('toggleOddEyeBtn');
@@ -1037,9 +1065,9 @@
               else selectedRightEye = c.key;
 
               container.querySelectorAll('button').forEach(b => {
-                b.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
+                b.className = 'px-2 py-0.5 rounded-full text-[10px] font-medium border border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 transition select-none';
               });
-              chip.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
+              chip.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold border border-theme-border bg-theme-bg text-theme-light shadow-sm transition select-none';
             }
             updatePromptCountUI();
           });
@@ -1667,9 +1695,6 @@
       document.getElementById('breakdownMult').textContent = `+ ${(addFromCrit + addFromMult).toLocaleString()}`;
     }
 
-    // ---------------------------------------------------------------------------------
-    // [이미지 완벽 구속 및 Cover 모드 구현: 빈 공간(검은 배경) 노출 완전 차단]
-    // ---------------------------------------------------------------------------------
     function getImageDimensions() {
       const img = document.getElementById('previewImage');
       const container = document.getElementById('avatarContainer');
@@ -1680,7 +1705,6 @@
       const natW = img.naturalWidth || cW;
       const natH = img.naturalHeight || cH;
 
-      // 컨테이너를 빈틈없이 꽉 채우는 기본 배율(cover scale)
       const baseScale = Math.max(cW / natW, cH / natH);
       const baseW = natW * baseScale;
       const baseH = natH * baseScale;
@@ -1699,10 +1723,8 @@
       const dims = getImageDimensions();
       if (!img || !dims) return;
 
-      // 줌 배율이 1.0보다 작아져 빈 공간이 나오지 못하도록 강제
       if (currentImageZoom < 1.0) currentImageZoom = 1.0;
 
-      // 이미지가 프레임 경계 밖으로 벗어나지 못하도록 1픽셀 오차 없이 구속
       currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
       currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
 
@@ -1761,7 +1783,6 @@
         }
       });
 
-      // 모바일 터치 이벤트: 1손가락(드래그 이동), 2손가락(핀치 줌)
       avatarContainer.addEventListener('touchstart', (e) => {
         if (img.classList.contains('hidden')) return;
 
@@ -1881,7 +1902,6 @@
       });
     }
 
-    // [864x1152 규격에 정확히 잘라내기: 빈틈 없는 1:1 대응 크롭]
     function getCroppedCardImage() {
       const img = document.getElementById('previewImage');
       const dims = getImageDimensions();
@@ -2025,6 +2045,7 @@
             arcanaKey: currentArcanaKey,
             adminKey: ADMIN_KEY,
             customPrompt: promptString,
+            artStyle: selectedArtStyle, // 순수 워크플로우 분기 파라미터 전송
             turnstileToken: turnstileToken
           }
         });
