@@ -281,6 +281,41 @@
       border-color: var(--theme-main) !important;
     }
 
+    /* Uko Light Mode yinjira muri accordéon y'ibiranga imiterere */
+    html.light-theme #promptAccordionBtn {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #1e293b !important;
+    }
+    html.light-theme #promptAccordionContent {
+      background-color: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+    html.light-theme #promptAccordionContent span.text-slate-400 {
+      color: #475569 !important;
+    }
+    html.light-theme .art-style-chip:not([class*="bg-theme-bg"]),
+    html.light-theme #promptAccordionContent button:not([class*="bg-theme-bg"]):not(#toggleOddEyeBtn) {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #475569 !important;
+    }
+    html.light-theme .art-style-chip:not([class*="bg-theme-bg"]):hover,
+    html.light-theme #promptAccordionContent button:not([class*="bg-theme-bg"]):not(#toggleOddEyeBtn):hover {
+      background-color: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
+      color: #0f172a !important;
+    }
+    html.light-theme #toggleOddEyeBtn:not([class*="bg-theme-bg"]) {
+      background-color: #ffffff !important;
+      border-color: #cbd5e1 !important;
+      color: #64748b !important;
+    }
+    html.light-theme #oddEyeContainer {
+      background-color: #edf2f7 !important;
+      border-color: #cbd5e1 !important;
+    }
+
     html.light-theme #cardExportArea {
       background: #f8fafc !important;
       border-color: #cbd5e1 !important;
@@ -615,7 +650,7 @@
           </button>
           
           <div id="promptAccordionContent" class="hidden mt-2 p-3.5 bg-slate-950/80 border border-slate-800 rounded-lg space-y-4">
-            <!-- [추가] 화풍 스타일 선택 (워크플로우 분기용) -->
+            <!-- 화풍 스타일 선택 (워크플로우 분기용) -->
             <div>
               <span class="text-[11px] font-bold text-slate-400 block mb-1.5">화풍 스타일 선택</span>
               <div class="flex flex-wrap gap-1.5" id="artStyleContainer">
