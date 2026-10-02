@@ -1773,8 +1773,12 @@
 
       if (currentImageZoom < 1.0) currentImageZoom = 1.0;
 
-      currentImagePosX = Math.max(-dims.maxLimitX, Math.min(dims.maxLimitX, currentImagePosX));
-      currentImagePosY = Math.max(-dims.maxLimitY, Math.min(dims.maxLimitY, currentImagePosY));
+      // 컨테이너 크기보다 확대되어 커진 영역 내에서만 이동을 엄격히 제한 (검은 여백 노출 완전 차단)
+      const maxLimitX = Math.max(0, (dims.currentW - dims.cW) / 2);
+      const maxLimitY = Math.max(0, (dims.currentH - dims.cH) / 2);
+
+      currentImagePosX = Math.max(-maxLimitX, Math.min(maxLimitX, currentImagePosX));
+      currentImagePosY = Math.max(-maxLimitY, Math.min(maxLimitY, currentImagePosY));
 
       img.style.width = `${dims.baseW}px`;
       img.style.height = `${dims.baseH}px`;
@@ -2115,12 +2119,14 @@
 
           adModal.classList.add('hidden');
 
+          // 이미지 갱신 및 로드 완료 시 중앙 위치 초기화
+          previewImg.onload = () => {
+            currentImageZoom = 1.0;
+            currentImagePosX = 0;
+            currentImagePosY = 0;
+            updateImageTransform();
+          };
           previewImg.src = finalUrl;
-          
-          currentImageZoom = 1.0;
-          currentImagePosX = 0;
-          currentImagePosY = 0;
-          updateImageTransform();
 
           const badge = document.getElementById('animeOverlayBadge');
           if (badge) badge.classList.remove('hidden');
