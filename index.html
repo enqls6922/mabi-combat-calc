@@ -2018,7 +2018,7 @@
       });
     }
 
-    async function handleAiIllustrationGeneration() {
+  async function handleAiIllustrationGeneration() {
       const previewImg = document.getElementById('previewImage');
       const aiBtn = document.getElementById('aiTransformBtn');
       const adModal = document.getElementById('adSimulationModal');
@@ -2055,9 +2055,8 @@
         tokenPromise = getTurnstileToken();
       }
 
-      let progressTimer = null;
-
       try {
+        // 5초 광고 시뮬레이션
         if (remain < 999) {
           const totalMs = 5000;
           const intervalMs = 100;
@@ -2081,16 +2080,8 @@
         }
 
         adCountdownText.textContent = "AI";
-        adStatusText.textContent = "정밀 2D 애니메이션 일러스트로 렌더링 중...";
-
-        let currentPercent = 10;
-        adProgressBar.style.width = `${currentPercent}%`;
-        progressTimer = setInterval(() => {
-          if (currentPercent < 92) {
-            currentPercent += 1.5;
-            adProgressBar.style.width = `${currentPercent}%`;
-          }
-        }, 300);
+        adStatusText.textContent = "러닝허브 작업 큐 등록 중...";
+        adProgressBar.style.width = "10%";
 
         const clientFingerprint = localStorage.getItem('client_fp') || (window.crypto && crypto.randomUUID ? crypto.randomUUID() : ('fp_' + Math.random().toString(36).substring(2)));
         localStorage.setItem('client_fp', clientFingerprint);
@@ -2098,8 +2089,10 @@
         const promptString = getCombinedCustomPrompt();
         const turnstileToken = await tokenPromise;
 
-        const { data, error } = await supabaseClient.functions.invoke('transform-anime', {
+        // [1단계: 러닝허브 작업 제출 (1~2초 소요)]
+        const { data: submitData, error: submitError } = await supabaseClient.functions.invoke('transform-anime', {
           body: { 
+            action: 'submit',
             imageBase64: croppedBase64,
             userIdentifier: clientFingerprint,
             arcanaKey: currentArcanaKey,
@@ -2110,45 +2103,76 @@
           }
         });
 
-        if (progressTimer) clearInterval(progressTimer);
+        if (submitError || !submitData?.taskId) {
+          throw new Error(submitError?.message || submitData?.error || "작업 요청 생성에 실패했습니다.");
+        }
 
-        if (error) {
-          if (error.message && error.message.includes("한도")) {
-            throw new Error("오늘 무료 AI 일러스트 생성 한도(3회)를 초과했습니다.");
+        const taskId = submitData.taskId;
+        adStatusText.textContent = "대기열 대기 및 고화질 렌더링 중...";
+        
+        // [2단계: 브라우저 직접 폴링 (타임아웃 100% 방지)]
+        let finalUrl = "";
+        let pollCount = 0;
+        const maxPolls = 120; // 2초 간격 최대 240초(4분)까지 대기열 버팀
+
+        while (pollCount < maxPolls) {
+          await new Promise((r) => setTimeout(r, 2000));
+          pollCount++;
+
+          // 프로그레스 바 게이지 점진적 증가
+          const progressPercent = Math.min(94, 15 + Math.floor((pollCount / maxPolls) * 80));
+          adProgressBar.style.width = `${progressPercent}%`;
+
+          const { data: pollData, error: pollError } = await supabaseClient.functions.invoke('transform-anime', {
+            body: {
+              action: 'poll',
+              taskId: taskId,
+              arcanaKey: currentArcanaKey,
+              userIdentifier: clientFingerprint,
+              adminKey: ADMIN_KEY
+            }
+          });
+
+          if (pollError) {
+            console.warn('[폴링 재시도]:', pollError);
+            continue;
           }
-          throw new Error(error.message || 'AI 변환 서버 응답 오류');
+
+          if (pollData?.status === "SUCCESS" && pollData?.outputUrl) {
+            finalUrl = pollData.outputUrl;
+            break;
+          } else if (pollData?.status === "FAILED") {
+            throw new Error(pollData.error || "러닝허브 생성 작업이 실패했습니다.");
+          }
         }
 
-        const finalUrl = data?.outputUrl || data?.imageUrl || data?.url || data?.output;
-
-        if (finalUrl) {
-          adProgressBar.style.width = "100%";
-          await new Promise(r => setTimeout(r, 200));
-
-          adModal.classList.add('hidden');
-
-          previewImg.onload = () => {
-            currentImageZoom = 1.0;
-            currentImagePosX = 0;
-            currentImagePosY = 0;
-            updateImageTransform();
-          };
-          previewImg.src = finalUrl;
-
-          const badge = document.getElementById('animeOverlayBadge');
-          if (badge) badge.classList.remove('hidden');
-
-          const newRemain = await updateRemainUsageUI();
-
-          setTimeout(() => {
-            const countMsg = newRemain >= 999 ? '무제한 (관리자 모드)' : `${newRemain}회`;
-            alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${countMsg})`);
-          }, 100);
-        } else {
-          throw new Error('결과 이미지 주소를 수신하지 못했습니다.');
+        if (!finalUrl) {
+          throw new Error("대기 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.");
         }
+
+        adProgressBar.style.width = "100%";
+        await new Promise(r => setTimeout(r, 200));
+        adModal.classList.add('hidden');
+
+        previewImg.onload = () => {
+          currentImageZoom = 1.0;
+          currentImagePosX = 0;
+          currentImagePosY = 0;
+          updateImageTransform();
+        };
+        previewImg.src = finalUrl;
+
+        const badge = document.getElementById('animeOverlayBadge');
+        if (badge) badge.classList.remove('hidden');
+
+        const newRemain = await updateRemainUsageUI();
+
+        setTimeout(() => {
+          const countMsg = newRemain >= 999 ? '무제한 (관리자 모드)' : `${newRemain}회`;
+          alert(`✨ 2D 일러스트 생성이 완료되었습니다!\n(오늘 남은 무료 횟수: ${countMsg})`);
+        }, 100);
+
       } catch (err) {
-        if (progressTimer) clearInterval(progressTimer);
         console.error('[AI 생성 에러]:', err);
         adModal.classList.add('hidden');
         alert(err.message || 'AI 일러스트 생성 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
