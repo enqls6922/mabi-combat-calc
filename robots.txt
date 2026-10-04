@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://mabisp.com/sitemap.xml
